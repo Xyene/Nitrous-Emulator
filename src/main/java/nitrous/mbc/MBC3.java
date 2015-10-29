@@ -35,7 +35,14 @@ public class MBC3 extends MBC
     @Override
     public void load(InputStream in) throws IOException
     {
-        while (in.read(cartRam) != -1) ;
+        int read = 0;
+        while (true)
+        {
+            int n = in.read(cartRam, read, cartRam.length);
+            if (n == -1) break;
+            read += n;
+        }
+        if (read != cartRam.length) throw new IOException("cart data invalid");
     }
 
     @Override
