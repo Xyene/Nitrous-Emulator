@@ -100,7 +100,9 @@ public class MBC3 extends MBC
                     cartRam[addr - 0xA000 + ramPageStart] = data;
                 } else if (rtcEnabled)
                 {
-                    rtc[ramBank - 0x08] = data;
+                    // FIXME this is probably incorrect
+                    //  rtc[ramBank - 0x08] = data;
+                    System.err.println("Write to RTC not implemented yet");
                 }
                 break;
             default:
