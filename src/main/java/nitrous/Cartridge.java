@@ -83,7 +83,8 @@ public class Cartridge
          * later they had the fantastic idea to reduce it to 11 characters only.
          */
         String title = new String(rom, 0x134, isColorGB ? 11 : 16, StandardCharsets.US_ASCII);
-        this.gameTitle = title.substring(0, title.indexOf('\0'));
+        int stop = title.indexOf('\0');
+        this.gameTitle = stop != -1 ? title.substring(0, stop) : title;
 
         /**
          * Specifies whether the game supports SGB functions, common values are:
