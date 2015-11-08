@@ -200,9 +200,9 @@ public class LCD
         lcdCycles += cycles;
         // 4.194304MHz clock, 154 scanlines per frame, 59.7 frames/second
         // = ~456 cycles / line
-        if (lcdCycles >= 457)
+        if (lcdCycles >= 456)
         {
-            lcdCycles -= 457;
+            lcdCycles -= 456;
             /**
              * The LY indicates the vertical line to which the present data is transferred to the LCD Driver.
              * The LY can take on any value between 0 through 153. The values between 144 and 153 indicate the
