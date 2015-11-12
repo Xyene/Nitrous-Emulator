@@ -415,6 +415,8 @@ public class Emulator
             ac += delta;
             executed += delta;
 
+            updateInterrupts(delta);
+
             if (interruptsEnabled)
             {
                 fireInterrupts();
