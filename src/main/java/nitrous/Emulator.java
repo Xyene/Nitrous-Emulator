@@ -407,7 +407,7 @@ public class Emulator
     public void exec()
     {
         long last = System.nanoTime();
-        long _last = System.nanoTime();
+
         while (true)
         {
             long delta = _exec();
@@ -421,12 +421,7 @@ public class Emulator
             {
                 fireInterrupts();
             }
-            //     delta = updateInterrupts(delta);
-//            cycle += delta;
-//            ac += delta;
-//            executed += delta;
 
-            //double modifier = (executed / 4194304.0);
             if (System.nanoTime() - last > 1_000_000_000)
             {
                 System.err.println(last + " -- " + (executed / 4194304.0));
