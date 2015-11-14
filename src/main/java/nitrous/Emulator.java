@@ -882,8 +882,6 @@ public class Emulator
                         case 0xbf:
                         {
                             short n = (short) (getRegister(op & 0x7) & 0xFF);
-                            // TODO FIXME
-
                             F = F_N;
                             if (A < n) F |= F_C;
                             if (A == n) F |= F_Z;
