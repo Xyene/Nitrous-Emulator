@@ -932,7 +932,7 @@ public class Emulator
 
                             setRegisterPair(HL, hl);
                             break;
-                        }//TODO this means ADD SP is also broken
+                        }
                         // JP (HL)
                         case 0xe9:
                         {
