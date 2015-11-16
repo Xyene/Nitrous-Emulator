@@ -544,7 +544,7 @@ public class Emulator
             //A -= n;
             //System.err.println(nsp);
             if ((nsp & 0xFF00) != 0) F |= F_C;
-     //       F |= F_N;
+            //       F |= F_N;
         }
 
         nsp &= 0xffff;
@@ -593,7 +593,7 @@ public class Emulator
     public int LDHL_SP_n(int op)
     {
         int offset = nextByte();
-     //   offset = (short) ((offset & 0x7f) - (offset & 0x80));
+        //   offset = (short) ((offset & 0x7f) - (offset & 0x80));
         int nsp = (SP + offset);
 
         F = 0;//(short) (F & F_Z);
@@ -1579,11 +1579,14 @@ public class Emulator
         Cartridge cartridge = new Cartridge(buf);
 
         Emulator core = new Emulator(cartridge);
+
+        File savefile = new File(cartridge.gameTitle + ".sav");
+
         if (core.mmu.hasBattery())
         {
             try
             {
-                core.mmu.load(new FileInputStream("savefile"));
+                core.mmu.load(new FileInputStream(savefile));
             } catch (Exception e)
             {
 
@@ -1681,7 +1684,7 @@ public class Emulator
                     System.err.println(core.cycle);
                     try
                     {
-                        FileOutputStream f = new FileOutputStream("savefile");
+                        FileOutputStream f = new FileOutputStream(savefile);
                         if (core.mmu.hasBattery())
                         {
                             System.err.println("Saving cart ram");
