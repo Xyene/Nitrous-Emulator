@@ -1594,13 +1594,7 @@ public class Emulator
         }
 
         Thread codeExecutionThread = new Thread(() -> {
-            try
-            {
-                core.exec();
-            } catch (Exception e)
-            {
-                e.printStackTrace();
-            }
+            core.exec();
         });
 
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
