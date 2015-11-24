@@ -2,12 +2,19 @@ package nitrous;
 
 import nitrous.lcd.LCD;
 import nitrous.mbc.Memory;
+import nitrous.renderer.D3DRenderManager;
+import nitrous.renderer.GDIRenderManager;
+import nitrous.renderer.IRenderManager;
+import nitrous.renderer.WGLRenderManager;
+import sun.awt.windows.WComponentPeer;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.awt.peer.ComponentPeer;
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.locks.LockSupport;
 
 import static nitrous.Emulator.RegisterPair.*;
@@ -168,7 +175,7 @@ public class Emulator
             case SP:
                 A = hi;
                 // Other bits don't actually exist
-                F = (short) (lo & (F_C | F_H | F_N | F_Z));
+                F = lo & (F_C | F_H | F_N | F_Z);
                 break;
         }
     }
@@ -176,7 +183,7 @@ public class Emulator
     public void reset()
     {
         // On startup, a CGB has 11h in A, a normal GB has 01h
-        A = (short) (cartridge.isColorGB ? 0x11 : 0x01);
+        A = cartridge.isColorGB ? 0x11 : 0x01;
         F = 0xB0;
 
         setRegisterPair(BC, 0x0013);
@@ -398,6 +405,7 @@ public class Emulator
 
         // Update the display
         lcd.tick(cycles);
+
         return 0;
     }
 
@@ -527,38 +535,14 @@ public class Emulator
     public int ADD_SP_n(int op)
     {
         int offset = nextByte();
-        //   offset = (short) ((offset & 0x7f) - (offset & 0x80));
         int nsp = (SP + offset);
 
-        F = 0;//(short) (F & F_Z);
-
-        if (offset >= 0)
-        {
-            if ((SP & 0xff) + offset > 0xff) F |= F_C;
-            if ((((SP & 0xf) + (offset & 0xf)) & 0xF0) != 0) F |= F_H;
-        } else
-        {
-//                                if ((nsp & 0xff) <= (SP & 0xff)) F |= F_C;
-//                                if ((nsp & 0xf) <= (SP & 0xf)) F |= F_H;
-            if ((SP & 0xf) - (offset & 0xf) < 0) F |= F_H;
-            //A -= n;
-            //System.err.println(nsp);
-            if ((nsp & 0xFF00) != 0) F |= F_C;
-            //       F |= F_N;
-        }
+        F = 0;
+        int carry = nsp ^ SP ^ offset;
+        if ((carry & 0x100) != 0) F |= F_C;
+        if ((carry & 0x10) != 0) F |= F_H;
 
         nsp &= 0xffff;
-
-//                            if (((SP & 0xFFF) + (offset & 0xFFF)) > 0xFFF)
-//                            {
-//                                F |= F_H;
-//                            }
-//
-//                            if (nsp > 0xFFFF)
-//                            {
-//                                F |= F_C;
-//                                nsp &= 0xFFFF;
-//                            }
 
         SP = nsp;
         return 4;
@@ -573,7 +557,7 @@ public class Emulator
 
     public int CCF(int op)
     {
-        F = (short) ((F & F_C) != 0 ? (F & F_Z) : ((F & F_Z) | F_C));
+        F = (F & F_C) != 0 ? (F & F_Z) : ((F & F_Z) | F_C);
         return 0;
     }
 
@@ -597,34 +581,10 @@ public class Emulator
         int nsp = (SP + offset);
 
         F = 0;//(short) (F & F_Z);
-
-        if (offset >= 0)
-        {
-            if ((SP & 0xff) + offset > 0xff) F |= F_C;
-            if ((((SP & 0xf) + (offset & 0xf)) & 0xF0) != 0) F |= F_H;
-        } else
-        {
-//                                if ((nsp & 0xff) <= (SP & 0xff)) F |= F_C;
-//                                if ((nsp & 0xf) <= (SP & 0xf)) F |= F_H;
-            if ((SP & 0xf) - (offset & 0xf) < 0) F |= F_H;
-            //A -= n;
-            //System.err.println(nsp);
-            if ((nsp & 0xFF00) != 0) F |= F_C;
-            F |= F_N;
-        }
-
+        int carry = nsp ^ SP ^ offset;
+        if ((carry & 0x100) != 0) F |= F_C;
+        if ((carry & 0x10) != 0) F |= F_H;
         nsp &= 0xffff;
-
-//                            if (((SP & 0xFFF) + (offset & 0xFFF)) > 0xFFF)
-//                            {
-//                                F |= F_H;
-//                            }
-//
-//                            if (nsp > 0xFFFF)
-//                            {
-//                                F |= F_C;
-//                                nsp &= 0xFFFF;
-//                            }
 
         setRegisterPair(HL, nsp);
         return 0;
@@ -632,8 +592,8 @@ public class Emulator
 
     public int CPL(int op)
     {
-        A = (short) ((~A) & 0xFF);
-        F = (short) ((F & (F_C | F_Z)) | F_H | F_N);
+        A = (~A) & 0xFF;
+        F = (F & (F_C | F_Z)) | F_H | F_N;
         return 0;
     }
 
@@ -822,14 +782,12 @@ public class Emulator
                         case 0x34: // (HL)
                         case 0x2c: // G
                         {
-                            short reg = (short) ((op >> 3) & 0x7);
-                            short a = (short) ((getRegister(reg)) & 0xff);
+                            int reg = (op >> 3) & 0x7;
+                            int a = getRegister(reg) & 0xff;
 
-                            F &= F_C;
-                            if ((((a & 0xf) + 1) & 0xF0) != 0) F |= F_H;
-                            a++;
-                            a &= 0xFF;
-                            if (a == 0) F |= F_Z;
+                            F = (F & F_C) | Tables.INC[a];
+
+                            a = (a + 1) & 0xff;
 
                             setRegister(reg, a);
                             break;
@@ -844,17 +802,12 @@ public class Emulator
                         case 0x2d: // L
                         case 0x35: // (HL)
                         {
-                            short reg = (short) ((short) (op >> 3) & 0x7);
-                            short a = (short) ((getRegister(reg)) & 0xff);
+                            int reg = (op >> 3) & 0x7;
+                            int a = getRegister(reg) & 0xff;
 
-                            // 1 0 0 0  0 0 0 0
-                            // 0 1 1 1
-                            F &= F_C;
-                            F |= F_N;
-                            if ((a & 0xf) - 1 < 0) F |= F_H;
-                            a--;
-                            a &= 0xFF;
-                            if (a == 0) F |= F_Z;
+                            F = (F & F_C) | Tables.DEC[a];
+
+                            a = (a - 1) & 0xff;
 
                             setRegister(reg, a);
                             break;
@@ -881,7 +834,7 @@ public class Emulator
                         case 0xbe:
                         case 0xbf:
                         {
-                            short n = (short) (getRegister(op & 0x7) & 0xFF);
+                            int n = getRegister(op & 0x7) & 0xFF;
                             F = F_N;
                             if (A < n) F |= F_C;
                             if (A == n) F |= F_Z;
@@ -914,7 +867,7 @@ public class Emulator
                             int ss = getRegisterPair(RegisterPair.byValue[(op >> 4) & 0x3]);
                             int hl = getRegisterPair(HL);
 
-                            F = (short) (F & F_Z);
+                            F &= F_Z;
 
                             if (((hl & 0xFFF) + (ss & 0xFFF)) > 0xFFF)
                             {
@@ -928,7 +881,6 @@ public class Emulator
                                 F |= F_C;
                                 hl &= 0xFFFF;
                             }
-
 
                             setRegisterPair(HL, hl);
                             break;
@@ -988,7 +940,7 @@ public class Emulator
                         case 0x96: // (HL)
                         case 0x97:
                         {
-                            short n = (short) (getRegister(op & 0b111) & 0xff);
+                            int n = getRegister(op & 0b111) & 0xff;
                             F = F_N;
                             if ((A & 0xf) - (n & 0xf) < 0) F |= F_H;
                             A -= n;
@@ -1024,7 +976,7 @@ public class Emulator
                         case 0x85:
                         case 0x86: // (HL)
                         {
-                            short n = (short) (getRegister(op & 0b111) & 0xff);
+                            int n = getRegister(op & 0b111) & 0xff;
 
                             F = 0;
                             if ((((A & 0xf) + (n & 0xf)) & 0xF0) != 0) F |= F_H;
@@ -1073,7 +1025,7 @@ public class Emulator
                         case 0xa6: // (HL)
                         case 0xa7:
                         {
-                            A = (short) ((A & getRegister(op & 0b111)) & 0xff);
+                            A = (A & getRegister(op & 0b111)) & 0xff;
                             F = F_H;
                             if (A == 0) F |= F_Z;
                             break;
@@ -1089,7 +1041,7 @@ public class Emulator
                         case 0xae:
                         case 0xaf:
                         {
-                            A = (short) ((A ^ getRegister(op & 0b111)) & 0xff);
+                            A = (A ^ getRegister(op & 0b111)) & 0xff;
                             F = 0;
                             if (A == 0) F |= F_Z;
                             break;
@@ -1170,7 +1122,7 @@ public class Emulator
                                 if ((F & F_C) != 0 || ((tmp > 0x9f))) tmp += 0x60;
                             } else
                             {
-                                if ((F & F_H) != 0) tmp = (short) ((tmp - 6) & 0xff);
+                                if ((F & F_H) != 0) tmp = ((tmp - 6) & 0xff);
                                 if ((F & F_C) != 0) tmp -= 0x60;
                             }
                             F &= F_N | F_C;
@@ -1397,8 +1349,8 @@ public class Emulator
                             int x = pc++;
 
                             int cbop = getUByte(x);
-                            short r = (short) (cbop & 7);
-                            short d = (short) (getRegister(r) & 0xff);
+                            int r = cbop & 0x7;
+                            int d = getRegister(r) & 0xff;
 
                             switch ((cbop & 0b11000000))
                             {
@@ -1406,14 +1358,14 @@ public class Emulator
                                 // 1 0 b b b r r r
                                 case 0x80:
                                 {
-                                    setRegister(r, (short) (d & ~(0x1 << (cbop >> 3 & 0x7))));
+                                    setRegister(r, d & ~(0x1 << (cbop >> 3 & 0x7)));
                                     break outer;
                                 }
                                 // SET b, r
                                 // 1 1 b b b r r r
                                 case 0xc0:
                                 {
-                                    setRegister(r, (short) (d | (0x1 << (cbop >> 3 & 0x7))));
+                                    setRegister(r, d | (0x1 << (cbop >> 3 & 0x7)));
                                     break outer;
                                 }
                                 // BIT b, r
@@ -1514,7 +1466,7 @@ public class Emulator
                                         }
                                         case 0x30: // SWAP m
                                         {
-                                            d = (short) (((d & 0xF0) >> 4) | ((d & 0x0F) << 4));
+                                            d = ((d & 0xF0) >> 4) | ((d & 0x0F) << 4);
                                             F = d == 0 ? F_Z : 0;
                                             setRegister(r, d);
                                             break outer;
@@ -1536,7 +1488,7 @@ public class Emulator
                                     int from = op & 0x7;
                                     int to = (op >> 3) & 0x7;
                                     // important note: getIO(6) fetches (HL)
-                                    setRegister(to, (short) (getRegister(from) & 0xFF));
+                                    setRegister(to, getRegister(from) & 0xFF);
                                     break;
                                 }
                                 default:
@@ -1561,13 +1513,15 @@ public class Emulator
     }
 
 
-    public static final BufferedImage screenBuffer = new BufferedImage(160, 144, BufferedImage.TYPE_INT_ARGB);
-    public static JPanel display;
+    public static final BufferedImage screenBuffer = new BufferedImage(160, 144, BufferedImage.TYPE_INT_RGB);
+    public static Panel display;
 
     public static void main(String[] argv) throws IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException
     {
-        // System.setProperty("sun.java2d.opengl", "True");
-        System.setOut(new PrintStream(new BufferedOutputStream(new FileOutputStream("emu.log"))));
+        JPopupMenu.setDefaultLightWeightPopupEnabled(false);
+        System.setProperty("sun.java2d.opengl", "false");
+        System.setProperty("sun.java2d.d3d", "true");
+        //    System.setOut(new PrintStream(new BufferedOutputStream(new FileOutputStream("emu.log"))));
 
         File f = new File(argv[0]);
         FileInputStream in = new FileInputStream(f);
@@ -1600,7 +1554,7 @@ public class Emulator
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         SwingUtilities.invokeLater(() -> {
             JFrame disp = new JFrame(cartridge.gameTitle);
-            disp.setContentPane(display = new JPanel()
+            disp.setContentPane(display = new Panel()
             {
                 {
                     int mag = 2;
@@ -1654,18 +1608,48 @@ public class Emulator
                             toggle(e, true);
                         }
                     };
+                    addMouseListener(new MouseAdapter()
+                    {
+                        @Override
+                        public void mouseReleased(MouseEvent e)
+                        {
+                            JPopupMenu menu = new JPopupMenu();
+                            menu.add(new JMenu("Renderer")
+                            {
+                                {
+                                    ButtonGroup group = new ButtonGroup();
+
+                                    for (IRenderManager renderer : core.lcd.renderers)
+                                    {
+                                        JRadioButtonMenuItem menuItem = renderer.getRadioMenuItem(core.lcd);
+                                        group.add(menuItem);
+                                        if (renderer == core.lcd.currentRenderer)
+                                            group.setSelected(menuItem.getModel(), true);
+                                        add(menuItem);
+                                    }
+                                }
+                            });
+
+                            if (SwingUtilities.isRightMouseButton(e))
+                                menu.show(e.getComponent(), e.getX(), e.getY());
+                        }
+                    });
                     addKeyListener(toggler);
                     disp.addKeyListener(toggler);
+                    setIgnoreRepaint(true);
                 }
 
                 @Override
-                public void paintComponent(Graphics g)
+                public void paint(Graphics g)
                 {
+                    throw new RuntimeException();
+                    //System.err.println("a");
                     //super.paintComponent(g);
-                    //   ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-                    g.drawImage(screenBuffer, 0, 0, getWidth(), getHeight(), null);
+//                       ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                    //   g.drawImage(screenBuffer, 0, 0, getWidth(), getHeight(), null);
                 }
             });
+
             disp.pack();
             disp.setResizable(false);
             disp.setLocationRelativeTo(null);
@@ -1692,6 +1676,7 @@ public class Emulator
                 }
             });
             disp.setVisible(true);
+            core.lcd.initializeRenderers();
             codeExecutionThread.start();
         });
 

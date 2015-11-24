@@ -4,10 +4,16 @@ import nitrous.Emulator;
 import nitrous.PaletteColors;
 import nitrous.R;
 import nitrous.mbc.Memory;
+import nitrous.renderer.IRenderManager;
 
+import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.awt.peer.ComponentPeer;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import static nitrous.Emulator.*;
 
@@ -35,42 +41,48 @@ public class LCD
     {
         for (int i = 0; i < 8; i++)
         {
-            int[] color = new int[4];
-            for (int j = 0; j < 4; j++)
-            {
-                /**
-                 * This register allows to read/write data to the CGBs Background Palette Memory, addressed through Register FF68.
-                 * Each color is defined by two bytes (Bit 0-7 in first byte).
-                 *
-                 * Bit 0-4   Red Intensity   (00-1F)
-                 * Bit 5-9   Green Intensity (00-1F)
-                 * Bit 10-14 Blue Intensity  (00-1F)
-                 */
-                int data = (((from[i * 8 + j * 2 + 1]) & 0xff) << 8) | ((from[i * 8 + j * 2]) & 0xff);
-                int red = (data & 0x1f);
-                int green = (data >> 5) & 0x1f;
-                int blue = (data >> 10) & 0x1f;
-                color[j] = 0xff000000 |
-                        (((int) (red / 31f * 255 + 0.5) & 0xFF) << 16) |
-                        (((int) (green / 31f * 255 + 0.5) & 0xFF) << 8) |
-                        ((int) (blue / 31f * 255 + 0.5) & 0xFF);
-            }
-            to[i] = new GBCPalette(color);
+            updatePalette(from, to, i);
 
             // System.err.println(Thread.currentThread().getStackTrace()[7]);
         }
     }
 
+    private void updatePalette(byte[] from, Palette[] to, int i)
+    {
+        int[] color = ((GBCPalette) to[i]).colors;
+        for (int j = 0; j < 4; j++)
+        {
+            /**
+             * This register allows to read/write data to the CGBs Background Palette Memory, addressed through Register FF68.
+             * Each color is defined by two bytes (Bit 0-7 in first byte).
+             *
+             * Bit 0-4   Red Intensity   (00-1F)
+             * Bit 5-9   Green Intensity (00-1F)
+             * Bit 10-14 Blue Intensity  (00-1F)
+             */
+            int data = ((from[i * 8 + j * 2 + 1] & 0xff) << 8) | (from[i * 8 + j * 2] & 0xff);
+            int red = (data & 0x1f);
+            int green = (data >> 5) & 0x1f;
+            int blue = (data >> 10) & 0x1f;
+            color[j] = 0xff000000 |
+                    (((int) (red / 31f * 255 + 0.5) & 0xFF) << 16) |
+                    (((int) (green / 31f * 255 + 0.5) & 0xFF) << 8) |
+                    ((int) (blue / 31f * 255 + 0.5) & 0xFF);
+        }
+    }
+
     public void setBackgroundPalette(int reg, int data)
     {
-        gbcBackgroundPaletteMemory[reg] = (byte) (data);
-        loadPalettesFromMemory(gbcBackgroundPaletteMemory, bgPalettes);
+        gbcBackgroundPaletteMemory[reg] = (byte) data;
+        updatePalette(gbcBackgroundPaletteMemory, bgPalettes, reg / 8);
+        //loadPalettesFromMemory(gbcBackgroundPaletteMemory, bgPalettes);
     }
 
     public void setSpritePalette(int reg, int data)
     {
-        gbcSpritePaletteMemory[reg] = (byte) (data);
-        loadPalettesFromMemory(gbcSpritePaletteMemory, spritePalettes);
+        gbcSpritePaletteMemory[reg] = (byte) data;
+        updatePalette(gbcSpritePaletteMemory, spritePalettes, reg / 8);
+        //loadPalettesFromMemory(gbcSpritePaletteMemory, spritePalettes);
     }
 
     public LCD(Emulator core)
@@ -79,6 +91,8 @@ public class LCD
         if (core.cartridge.isColorGB)
         {
             Arrays.fill(gbcBackgroundPaletteMemory, (byte) 0x1f);
+            for (int i = 0; i < spritePalettes.length; i++) spritePalettes[i] = new GBCPalette(new int[4]);
+            for (int i = 0; i < bgPalettes.length; i++) bgPalettes[i] = new GBCPalette(new int[4]);
             loadPalettesFromMemory(gbcSpritePaletteMemory, spritePalettes);
             loadPalettesFromMemory(gbcBackgroundPaletteMemory, bgPalettes);
         } else
@@ -167,9 +181,9 @@ public class LCD
             // obj above BG
             if ((attribs & 0x80) != 0 == underBG)
             {
-                short y = (short) (oam[i] & 0xff);
-                short x = (short) (oam[i + 1] & 0xff);
-                short tile = (short) (oam[i + 2] & 0xff);
+                int y = oam[i] & 0xff;
+                int x = oam[i + 1] & 0xff;
+                int tile = oam[i + 2] & 0xff;
                 boolean flipX = (attribs & 0x20) != 0;
                 boolean flipY = (attribs & 0x40) != 0;
 
@@ -179,8 +193,8 @@ public class LCD
                 if (isUsingTallSprites())
                 {
                     // If we're using tall sprites we actually have to flip the order that we draw the top/bottom tiles
-                    short hi = (short) (flipY ? (tile | 0x01) : (tile & 0xFE));
-                    short lo = (short) (flipY ? (tile & 0xFE) : (tile | 0x01));
+                    int hi = flipY ? (tile | 0x01) : (tile & 0xFE);
+                    int lo = flipY ? (tile & 0xFE) : (tile | 0x01);
                     if (drawTile(pal, buffer, data, x - 8, y - 16, hi, scanline, flipX, flipY, vrambank, false))
                         spritesDrawn[scanline]++;
                     if (drawTile(pal, buffer, data, x - 8, y - 8, lo, scanline, flipX, flipY, vrambank, false))
@@ -193,6 +207,34 @@ public class LCD
                 }
             }
         }
+    }
+
+    public IRenderManager currentRenderer;
+    public  List<IRenderManager> renderers;
+
+    public void initializeRenderers() {
+       renderers= Collections.unmodifiableList(new ArrayList<IRenderManager>()
+        {{
+                for (Class<? extends IRenderManager> rendererClass : IRenderManager.RENDERERS)
+                {
+                    IRenderManager renderer;
+                    try
+                    {
+                        System.err.println(rendererClass);
+                        renderer = rendererClass.getDeclaredConstructor(ComponentPeer.class).newInstance(display.getPeer());
+                    } catch (ReflectiveOperationException e1)
+                    {
+                        e1.printStackTrace();
+                        continue;
+                    }
+                    if (renderer.getGraphics() != null)
+                    {
+                        add(renderer);
+                        if (currentRenderer == null)
+                            currentRenderer = renderer;
+                    }
+                }
+            }});
     }
 
     public long tick(long cycles)
@@ -215,7 +257,8 @@ public class LCD
 
             boolean isVBlank = 144 <= LY;
 
-            if (!isVBlank && core.mmu.hdma != null) {
+            if (!isVBlank && core.mmu.hdma != null)
+            {
                 System.err.println(LY);
                 core.mmu.hdma.tick();
             }
@@ -253,8 +296,55 @@ public class LCD
             {
                 if (display != null)
                 {
-                    display.paintImmediately(display.getBounds());
+                    //display.paintImmediately(display.getBounds());
+
                 }
+
+
+//                Component top = display;//SwingUtilities.getWindowAncestor(display);
+//                System.out.println(display.getPeer());
+                //     display.repaint(0);
+
+                currentRenderer.getGraphics().drawImage(screenBuffer, 0, 0, display.getWidth(), display.getHeight(), null);
+
+
+//                    D3DSurfaceData surf = (D3DSurfaceData) ((WComponentPeer) top.getPeer()).getSurfaceData();
+//                    System.err.println(surf);
+//
+//                    D3DSurfaceData n = D3DSurfaceData.createData((WComponentPeer) top.getPeer(), screenBuffer);
+//
+//                    n.makeProxyFor(surf);
+////
+////                    surf.copyArea(new SunGraphics2D(n, Color.red, Color.green, null),
+////                            0, 0, 0, 0, screenBuffer.getWidth(), screenBuffer.getHeight());
+//
+//                    n.flush();
+
+                //  WritableRasterNative wrn = (WritableRasterNative) surf.getRaster(0, 0, screenBuffer.getWidth(), screenBuffer.getHeight());
+                //    D3DDataBufferNative
+//
+//    System.err.println(wrn);
+//                    DataBufferInt dbb = (DataBufferInt) screenBuffer.getRaster().getDataBuffer();
+//                    int[] data = dbb.getData(0);
+//
+////                    surf.
+
+                // surf.markDirty();
+//                    surf.flush();
+//                    D3DDrawImage img =
+
+//                    System.err.println(screenBuffer.conf);
+
+//                    System.err.println(surf);
+//                    if (false)
+//                    {
+//
+////                                ((SunGraphics2D) screenBuffer.getGraphics()).getSurfaceData().copyArea(surf,
+////                                        0, 0, 0, 0, screenBuffer.getWidth(), screenBuffer.getHeight());
+//                        surf.flush();
+//                        System.out.println(surf.getRaster(0, 0, screenBuffer.getWidth(), screenBuffer.getHeight()));
+//                    }
+//            }
                 if (core.isInterruptEnabled(R.VBLANK_BIT) && displayEnabled())
                 {
                     // Trigger VBlank
@@ -269,8 +359,30 @@ public class LCD
             }
             return 0;
         }
+
         return 0;
     }
+
+
+//    public void BlitBg(SurfaceData srcData, SurfaceData dstData, Composite comp, Region clip, Color bgColor, int srcx, int srcy, int dstx, int dsty, int width, int height)
+//    {
+//        ColorModel dstModel = dstData.getColorModel();
+//        if (!dstModel.hasAlpha() && bgColor.getTransparency() != Transparency.OPAQUE)
+//        {
+//            dstModel = ColorModel.getRGBdefault();
+//        }
+//        WritableRaster wr = dstModel.createCompatibleWritableRaster(width, height);
+//        boolean isPremult = dstModel.isAlphaPremultiplied();
+//        BufferedImage bimg = new BufferedImage(dstModel, wr, isPremult, null);
+//        SurfaceData tmpData = BufImgSurfaceData.createData(bimg);
+//        SunGraphics2D sg2d = new SunGraphics2D(tmpData, bgColor, bgColor, defaultFont);
+//        FillRect fillop = FillRect.locate(SurfaceType.AnyColor, CompositeType.SrcNoEa, tmpData.getSurfaceType());
+//        Blit combineop = Blit.getFromCache(srcData.getSurfaceType(), CompositeType.SrcOverNoEa, tmpData.getSurfaceType());
+//        Blit blitop = Blit.getFromCache(tmpData.getSurfaceType(), compositeType, dstData.getSurfaceType());
+//        fillop.FillRect(sg2d, tmpData, 0, 0, width, height);
+//        combineop.Blit(srcData, tmpData, AlphaComposite.SrcOver, null, srcx, srcy, 0, 0, width, height);
+//        blitop.Blit(tmpData, dstData, comp, clip, 0, 0, dstx, dsty, width, height);
+//    }
 
 
     public void draw(BufferedImage buffer, int scanline)

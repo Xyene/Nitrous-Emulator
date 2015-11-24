@@ -2,7 +2,7 @@ package nitrous.lcd;
 
 public class GBCPalette implements Palette
 {
-    private final int[] colors;
+    final int[] colors;
 
     public GBCPalette(int[] colors)
     {
