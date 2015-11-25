@@ -1,5 +1,6 @@
 package nitrous;
 
+import nitrous.lcd.Interpolator;
 import nitrous.lcd.LCD;
 import nitrous.mbc.Memory;
 import nitrous.renderer.D3DRenderManager;
@@ -1520,7 +1521,22 @@ public class Emulator
     {
         JPopupMenu.setDefaultLightWeightPopupEnabled(false);
         System.setProperty("sun.java2d.opengl", "false");
+//        System.setProperty("sun.java2d.xrender", "false");
         System.setProperty("sun.java2d.d3d", "true");
+
+//        JFrame x = new JFrame("AAA");
+//        x.add(new JButton("Cliq me") {
+//            {
+//                setPreferredSize(new Dimension(100, 100));
+//            }
+//        });
+//        x.pack();
+//        x.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//        x.setLocationRelativeTo(null);
+//        x.setVisible(true);
+
+//        if(true) return;
+
         //    System.setOut(new PrintStream(new BufferedOutputStream(new FileOutputStream("emu.log"))));
 
         File f = new File(argv[0]);
@@ -1558,6 +1574,7 @@ public class Emulator
             {
                 {
                     int mag = 2;
+                    setBackground(Color.BLACK);
                     setMaximumSize(new Dimension(160 * mag, 144 * mag));
                     setMinimumSize(new Dimension(160 * mag, 144 * mag));
                     setSize(new Dimension(160 * mag, 144 * mag));
@@ -1626,6 +1643,27 @@ public class Emulator
                                         if (renderer == core.lcd.currentRenderer)
                                             group.setSelected(menuItem.getModel(), true);
                                         add(menuItem);
+                                    }
+                                }
+                            });
+                            menu.add(new JMenu("Filter")
+                            {
+                                {
+                                    ButtonGroup group = new ButtonGroup();
+                                    for (final Interpolator interpolator : Interpolator.values())
+                                    {
+                                        add(new JRadioButtonMenuItem(interpolator.name)
+                                        {
+                                            {
+                                                group.add(this);
+                                                if (interpolator == core.lcd.interpolator)
+                                                    group.setSelected(getModel(), true);
+                                                addActionListener((e) -> {
+                                                    core.lcd.interpolator = interpolator;
+                                                    group.setSelected(getModel(), true);
+                                                });
+                                            }
+                                        });
                                     }
                                 }
                             });

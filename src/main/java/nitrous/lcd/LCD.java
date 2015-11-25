@@ -7,6 +7,7 @@ import nitrous.mbc.Memory;
 import nitrous.renderer.IRenderManager;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.awt.peer.ComponentPeer;
@@ -211,6 +212,7 @@ public class LCD
 
     public IRenderManager currentRenderer;
     public  List<IRenderManager> renderers;
+    public Interpolator interpolator = Interpolator.NEAREST;
 
     public void initializeRenderers() {
        renderers= Collections.unmodifiableList(new ArrayList<IRenderManager>()
@@ -224,7 +226,7 @@ public class LCD
                         renderer = rendererClass.getDeclaredConstructor(ComponentPeer.class).newInstance(display.getPeer());
                     } catch (ReflectiveOperationException e1)
                     {
-                        e1.printStackTrace();
+//                        e1.printStackTrace();
                         continue;
                     }
                     if (renderer.getGraphics() != null)
@@ -232,6 +234,8 @@ public class LCD
                         add(renderer);
                         if (currentRenderer == null)
                             currentRenderer = renderer;
+                    } else {
+                        System.err.println(renderer + " failed to produce a Graphics2D");
                     }
                 }
             }});
@@ -305,7 +309,21 @@ public class LCD
 //                System.out.println(display.getPeer());
                 //     display.repaint(0);
 
-                currentRenderer.getGraphics().drawImage(screenBuffer, 0, 0, display.getWidth(), display.getHeight(), null);
+                Graphics2D graphics = currentRenderer.getGraphics();
+
+                switch (interpolator) {
+                    case NEAREST:
+                        graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+                        break;
+                    case BILINEAR:
+                        graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                        break;
+                    case BICUBIC:
+                        graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+                        break;
+                    }
+                //graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_ANTIALIAS_ON);
+                graphics .drawImage(screenBuffer, 0, 0, display.getWidth(), display.getHeight(), null);
 
 
 //                    D3DSurfaceData surf = (D3DSurfaceData) ((WComponentPeer) top.getPeer()).getSurfaceData();
