@@ -123,7 +123,7 @@ public class Memory
 
     public class HDMA
     {
-        private int source;
+        private final int source;
         private final int dest;
         private int length;
         private int ptr;
@@ -240,6 +240,10 @@ public class Memory
 
     public void setIO(int addr, int data)
     {
+//        if(addr == R.R_SCX) {
+//            if(data == 0) return;//new IOException().printStackTrace();
+//            core.lcd.scrollx = data;
+//        }
         switch (addr)
         {
             case 0x69:

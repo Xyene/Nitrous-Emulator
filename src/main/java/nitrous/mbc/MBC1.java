@@ -3,7 +3,6 @@ package nitrous.mbc;
 import nitrous.Emulator;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 
 public class MBC1 extends MBC
@@ -27,19 +26,6 @@ public class MBC1 extends MBC
     public void save(OutputStream out) throws IOException
     {
         out.write(cartRam);
-    }
-
-    @Override
-    public void load(InputStream in) throws IOException
-    {
-        int read = 0;
-        while (true)
-        {
-            int n = in.read(cartRam, read, cartRam.length);
-            if (n == -1) break;
-            read += n;
-        }
-        if (read != cartRam.length) throw new IOException("cart data invalid");
     }
 
     private void mapRom(int bank)

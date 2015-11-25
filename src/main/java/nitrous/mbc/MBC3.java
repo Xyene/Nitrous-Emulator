@@ -3,7 +3,6 @@ package nitrous.mbc;
 import nitrous.Emulator;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 
 import static java.lang.Math.max;
@@ -30,19 +29,6 @@ public class MBC3 extends MBC
     public void save(OutputStream out) throws IOException
     {
         out.write(cartRam);
-    }
-
-    @Override
-    public void load(InputStream in) throws IOException
-    {
-        int read = 0;
-        while (true)
-        {
-            int n = in.read(cartRam, read, cartRam.length);
-            if (n == -1) break;
-            read += n;
-        }
-        if (read != cartRam.length) throw new IOException("cart data invalid");
     }
 
     @Override
@@ -109,7 +95,7 @@ public class MBC3 extends MBC
                 {
                     // FIXME this is probably incorrect
                     //  rtc[ramBank - 0x08] = data;
-                    System.err.println("Write to RTC not implemented yet");
+                    // System.err.println("Write to RTC not implemented yet");
                 }
                 break;
             default:

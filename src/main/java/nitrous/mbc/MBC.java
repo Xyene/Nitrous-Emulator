@@ -2,6 +2,9 @@ package nitrous.mbc;
 
 import nitrous.Emulator;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 public abstract class MBC extends Memory
 {
     public static final int RAM_PAGESIZE = 0x2000;
@@ -13,6 +16,20 @@ public abstract class MBC extends Memory
     {
         super(core);
     }
+
+    @Override
+    public void load(InputStream in) throws IOException
+    {
+        int read = 0;
+        while (true)
+        {
+            int n = in.read(cartRam, read, cartRam.length);
+            if (n == -1) break;
+            read += n;
+        }
+        if (read != cartRam.length) throw new IOException("cart data invalid");
+    }
+
 
     @Override
     public short getAddress(int addr)
