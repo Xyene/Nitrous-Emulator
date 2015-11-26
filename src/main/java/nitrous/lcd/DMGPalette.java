@@ -1,8 +1,8 @@
 package nitrous.lcd;
 
-public class DMGPalette implements Palette
+public class DMGPalette implements IPalette
 {
-    private LCD lcd;
+    private final LCD lcd;
     protected final int register;
     protected final int[] colors;
 

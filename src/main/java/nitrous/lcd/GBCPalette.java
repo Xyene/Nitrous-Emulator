@@ -1,6 +1,6 @@
 package nitrous.lcd;
 
-public class GBCPalette implements Palette
+public class GBCPalette implements IPalette
 {
     final int[] colors;
 

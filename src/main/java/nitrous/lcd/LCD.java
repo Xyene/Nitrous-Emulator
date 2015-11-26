@@ -6,11 +6,11 @@ import nitrous.R;
 import nitrous.mbc.Memory;
 import nitrous.renderer.IRenderManager;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.awt.peer.ComponentPeer;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,65 +24,61 @@ public class LCD
     /**
      * Background palettes. On CGB, 0-7 are used. On GB, only 0 is used.
      */
-    private Palette[] bgPalettes = new Palette[8];
+    private final IPalette[] bgPalettes = new IPalette[8];
     /**
      * Sprite palettes. 0-7 used on CGB, 0-1 used on GB.
      */
-    private Palette[] spritePalettes = new Palette[8];
+    private final IPalette[] spritePalettes = new IPalette[8];
     /**
      * Background palette memory on the CGB, indexed through $FF69.
      */
-    private byte[] gbcBackgroundPaletteMemory = new byte[0x40];
+    private final byte[] gbcBackgroundPaletteMemory = new byte[0x40];
     /**
-     * Sprite palette memory on the CGB, indexed through $FF6b.
+     * Sprite palette memory on the CGB, indexed through $FF6B.
      */
-    private byte[] gbcSpritePaletteMemory = new byte[0x40];
+    private final byte[] gbcSpritePaletteMemory = new byte[0x40];
 
-    private void loadPalettesFromMemory(byte[] from, Palette[] to)
+    private void loadPalettesFromMemory(byte[] from, IPalette[] to)
     {
         for (int i = 0; i < 8; i++)
-        {
-            updatePalette(from, to, i);
+            for (int j = 0; j < 4; ++j)
+                updatePalette(from, to, i, j);
 
-            // System.err.println(Thread.currentThread().getStackTrace()[7]);
-        }
+        // System.err.println(Thread.currentThread().getStackTrace()[7]);
     }
 
-    private void updatePalette(byte[] from, Palette[] to, int i)
+    private void updatePalette(byte[] from, IPalette[] to, int i, int j)
     {
         int[] color = ((GBCPalette) to[i]).colors;
-        for (int j = 0; j < 4; j++)
-        {
-            /**
-             * This register allows to read/write data to the CGBs Background Palette Memory, addressed through Register FF68.
-             * Each color is defined by two bytes (Bit 0-7 in first byte).
-             *
-             * Bit 0-4   Red Intensity   (00-1F)
-             * Bit 5-9   Green Intensity (00-1F)
-             * Bit 10-14 Blue Intensity  (00-1F)
-             */
-            int data = ((from[i * 8 + j * 2 + 1] & 0xff) << 8) | (from[i * 8 + j * 2] & 0xff);
-            int red = (data & 0x1f);
-            int green = (data >> 5) & 0x1f;
-            int blue = (data >> 10) & 0x1f;
-            color[j] = 0xff000000 |
-                    (((int) (red / 31f * 255 + 0.5) & 0xFF) << 16) |
-                    (((int) (green / 31f * 255 + 0.5) & 0xFF) << 8) |
-                    ((int) (blue / 31f * 255 + 0.5) & 0xFF);
-        }
+
+        /**
+         * This register allows to read/write data to the CGBs Background Palette Memory, addressed through Register FF68.
+         * Each color is defined by two bytes (Bit 0-7 in first byte).
+         *
+         * Bit 0-4   Red Intensity   (00-1F)
+         * Bit 5-9   Green Intensity (00-1F)
+         * Bit 10-14 Blue Intensity  (00-1F)
+         */
+        int data = ((from[i * 8 + j * 2 + 1] & 0xff) << 8) | (from[i * 8 + j * 2] & 0xff);
+        int red = (data & 0x1f);
+        int green = (data >> 5) & 0x1f;
+        int blue = (data >> 10) & 0x1f;
+        color[j] = (((int) (red / 31f * 255 + 0.5) & 0xFF) << 16) |
+                (((int) (green / 31f * 255 + 0.5) & 0xFF) << 8) |
+                ((int) (blue / 31f * 255 + 0.5) & 0xFF);
     }
 
     public void setBackgroundPalette(int reg, int data)
     {
         gbcBackgroundPaletteMemory[reg] = (byte) data;
-        updatePalette(gbcBackgroundPaletteMemory, bgPalettes, reg / 8);
+        updatePalette(gbcBackgroundPaletteMemory, bgPalettes, reg >> 3, (reg >> 1) & 0x3);
         //loadPalettesFromMemory(gbcBackgroundPaletteMemory, bgPalettes);
     }
 
     public void setSpritePalette(int reg, int data)
     {
         gbcSpritePaletteMemory[reg] = (byte) data;
-        updatePalette(gbcSpritePaletteMemory, spritePalettes, reg / 8);
+        updatePalette(gbcSpritePaletteMemory, spritePalettes, reg >> 3, (reg >> 1) & 0x3);
         //loadPalettesFromMemory(gbcSpritePaletteMemory, spritePalettes);
     }
 
@@ -100,15 +96,16 @@ public class LCD
         {
             /**
              * FF69 - BCPD/BGPD - CGB Mode Only - Background Palette Data
-             This register allows to read/write data to the CGBs Background Palette Memory, addressed through Register FF68.
-             Each color is defined by two bytes (Bit 0-7 in first byte).
-
-             Bit 0-4   Red Intensity   (00-1F)
-             Bit 5-9   Green Intensity (00-1F)
-             Bit 10-14 Blue Intensity  (00-1F)
-
-             Much like VRAM, Data in Palette Memory cannot be read/written during the time when the LCD Controller is reading from it. (That is when the STAT register indicates Mode 3).
-             Note: Initially all background colors are initialized as white.
+             * This register allows to read/write data to the CGBs Background Palette Memory, addressed through Register FF68.
+             * Each color is defined by two bytes (Bit 0-7 in first byte).
+             *
+             * Bit 0-4   Red Intensity   (00-1F)
+             * Bit 5-9   Green Intensity (00-1F)
+             * Bit 10-14 Blue Intensity  (00-1F)
+             *
+             * Much like VRAM, Data in Palette Memory cannot be read/written during the time when the LCD Controller is
+             * reading from it. (That is when the STAT register indicates Mode 3).
+             * Note: Initially all background colors are initialized as white.
              */
             PaletteColors colors = PaletteColors.byHash[core.cartridge.checksum];
             bgPalettes[0] = new DMGPalette(this, colors.bg, R.R_BGP);
@@ -117,105 +114,125 @@ public class LCD
         }
     }
 
-    private int[] spritesDrawn = new int[144];
+    private final int[] spritesDrawn = new int[144];
     private long lcdCycles = 0;
 
-    public boolean drawTile(Palette palette, BufferedImage where, int[] data, int x, int y, int tile, int scanline, boolean flipX, boolean flipY, int bank, boolean bgPass)
+    public void drawTile(IPalette palette, int[] data, int x, int y, int tile, int scanline,
+                         boolean flipX, boolean flipY, int bank, int basePriority, boolean sprite)
     {
         byte[] vram = core.mmu.vram;
-        int w = where.getWidth();
-        int h = where.getHeight();
-        if (y <= scanline && scanline < y + 8)
+        int w = 160;
+        int h = 144;
+        int line = scanline - y;
+        int addressBase = Memory.VRAM_PAGESIZE * bank + tile * 16;
+
+        for (int px = 0; px < 8; px++)
         {
-            int line = scanline - y;
+            // Destination pixels
+            int dx = x + px;
 
-            for (int px = 0; px < 8; px++)
-            {
-                /**
-                 * For each line, the first byte defines the least significant bits of the
-                 * color numbers for each pixel, and the second byte defines the upper bits of the color numbers.
-                 * In either case, Bit 7 is the leftmost pixel, and Bit 0 the rightmost.
-                 */
-                // here we handle the x and y flipping by tweaking the indexes we are accessing
-                int logicalLine = (flipY ? 7 - line : line);
-                int logicalX = (flipX ? 7 - px : px);
-                short paletteIndex = (short) (
-                        (
-                                (
-                                        (
-                                                // each tile takes up 16 bytes, and each line takes 2 bytes
-                                                vram[Memory.VRAM_PAGESIZE * bank + tile * 16 + logicalLine * 2 + 1] & (0x80 >> logicalX)
-                                        ) >> (7 - logicalX)
-                                ) << 1 // this is the upper bit of the color number
-                        ) |
-                                (
-                                        (
-                                                vram[Memory.VRAM_PAGESIZE * bank + tile * 16 + logicalLine * 2] & (0x80 >> logicalX)
-                                        ) >> (7 - logicalX)
-                                ) // << 0, this is the lower bit of the color number
-                );
-                // Drawing of the background layer is handled separately
-                if (bgPass && paletteIndex != 0) continue;
-                if (!bgPass && paletteIndex == 0) continue;
-                // Destination pixels
-                int dx = x + px;
-                int dy = y + line;
+            if (dx < 0 || dx >= w || scanline >= h)
+                continue;
 
-                if (dx >= 0 && dy >= 0 && dx < w && dy < h)
-                    data[dx + dy * w] = palette.getColor(paletteIndex);
-            }
-            return true;
+            int index = dx + scanline * w;
+            if (basePriority != 0 && basePriority < (data[index] & 0xFF000000))
+                continue;
+
+            /**
+             * For each line, the first byte defines the least significant bits of the
+             * color numbers for each pixel, and the second byte defines the upper bits of the color numbers.
+             * In either case, Bit 7 is the leftmost pixel, and Bit 0 the rightmost.
+             */
+            // here we handle the x and y flipping by tweaking the indexes we are accessing
+            int logicalLine = (flipY ? 7 - line : line);
+            int logicalX = (flipX ? 7 - px : px);
+
+            int address = addressBase + logicalLine * 2;
+
+            int paletteIndex =
+                    (
+                            (
+                                    (
+                                            // each tile takes up 16 bytes, and each line takes 2 bytes
+                                            vram[address + 1] & (0x80 >> logicalX)
+                                    ) >> (7 - logicalX)
+                            ) << 1 // this is the upper bit of the color number
+                    ) |
+                            (
+                                    (
+                                            vram[address] & (0x80 >> logicalX)
+                                    ) >> (7 - logicalX)
+                            ); // << 0, this is the lower bit of the color number
+
+            boolean index0 = paletteIndex == 0;
+            int priority = basePriority == 0 ? (index0 ? 1 << 24 : 3 << 24) : basePriority;
+            if (sprite && index0)
+                continue;
+
+            if (priority >= (data[index] & 0xFF000000))
+                data[index] = priority | palette.getColor(paletteIndex);
         }
-        return false;
     }
 
-    private void drawSprites(BufferedImage buffer, int[] data, int scanline, boolean underBG)
+    private void drawSprites(int[] data, int scanline)
     {
         byte[] oam = core.mmu.oam;
+        boolean tall = isUsingTallSprites();
+        boolean isColorGB = core.cartridge.isColorGB;
+
         // Actual GameBoy hardware can only handle drawing 10 sprites per line
         // our code doesn't actually have this limitation, but we artificially introduce it by keeping
         // track of how many sprites are drawn per line
         for (int i = 0; i < oam.length && spritesDrawn[scanline] < 10; i += 4)
         {
             byte attribs = oam[i + 3];
-            int vrambank = (attribs & 0b1000) != 0 && core.cartridge.isColorGB ? 1 : 0;
-            // obj above BG
-            if ((attribs & 0x80) != 0 == underBG)
+            int vrambank = (attribs & 0b1000) != 0 && isColorGB ? 1 : 0;
+            int priority = (attribs & 0x80) != 0 ? 2 << 24 : 5 << 24;
+
+            int y = oam[i] & 0xff;
+
+            if (!tall && !(y - 16 <= scanline && scanline < y - 8))
+                continue;
+
+            int x = oam[i + 1] & 0xff;
+            int tile = oam[i + 2] & 0xff;
+            boolean flipX = (attribs & 0x20) != 0;
+            boolean flipY = (attribs & 0x40) != 0;
+            int obp = isColorGB ? (attribs & 0x7) : (attribs >> 4) & 0x1;
+
+            IPalette pal = spritePalettes[obp];
+            if (tall)
             {
-                int y = oam[i] & 0xff;
-                int x = oam[i + 1] & 0xff;
-                int tile = oam[i + 2] & 0xff;
-                boolean flipX = (attribs & 0x20) != 0;
-                boolean flipY = (attribs & 0x40) != 0;
-
-                int obp = core.cartridge.isColorGB ? (attribs & 0x7) : (attribs >> 4) & 0x1;
-
-                Palette pal = spritePalettes[obp];
-                if (isUsingTallSprites())
+                // If we're using tall sprites we actually have to flip the order that we draw the top/bottom tiles
+                int hi = flipY ? (tile | 0x01) : (tile & 0xFE);
+                int lo = flipY ? (tile & 0xFE) : (tile | 0x01);
+                if (y - 16 <= scanline && scanline < y - 8)
                 {
-                    // If we're using tall sprites we actually have to flip the order that we draw the top/bottom tiles
-                    int hi = flipY ? (tile | 0x01) : (tile & 0xFE);
-                    int lo = flipY ? (tile & 0xFE) : (tile | 0x01);
-                    if (drawTile(pal, buffer, data, x - 8, y - 16, hi, scanline, flipX, flipY, vrambank, false))
-                        spritesDrawn[scanline]++;
-                    if (drawTile(pal, buffer, data, x - 8, y - 8, lo, scanline, flipX, flipY, vrambank, false))
-                        spritesDrawn[scanline]++;
-
-                } else
-                {
-                    if (drawTile(pal, buffer, data, x - 8, y - 16, tile, scanline, flipX, flipY, vrambank, false))
-                        spritesDrawn[scanline]++;
+                    drawTile(pal, data, x - 8, y - 16, hi, scanline, flipX, flipY, vrambank, priority, true);
+                    spritesDrawn[scanline]++;
                 }
+                if (y - 8 <= scanline && scanline < y)
+                {
+                    drawTile(pal, data, x - 8, y - 8, lo, scanline, flipX, flipY, vrambank, priority, true);
+                    spritesDrawn[scanline]++;
+                }
+
+            } else
+            {
+                drawTile(pal, data, x - 8, y - 16, tile, scanline, flipX, flipY, vrambank, priority, true);
+                spritesDrawn[scanline]++;
             }
         }
     }
 
     public IRenderManager currentRenderer;
-    public  List<IRenderManager> renderers;
+    public List<IRenderManager> renderers;
     public Interpolator interpolator = Interpolator.NEAREST;
 
-    public void initializeRenderers() {
-       renderers= Collections.unmodifiableList(new ArrayList<IRenderManager>()
+    @SuppressWarnings("deprecation")
+    public void initializeRenderers()
+    {
+        renderers = Collections.unmodifiableList(new ArrayList<IRenderManager>()
         {{
                 for (Class<? extends IRenderManager> rendererClass : IRenderManager.RENDERERS)
                 {
@@ -234,14 +251,15 @@ public class LCD
                         add(renderer);
                         if (currentRenderer == null)
                             currentRenderer = renderer;
-                    } else {
+                    } else
+                    {
                         System.err.println(renderer + " failed to produce a Graphics2D");
                     }
                 }
             }});
     }
 
-    public long tick(long cycles)
+    public void tick(long cycles)
     {
         lcdCycles += cycles;
         // 4.194304MHz clock, 154 scanlines per frame, 59.7 frames/second
@@ -298,20 +316,10 @@ public class LCD
              */
             if (LY == 144)
             {
-                if (display != null)
-                {
-                    //display.paintImmediately(display.getBounds());
-
-                }
-
-
-//                Component top = display;//SwingUtilities.getWindowAncestor(display);
-//                System.out.println(display.getPeer());
-                //     display.repaint(0);
-
                 Graphics2D graphics = currentRenderer.getGraphics();
 
-                switch (interpolator) {
+                switch (interpolator)
+                {
                     case NEAREST:
                         graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
                         break;
@@ -321,9 +329,9 @@ public class LCD
                     case BICUBIC:
                         graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
                         break;
-                    }
+                }
                 //graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_ANTIALIAS_ON);
-                graphics .drawImage(screenBuffer, 0, 0, display.getWidth(), display.getHeight(), null);
+                graphics.drawImage(screenBuffer, 0, 0, display.getWidth(), display.getHeight(), null);
 
 
 //                    D3DSurfaceData surf = (D3DSurfaceData) ((WComponentPeer) top.getPeer()).getSurfaceData();
@@ -375,10 +383,7 @@ public class LCD
                     }
                 }
             }
-            return 0;
         }
-
-        return 0;
     }
 
 
@@ -403,19 +408,24 @@ public class LCD
 //    }
 
 
+    static final int[] BLANK = new int[160 * 144];
+
     public void draw(BufferedImage buffer, int scanline)
     {
         // don't even bother if the display is not enabled
         if (!displayEnabled()) return;
 
         // we still receive these calls for scanlines in vblank, but we can just ignore them
-        if (scanline >= 144) return;
+        if (scanline >= 144 || scanline < 0) return;
 
         spritesDrawn[scanline] = 0;
 
         int W = buffer.getWidth();
         DataBufferInt dbb = (DataBufferInt) buffer.getRaster().getDataBuffer();
         int[] data = dbb.getData(0);
+
+        if (scanline == 0)
+            System.arraycopy(BLANK, 0, data, 0, data.length);
 
         byte[] vram = core.mmu.vram;
 
@@ -429,6 +439,9 @@ public class LCD
                 int y = (scanline + getScrollY() % 8) / 8;
                 int scrollY = getScrollY();
                 int scrollX = getScrollX();
+
+//                System.out.printf("SCX=%d, SCY=%d\n", scrollX, scrollY);
+
                 int offset = getBackgroundTileMapOffset();
 
                 // 20 8x8 tiles fit in a 160px-wide screen
@@ -437,19 +450,16 @@ public class LCD
                     int addressBase = offset + ((y + scrollY / 8) % 32 * 32) + ((x + scrollX / 8) % 32);
                     // add 256 to jump into second tile pattern table
                     int tile = tileDataOffset == 0 ? vram[addressBase] & 0xff : vram[addressBase] + 256;
-                    int gbcVramBank = 0;
-                    boolean flipX = false;
-                    boolean flipY = false;
-                    int gbcPalette = 0;
 
                     int attribs = vram[Memory.VRAM_PAGESIZE + addressBase];
-                    if ((attribs & 0x8) != 0) gbcVramBank = 1;
-                    flipX = (attribs & 0x20) != 0;
-                    flipY = (attribs & 0x10) != 0;
-                    gbcPalette = (attribs & 0x7);
 
-                    drawTile(bgPalettes[gbcPalette],
-                            buffer, data, -(scrollX % 8) + x * 8, -(scrollY % 8) + y * 8, tile, scanline, flipX, flipY, gbcVramBank, true);
+                    int gbcVramBank = 0;
+                    if ((attribs & 0x8) != 0) gbcVramBank = 1;
+                    boolean flipX = (attribs & 0x40) != 0;
+                    boolean flipY = (attribs & 0x20) != 0;
+                    int gbcPalette = (attribs & 0x7);
+
+                    drawTile(bgPalettes[gbcPalette], data, -(scrollX % 8) + x * 8, -(scrollY % 8) + y * 8, tile, scanline, flipX, flipY, gbcVramBank, 0, false);
                 }
             } else
             {
@@ -460,9 +470,9 @@ public class LCD
         }
 
         if (spritesEnabled())
-            drawSprites(buffer, data, scanline, true);
+            drawSprites(data, scanline);
 
-        if (backgroundEnabled())
+        /*if (backgroundEnabled())
         {
             int y = (scanline + getScrollY() % 8) / 8;
             int scrollY = getScrollY();
@@ -483,14 +493,15 @@ public class LCD
                 {
                     int attribs = vram[Memory.VRAM_PAGESIZE + addressBase];
                     if ((attribs & 0x8) != 0) gbcVramBank = 1;
-                    flipX = (attribs & 0x10) != 0;
-                    flipY = (attribs & 0x20) != 0;
+                    flipX = (attribs & 0x20) != 0;
+                    flipY = (attribs & 0x40) != 0;
                     gbcPalette = (attribs & 0x07);
                 }
                 drawTile(bgPalettes[gbcPalette],
                         buffer, data, -(scrollX % 8) + x * 8, -(scrollY % 8) + y * 8, tile, scanline, flipX, flipY, gbcVramBank, false);
             }
-        }
+        }*/
+//        System.out.printf("WX=%d, WY=%d\n", getWindowPosY(), getW)
         if (windowEnabled() &&
                 scanline >= getWindowPosY() &&
                 getWindowPosX() < buffer.getWidth() && getWindowPosY() >= 0)
@@ -506,6 +517,7 @@ public class LCD
 
             int y = (scanline - posY) / 8;
             for (int x = getWindowPosX() / 8; x < 21; x++)
+//            for (int x = 0; x < 21 - getWindowPosX() / 8; x++)
             {
                 // 32 tiles a row
                 int addressBase = tileMapOffset + (x + y * 32);
@@ -524,8 +536,8 @@ public class LCD
                     flipY = (attribs & 0x20) != 0;
                     gbcPalette = (attribs & 0x07);
                 }
-                drawTile(bgPalettes[gbcPalette],
-                        buffer, data, posX + x * 8, posY + y * 8, tile, scanline, flipX, flipY, gbcVramBank, false);
+
+                drawTile(bgPalettes[gbcPalette], data, posX + x * 8, posY + y * 8, tile, scanline, flipX, flipY, gbcVramBank, 4 << 24, false);
 
 
 //                int tile = tileDataOffset == 0 ? vram[addressBase] & 0xff : vram[addressBase] + 256;
@@ -533,8 +545,8 @@ public class LCD
             }
         }
 
-        if (spritesEnabled())
-            drawSprites(buffer, data, scanline, false);
+        /*if (spritesEnabled())
+            drawSprites(buffer, data, scanline, false);*/
     }
 
     /**
@@ -600,6 +612,7 @@ public class LCD
         return 0x0800;
     }
 
+    //    public int scrollx;
     public int getScrollX()
     {
         return (core.mmu.registers[R.R_SCX] & 0xFF);

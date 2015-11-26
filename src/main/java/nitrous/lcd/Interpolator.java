@@ -2,7 +2,7 @@ package nitrous.lcd;
 
 public enum Interpolator
 {
-    NEAREST("Nearest"),
+    NEAREST("None"),
     BILINEAR("Bilinear"),
     BICUBIC("Bicubic");
 
