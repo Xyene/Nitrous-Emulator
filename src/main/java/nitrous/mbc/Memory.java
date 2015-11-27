@@ -322,18 +322,29 @@ public class Memory
                 break;
             }
             case R.R_NR14:
-                if ((registers[R.R_NR14] & 0x80) != 0) {
+                /*if ((registers[R.R_NR14] & 0x80) != 0) {
                     core.sound.channel1.enabled = true;
                     core.sound.channel1.update();
-                }
+                }*/
                 break;
             case R.R_NR24:
-                if ((registers[R.R_NR24] & 0x80) != 0) {
-                    core.sound.channel2.enabled = true;
-                    core.sound.channel2.update();
-                }
+                if ((registers[R.R_NR24] & 0x80) != 0)
+                    core.sound.channel2.restart();
+            case R.R_NR21:
+            case R.R_NR22:
+            case R.R_NR23:
+                core.sound.channel2.update();
                 break;
-            case 0x1a: // Channel 3 sound on/off
+            case R.R_NR34:
+                if ((registers[R.R_NR34] & 0x80) != 0)
+                    core.sound.channel3.restart();
+            case R.R_NR30:
+            case R.R_NR31:
+            case R.R_NR32:
+            case R.R_NR33:
+                core.sound.channel3.update();
+                break;
+            //case 0x1a: // Channel 3 sound on/off
 //                System.err.print("Channel 3 sound: ");
 //                if ((data & 0x80) != 0)
 //                {
@@ -345,7 +356,7 @@ public class Memory
 //                    // Channel3.stop();
 //                }
 //                System.err.println();
-                break;
+                //break;
             /**
              * Writing to this register launches a DMA transfer from ROM or RAM to OAM memory (sprite attribute table).
              * The written value specifies the transfer source address divided by 100h, ie. source & destination are:
@@ -416,6 +427,9 @@ public class Memory
                 break;
             case R.R_LCD_STAT:
                 break;
+            default:
+                if (0x30 <= addr && addr < 0x40)
+                    core.sound.channel3.updateSample(addr - 0x30, (byte) data);
         }
         registers[addr] = (byte) data;
     }

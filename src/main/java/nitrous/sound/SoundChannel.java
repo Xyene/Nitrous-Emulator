@@ -13,4 +13,10 @@ public abstract class SoundChannel
     public SoundChannel(Emulator core) {
         this.core = core;
     }
+
+    public static int gbFreqToCycles(int gbFreq) {
+        return 32 * (2048 - gbFreq);
+    }
+
+    public abstract void render(byte[] output, int off, int len);
 }

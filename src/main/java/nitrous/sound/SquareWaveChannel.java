@@ -9,7 +9,6 @@ import java.util.Arrays;
 
 public class SquareWaveChannel extends SoundChannel
 {
-
     private static final int dutyConvert[] = {6, 5, 3, 1};
 
     private final int ioStart;
@@ -17,15 +16,13 @@ public class SquareWaveChannel extends SoundChannel
 
     private int gbFreq;
     private int period = 4096;
-    private int length = 1048576;
-    private boolean useLength = false;
+    private int length = 0;
+    private boolean useLength = true;
     private int clockBase = 0;
     private int envelopeInitial = 15;
     private boolean envelopeIncrease = true;
     private int envelopeSweep = 0;
     private int duty = 6;
-
-    public boolean enabled = false;
 
     public SquareWaveChannel(Emulator core, int ioStart, boolean sweep)
     {
@@ -35,12 +32,7 @@ public class SquareWaveChannel extends SoundChannel
         this.sweep = sweep;
     }
 
-    private static int gbFreqToCycles(int gbFreq) {
-        return 32 * (2048 - gbFreq);
-    }
-
-    public void update()
-    {
+    public void update() {
         duty = dutyConvert[(core.mmu.registers[ioStart] >> 6) & 0x3];
         length = (64 - (core.mmu.registers[ioStart] & 0x3F)) * 16384;
         envelopeInitial = (core.mmu.registers[ioStart + 1] >> 4) & 0xF;
@@ -52,7 +44,9 @@ public class SquareWaveChannel extends SoundChannel
         period = gbFreqToCycles(gbFreq);
 
         useLength = (core.mmu.registers[ioStart + 3] & 0x40) != 0;
+    }
 
+    public void restart() {
         clockBase = 0;
 
         /*System.out.println("Note:");
@@ -63,9 +57,6 @@ public class SquareWaveChannel extends SoundChannel
 
     public void render(byte[] output, int off, int len)
     {
-        if (!enabled)
-            return;
-
         float samplePeriod = core.clockSpeed / AUDIO_FORMAT.getSampleRate();
 
         for (int i = 0; i < len; ++i)
@@ -113,7 +104,6 @@ public class SquareWaveChannel extends SoundChannel
         byte[] data = new byte[48000];
 
         SquareWaveChannel channel = new SquareWaveChannel(null, 0, false);
-        channel.enabled = true;
         channel.period = 4096;
         channel.length = 1048576;
         channel.useLength = false;
