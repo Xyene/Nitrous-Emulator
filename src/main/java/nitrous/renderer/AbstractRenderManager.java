@@ -11,11 +11,11 @@ import java.lang.reflect.Method;
 
 public abstract class AbstractRenderManager implements IRenderManager
 {
-    private ComponentPeer peer;
-    private Class<?> peerClass;
-    private Class<?> surfaceClass;
-    private Graphics2D graphics2D;
-    private GraphicsConfiguration graphicsConfiguration;
+    protected final ComponentPeer peer;
+    protected Class<?> peerClass;
+    protected Class<?> surfaceClass;
+    protected Graphics2D graphics2D;
+    protected GraphicsConfiguration graphicsConfiguration;
 
     public AbstractRenderManager(ComponentPeer peer, String peerClass, String surfaceClass)
     {
@@ -27,10 +27,12 @@ public abstract class AbstractRenderManager implements IRenderManager
             this.surfaceClass = Class.forName(surfaceClass);
         } catch (ClassNotFoundException e)
         {
-            return;
+            throw new RuntimeException(e);
         }
 
         graphicsConfiguration = getGraphicsConfig();
+
+        update();
 
         if (graphicsConfiguration != null)
             graphics2D = createGraphics();
@@ -55,16 +57,12 @@ public abstract class AbstractRenderManager implements IRenderManager
 
             if (surf == null)
             {
-                System.err.println("Could not create SurfaceData");
                 return null;
             }
-
-            System.err.println(surf);
 
             return new SunGraphics2D(surf, Color.BLACK, Color.BLACK, null);
         } catch (Exception e)
         {
-            e.printStackTrace();
             return null;
         }
     }
@@ -72,9 +70,19 @@ public abstract class AbstractRenderManager implements IRenderManager
     protected abstract String getName();
 
     @Override
-    public Graphics2D getGraphics()
+    public void update()
     {
         peer.updateGraphicsData(graphicsConfiguration);
+    }
+
+    @Override
+    public Graphics2D getGraphics()
+    {
+        if (((SunGraphics2D) graphics2D).surfaceData.isSurfaceLost())
+        {
+            createGraphics();
+            new RuntimeException("surface lost").printStackTrace();
+        }
         return graphics2D;
     }
 
@@ -86,8 +94,9 @@ public abstract class AbstractRenderManager implements IRenderManager
             {
                 addActionListener((x) ->
                 {
-                    System.err.println(AbstractRenderManager.this.getName());
+                    System.err.println("Switched to " + AbstractRenderManager.this.getName() + " renderer.");
                     lcd.currentRenderer = AbstractRenderManager.this;
+                    lcd.currentRenderer.update();
                 });
             }
         };
