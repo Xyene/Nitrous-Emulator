@@ -42,7 +42,7 @@ public class RawWaveChannel extends SoundChannel {
 
     @Override
     public int render() {
-        return samples[((int) (((core.cycle - clockStart) / period) & 0x1F))] << 1 >> shift;
+        return enabled ? samples[((int) (((core.cycle - clockStart) / period) & 0x1F))] << 1 >> shift : 0;
     }
 
     public void render(byte[] output, int off, int len) {

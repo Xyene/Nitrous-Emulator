@@ -1862,6 +1862,8 @@ public class Emulator
         ac += 4;
         executed += 4;
         cycle += 4;
+        lcd.tick(4);
+        sound.tick(4);
         mmu.setAddress(addr, _data);
     }
 
@@ -1870,6 +1872,8 @@ public class Emulator
         ac += 4;
         executed += 4;
         cycle += 4;
+        lcd.tick(4);
+        sound.tick(4);
         mmu.setIO(addr, data);
     }
 
@@ -1883,6 +1887,8 @@ public class Emulator
         ac += 4;
         executed += 4;
         cycle += 4;
+        lcd.tick(4);
+        sound.tick(4);
         return mmu.getAddress(addr);
     }
 
@@ -1891,6 +1897,8 @@ public class Emulator
         ac += 4;
         executed += 4;
         cycle += 4;
+        lcd.tick(4);
+        sound.tick(4);
         return mmu.getIO(addr);
     }
 }
