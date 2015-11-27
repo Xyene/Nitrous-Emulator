@@ -11,6 +11,8 @@ public interface R
     int R_TAC = 0x07;
     int R_TIMA = 0x05;
     int R_TMA = 0x06;
+    int R_NR14 = 0x14;
+    int R_NR24 = 0x16;
     int R_WRAM_BANK = 0x70;
     int R_VRAM_BANK = 0x4f;
     int R_LCDC = 0x40;
