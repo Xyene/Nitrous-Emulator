@@ -367,6 +367,7 @@ public class Emulator
 
     long divCycle = 0;
     public long timerCycle = 0;
+    public int clockSpeed = 4194304;
     public boolean emulateSpeed = true;
 
     public void updateInterrupts(long cycles)
@@ -430,7 +431,7 @@ public class Emulator
 
             if (System.nanoTime() - last > 1_000_000_000)
             {
-                System.err.println(last + " -- " + (executed / 4194304.0));
+                System.err.println(last + " -- " + (1.0 * executed / clockSpeed));
                 last = System.nanoTime();
                 executed = 0;
             }
@@ -449,8 +450,11 @@ public class Emulator
                     // _last = System.nanoTime();
                     if (emulateSpeed)
                     {
-                        //sound.render(t);
-                        LockSupport.parkNanos((long) ((t / 4194304.0) * 1_000_000_000) + _last - System.nanoTime());
+                        sound.render(t, clockSpeed);
+                        LockSupport.parkNanos(1_000_000_000L * t / clockSpeed + _last - System.nanoTime());
+                    } else
+                    {
+                        sound.render(t, (int) (1_000_000_000L * t / (System.nanoTime() - _last)));
                         _last = System.nanoTime();
                     }
                 } catch (Exception e)

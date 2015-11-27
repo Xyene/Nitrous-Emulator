@@ -59,10 +59,11 @@ public class SquareWaveChannel extends SoundChannel
         if (!enabled)
             return;
 
+        float samplePeriod = core.clockSpeed / AUDIO_FORMAT.getSampleRate();
+
         for (int i = 0; i < len; ++i)
         {
             int clock = clockBase + (int) (i * samplePeriod);
-            //System.out.println(clock);
             if (useLength && clock > length)
                 break;
             int volume;
