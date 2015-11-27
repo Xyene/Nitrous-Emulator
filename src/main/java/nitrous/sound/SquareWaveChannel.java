@@ -52,6 +52,13 @@ public class SquareWaveChannel extends SoundChannel
         period = gbFreqToCycles(gbFreq);
 
         useLength = (core.mmu.registers[ioStart + 3] & 0x40) != 0;
+
+        clockBase = 0;
+
+        /*System.out.println("Note:");
+        System.out.printf("Frequency: %d, %fHz, %d, %fHz\n", gbFreq, 131072.0 / (2048 - gbFreq), period, 4194304.0 / period);
+        System.out.printf("Length: %d, %fs, %fs\n", length, length / 4194304.0, (64 - (core.mmu.registers[ioStart] & 0x3F)) / 256.);
+        System.out.println();*/
     }
 
     public void render(byte[] output, int off, int len)
