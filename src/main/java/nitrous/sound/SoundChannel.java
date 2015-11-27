@@ -18,5 +18,5 @@ public abstract class SoundChannel
         return 32 * (2048 - gbFreq);
     }
 
-    public abstract void render(byte[] output, int off, int len);
+    public abstract int render();
 }

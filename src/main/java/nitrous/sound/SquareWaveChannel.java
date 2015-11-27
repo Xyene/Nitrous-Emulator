@@ -18,7 +18,7 @@ public class SquareWaveChannel extends SoundChannel
     private int period = 4096;
     private int length = 0;
     private boolean useLength = true;
-    private int clockBase = 0;
+    private long clockStart = 0;
     private int envelopeInitial = 15;
     private boolean envelopeIncrease = true;
     private int envelopeSweep = 0;
@@ -33,7 +33,16 @@ public class SquareWaveChannel extends SoundChannel
     }
 
     public void update() {
+        /**
+         * Duty   Waveform    Ratio  Cycle
+         * -------------------------------
+         * 0      00000001    12.5%      6
+         * 1      10000001    25%        5
+         * 2      10000111    50%        3
+         * 3      01111110    75%        1
+         */
         duty = dutyConvert[(core.mmu.registers[ioStart] >> 6) & 0x3];
+
         length = (64 - (core.mmu.registers[ioStart] & 0x3F)) * 16384;
         envelopeInitial = (core.mmu.registers[ioStart + 1] >> 4) & 0xF;
         envelopeIncrease = (core.mmu.registers[ioStart + 1] & 0x8) != 0;
@@ -47,7 +56,7 @@ public class SquareWaveChannel extends SoundChannel
     }
 
     public void restart() {
-        clockBase = 0;
+        clockStart = core.cycle;
 
         /*System.out.println("Note:");
         System.out.printf("Frequency: %d, %fHz, %d, %fHz\n", gbFreq, 131072.0 / (2048 - gbFreq), period, 4194304.0 / period);
@@ -55,48 +64,64 @@ public class SquareWaveChannel extends SoundChannel
         System.out.println();*/
     }
 
-    public void render(byte[] output, int off, int len)
-    {
-        float samplePeriod = core.clockSpeed / AUDIO_FORMAT.getSampleRate();
+    @Override
+    public int render() {
+        int delta = (int) (core.cycle - clockStart);
+        if (useLength && delta > length)
+            return 0;
 
-        for (int i = 0; i < len; ++i)
-        {
-            int clock = clockBase + (int) (i * samplePeriod);
-            if (useLength && clock > length)
-                break;
-            int volume;
-            if (envelopeSweep == 0)
-                volume = envelopeInitial;
-            else
-                volume = Math.min(15, Math.max(0, envelopeInitial + clock / envelopeSweep * (envelopeIncrease ? 1 : -1))) * 2;
-            int cycle = (clock * 8 / period) & 7;
+        int volume;
+        if (envelopeSweep == 0)
+            volume = envelopeInitial;
+        else
+            volume = Math.min(15, Math.max(0, envelopeInitial + delta / envelopeSweep * (envelopeIncrease ? 1 : -1))) * 2;
+        int cycle = (delta * 8 / period) & 7;
 
-            /**
-             * Duty   Waveform    Ratio  Cycle
-             * -------------------------------
-             * 0      00000001    12.5%      6
-             * 1      10000001    25%        5
-             * 2      10000111    50%        3
-             * 3      01111110    75%        1
-             */
-            output[off+i] += (byte) (cycle > duty ? volume : -volume);
-            /*switch (duty) {
-                case 0:
-                    output[i] = (byte) (cycle == 7 ? volume : -volume);
-                    break;
-                case 1:
-                    output[i] = (byte) (cycle == 0 || cycle == 7 ? volume : -volume);
-                    break;
-                case 2:
-                    output[i] = (byte) (cycle == 0 || cycle > 4 ? volume : -volume);
-                    break;
-                case 3:
-                    output[i] = (byte) (cycle != 0 && cycle != 7 ? volume : -volume);
-                    break;
-            }*/
-        }
-        clockBase += len * samplePeriod;
+        return cycle > duty ? volume : -volume;
     }
+
+//    public void render(byte[] output, int off, int len)
+//    {
+//        float samplePeriod = core.clockSpeed / AUDIO_FORMAT.getSampleRate();
+//
+//        for (int i = 0; i < len; ++i)
+//        {
+//            int clock = clockStart + (int) (i * samplePeriod);
+//            if (useLength && clock > length)
+//                break;
+//            int volume;
+//            if (envelopeSweep == 0)
+//                volume = envelopeInitial;
+//            else
+//                volume = Math.min(15, Math.max(0, envelopeInitial + clock / envelopeSweep * (envelopeIncrease ? 1 : -1))) * 2;
+//            int cycle = (clock * 8 / period) & 7;
+//
+//            /**
+//             * Duty   Waveform    Ratio  Cycle
+//             * -------------------------------
+//             * 0      00000001    12.5%      6
+//             * 1      10000001    25%        5
+//             * 2      10000111    50%        3
+//             * 3      01111110    75%        1
+//             */
+//            output[off+i] += (byte) (cycle > duty ? volume : -volume);
+//            /*switch (duty) {
+//                case 0:
+//                    output[i] = (byte) (cycle == 7 ? volume : -volume);
+//                    break;
+//                case 1:
+//                    output[i] = (byte) (cycle == 0 || cycle == 7 ? volume : -volume);
+//                    break;
+//                case 2:
+//                    output[i] = (byte) (cycle == 0 || cycle > 4 ? volume : -volume);
+//                    break;
+//                case 3:
+//                    output[i] = (byte) (cycle != 0 && cycle != 7 ? volume : -volume);
+//                    break;
+//            }*/
+//        }
+//        clockStart += len * samplePeriod;
+//    }
 
     public static void main(String... args) throws LineUnavailableException, InterruptedException
     {
@@ -107,12 +132,12 @@ public class SquareWaveChannel extends SoundChannel
         channel.period = 4096;
         channel.length = 1048576;
         channel.useLength = false;
-        channel.clockBase = 0;
+        channel.clockStart = 0;
         channel.envelopeInitial = 15;
         channel.envelopeIncrease = true;
         channel.envelopeSweep = 7 * 65536;
         channel.duty = 3;
-        channel.render(data, 0, data.length);
+        //channel.render(data, 0, data.length);
 
         byte[] sample = new byte[1000];
         System.arraycopy(data, 0, sample, 0, sample.length);

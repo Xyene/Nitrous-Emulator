@@ -10,7 +10,7 @@ public class RawWaveChannel extends SoundChannel {
     private int shift;
     private boolean useLength;
 
-    private int clockBase = 0;
+    private long clockStart = 0;
     private byte[] samples = new byte[32];
 
     public RawWaveChannel(Emulator core) {
@@ -32,7 +32,7 @@ public class RawWaveChannel extends SoundChannel {
     }
 
     public void restart() {
-        clockBase = 0;
+        clockStart = core.cycle;
     }
 
     public void updateSample(int byteId, byte value) {
@@ -41,6 +41,10 @@ public class RawWaveChannel extends SoundChannel {
     }
 
     @Override
+    public int render() {
+        return samples[((int) (((core.cycle - clockStart) / period) & 0x1F))] << 1 >> shift;
+    }
+
     public void render(byte[] output, int off, int len) {
         if (!enabled)
             return;
@@ -49,12 +53,12 @@ public class RawWaveChannel extends SoundChannel {
 
         for (int i = 0; i < len; ++i)
         {
-            int clock = clockBase + (int) (i * samplePeriod);
+            /*int clock = clockStart + (int) (i * samplePeriod);
             if (useLength && clock > length)
                 break;
 
-            output[i] += (byte) (samples[(clock / period) & 0x1F] << 1 >> shift);
+            output[i] += (byte) (samples[(clock / period) & 0x1F] << 1 >> shift);*/
         }
-        clockBase += len * samplePeriod;
+        clockStart += len * samplePeriod;
     }
 }

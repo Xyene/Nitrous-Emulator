@@ -23,6 +23,7 @@ public class Emulator
         this.mmu = cartridge.createController(this);
         this.lcd = new LCD(this);
         this.sound = new SoundManager(this);
+        sound.updateClockSpeed(clockSpeed);
         reset();
     }
 
@@ -404,7 +405,7 @@ public class Emulator
 
         // Update the display
         lcd.tick(cycles);
-
+        sound.tick(cycles);
     }
 
     public long ac;
@@ -431,7 +432,7 @@ public class Emulator
 
             if (System.nanoTime() - last > 1_000_000_000)
             {
-                System.err.println(last + " -- " + (1.0 * executed / clockSpeed));
+                System.err.println(last + " -- " + clockSpeed + " Hz -- " + (1.0 * executed / clockSpeed));
                 last = System.nanoTime();
                 executed = 0;
             }
@@ -447,16 +448,17 @@ public class Emulator
                 try
                 {
                     //   LockSupport.parkNanos(1000000000 - (System.nanoTime() - _last));
-                    // _last = System.nanoTime();
                     if (emulateSpeed)
                     {
-                        sound.render(t, clockSpeed);
+                        //sound.render(t);
                         LockSupport.parkNanos(1_000_000_000L * t / clockSpeed + _last - System.nanoTime());
                     } else
                     {
-                        sound.render(t, (int) (1_000_000_000L * t / (System.nanoTime() - _last)));
-                        _last = System.nanoTime();
+                        clockSpeed = (int) (1_000_000_000L * t / (System.nanoTime() - _last));
+                        sound.updateClockSpeed(clockSpeed);
+                        //sound.render(t);
                     }
+                    _last = System.nanoTime();
                 } catch (Exception e)
                 {
                     e.printStackTrace();
