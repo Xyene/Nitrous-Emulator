@@ -321,6 +321,18 @@ public class Memory
                 }
                 break;
             }
+            case R.R_NR14:
+                if ((registers[R.R_NR14] & 0x80) != 0) {
+                    core.sound.channel1.enabled = true;
+                    core.sound.channel1.update();
+                }
+                break;
+            case R.R_NR24:
+                if ((registers[R.R_NR24] & 0x80) != 0) {
+                    core.sound.channel2.enabled = true;
+                    core.sound.channel2.update();
+                }
+                break;
             case 0x1a: // Channel 3 sound on/off
 //                System.err.print("Channel 3 sound: ");
 //                if ((data & 0x80) != 0)
@@ -514,6 +526,7 @@ public class Memory
                     reg |= 0x01;
                 } else
                 {
+//                    System.out.println("!!!");
                     // FIXME
 //                    long _cycle = core.cycle % R.INSTRS_PER_HBLANK;
 //                    int section = R.INSTRS_PER_HBLANK / 6;

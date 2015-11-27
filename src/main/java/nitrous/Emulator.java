@@ -4,6 +4,7 @@ import nitrous.lcd.Interpolator;
 import nitrous.lcd.LCD;
 import nitrous.mbc.Memory;
 import nitrous.renderer.IRenderManager;
+import nitrous.sound.SoundManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,6 +22,7 @@ public class Emulator
         this.cartridge = cartridge;
         this.mmu = cartridge.createController(this);
         this.lcd = new LCD(this);
+        this.sound = new SoundManager(this);
         reset();
     }
 
@@ -29,6 +31,7 @@ public class Emulator
 
     public final Memory mmu;
     public final LCD lcd;
+    public final SoundManager sound;
 
     public final Cartridge cartridge;
 
@@ -364,7 +367,7 @@ public class Emulator
 
     long divCycle = 0;
     public long timerCycle = 0;
-    public boolean emulateSpeed = false;
+    public boolean emulateSpeed = true;
 
     public void updateInterrupts(long cycles)
     {
@@ -409,6 +412,7 @@ public class Emulator
     public void exec()
     {
         long last = System.nanoTime();
+        long _last = System.nanoTime();
 
         while (true)
         {
@@ -432,7 +436,7 @@ public class Emulator
             }
             // The idea here is that we cap the amount of cycles we execute per second to 4194304
             // it doesn't actually do this since some timing is off
-            int t = 6000;//4194304;
+            int t = 27360;///6000;//4194304;
             if (ac >= t)
             {
                 // System.err.println(cycle + "..." + oldCycle);
@@ -443,7 +447,12 @@ public class Emulator
                 {
                     //   LockSupport.parkNanos(1000000000 - (System.nanoTime() - _last));
                     // _last = System.nanoTime();
-                    if (emulateSpeed) LockSupport.parkNanos((long) ((t / 4194304.0) * 1_000_000_000));
+                    if (emulateSpeed)
+                    {
+                        //sound.render(t);
+                        LockSupport.parkNanos((long) ((t / 4194304.0) * 1_000_000_000) + _last - System.nanoTime());
+                        _last = System.nanoTime();
+                    }
                 } catch (Exception e)
                 {
                     e.printStackTrace();
@@ -1632,124 +1641,157 @@ public class Emulator
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         SwingUtilities.invokeLater(() -> {
             JFrame disp = new JFrame(cartridge.gameTitle);
-            disp.setContentPane(display = new Panel()
+            disp.setContentPane(new Panel()
             {
                 {
-                    int mag = 2;
+                    setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+                    add(Box.createVerticalGlue());
                     setBackground(Color.BLACK);
-                    setMaximumSize(new Dimension(160 * mag, 144 * mag));
-                    setMinimumSize(new Dimension(160 * mag, 144 * mag));
-                    setSize(new Dimension(160 * mag, 144 * mag));
-                    setPreferredSize(new Dimension(160 * mag, 144 * mag));
+                    setIgnoreRepaint(true);
+
+                    add(new Panel()
+                    {
+                        {
+                            setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+                            setBackground(Color.BLACK);
+                            setIgnoreRepaint(true);
+
+                            add(Box.createHorizontalGlue());
+                            add(display = new Panel()
+                            {
+                                {
+                                    int mag = 2;
+                                    setBackground(Color.BLACK);
+                                    setMaximumSize(new Dimension(160 * mag, 144 * mag));
+                                    setMinimumSize(new Dimension(160 * mag, 144 * mag));
+                                    setSize(new Dimension(160 * mag, 144 * mag));
+                                    setPreferredSize(new Dimension(160 * mag, 144 * mag));
 //                    setBackground(Color.GREEN);
-                    KeyListener toggler = new KeyAdapter()
-                    {
-                        private void toggle(KeyEvent e, boolean to)
-                        {
-                            switch (e.getKeyCode())
-                            {
-                                case KeyEvent.VK_RIGHT:
-                                    core.buttonRight = to;
-                                    break;
-                                case KeyEvent.VK_LEFT:
-                                    core.buttonLeft = to;
-                                    break;
-                                case KeyEvent.VK_UP:
-                                    core.buttonUp = to;
-                                    break;
-                                case KeyEvent.VK_DOWN:
-                                    core.buttonDown = to;
-                                    break;
-                                case KeyEvent.VK_A:
-                                    core.buttonA = to;
-                                    break;
-                                case KeyEvent.VK_B:
-                                    core.buttonB = to;
-                                    break;
-                                case KeyEvent.VK_X:
-                                    core.buttonStart = to;
-                                    break;
-                                case KeyEvent.VK_Y:
-                                    core.buttonSelect = to;
-                                    break;
-                            }
-                        }
-
-                        @Override
-                        public void keyReleased(KeyEvent e)
-                        {
-                            toggle(e, false);
-                        }
-
-                        @Override
-                        public void keyPressed(KeyEvent e)
-                        {
-                            toggle(e, true);
-                        }
-                    };
-                    addMouseListener(new MouseAdapter()
-                    {
-                        @Override
-                        public void mouseReleased(MouseEvent e)
-                        {
-                            JPopupMenu menu = new JPopupMenu();
-                            menu.add(new JMenu("Renderer")
-                            {
-                                {
-                                    ButtonGroup group = new ButtonGroup();
-
-                                    for (IRenderManager renderer : core.lcd.renderers)
+                                    KeyListener toggler = new KeyAdapter()
                                     {
-                                        JRadioButtonMenuItem menuItem = renderer.getRadioMenuItem(core.lcd);
-                                        group.add(menuItem);
-                                        if (renderer == core.lcd.currentRenderer)
-                                            group.setSelected(menuItem.getModel(), true);
-                                        add(menuItem);
-                                    }
-                                }
-                            });
-                            menu.add(new JMenu("Filter")
-                            {
-                                {
-                                    ButtonGroup group = new ButtonGroup();
-                                    for (final Interpolator interpolator : Interpolator.values())
-                                    {
-                                        add(new JRadioButtonMenuItem(interpolator.name)
+                                        private void toggle(KeyEvent e, boolean to)
                                         {
+                                            switch (e.getKeyCode())
                                             {
-                                                group.add(this);
-                                                if (interpolator == core.lcd.interpolator)
-                                                    group.setSelected(getModel(), true);
-                                                addActionListener((e) -> {
-                                                    core.lcd.interpolator = interpolator;
-                                                    group.setSelected(getModel(), true);
-                                                });
+                                                case KeyEvent.VK_RIGHT:
+                                                    core.buttonRight = to;
+                                                    break;
+                                                case KeyEvent.VK_LEFT:
+                                                    core.buttonLeft = to;
+                                                    break;
+                                                case KeyEvent.VK_UP:
+                                                    core.buttonUp = to;
+                                                    break;
+                                                case KeyEvent.VK_DOWN:
+                                                    core.buttonDown = to;
+                                                    break;
+                                                case KeyEvent.VK_A:
+                                                    core.buttonA = to;
+                                                    break;
+                                                case KeyEvent.VK_B:
+                                                    core.buttonB = to;
+                                                    break;
+                                                case KeyEvent.VK_X:
+                                                    core.buttonStart = to;
+                                                    break;
+                                                case KeyEvent.VK_Y:
+                                                    core.buttonSelect = to;
+                                                    break;
                                             }
-                                        });
-                                    }
+                                        }
+
+                                        @Override
+                                        public void keyReleased(KeyEvent e)
+                                        {
+                                            toggle(e, false);
+                                        }
+
+                                        @Override
+                                        public void keyPressed(KeyEvent e)
+                                        {
+                                            toggle(e, true);
+                                        }
+                                    };
+                                    addMouseListener(new MouseAdapter()
+                                    {
+                                        @Override
+                                        public void mouseReleased(MouseEvent e)
+                                        {
+                                            JPopupMenu menu = new JPopupMenu();
+                                            menu.add(new JMenu("Renderer")
+                                            {
+                                                {
+                                                    ButtonGroup group = new ButtonGroup();
+
+                                                    for (IRenderManager renderer : core.lcd.renderers)
+                                                    {
+                                                        JRadioButtonMenuItem menuItem = renderer.getRadioMenuItem(core.lcd);
+                                                        group.add(menuItem);
+                                                        if (renderer == core.lcd.currentRenderer)
+                                                            group.setSelected(menuItem.getModel(), true);
+                                                        add(menuItem);
+                                                    }
+                                                }
+                                            });
+                                            menu.add(new JMenu("Filter")
+                                            {
+                                                {
+                                                    ButtonGroup group = new ButtonGroup();
+                                                    for (final Interpolator interpolator : Interpolator.values())
+                                                    {
+                                                        add(new JRadioButtonMenuItem(interpolator.name)
+                                                        {
+                                                            {
+                                                                group.add(this);
+                                                                if (interpolator == core.lcd.interpolator)
+                                                                    group.setSelected(getModel(), true);
+                                                                addActionListener((e) -> {
+                                                                    core.lcd.interpolator = interpolator;
+                                                                    group.setSelected(getModel(), true);
+                                                                });
+                                                            }
+                                                        });
+                                                    }
+                                                }
+                                            });
+
+                                            menu.add(new JSeparator());
+                                            menu.add(new JMenuItem("Options"));
+
+                                            if (SwingUtilities.isRightMouseButton(e))
+                                                menu.show(e.getComponent(), e.getX(), e.getY());
+                                        }
+                                    });
+                                    addKeyListener(toggler);
+                                    disp.addKeyListener(toggler);
+                                    setIgnoreRepaint(true);
+                                }
+
+                                @Override
+                                public void paint(Graphics g)
+                                {
+                                    throw new RuntimeException();
+                                    //System.err.println("a");
+                                    //super.paintComponent(g);
+//                       ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                                    //   g.drawImage(screenBuffer, 0, 0, getWidth(), getHeight(), null);
                                 }
                             });
-
-                            if (SwingUtilities.isRightMouseButton(e))
-                                menu.show(e.getComponent(), e.getX(), e.getY());
+                            add(Box.createHorizontalGlue());
                         }
                     });
-                    addKeyListener(toggler);
-                    disp.addKeyListener(toggler);
-                    setIgnoreRepaint(true);
-                }
 
-                @Override
-                public void paint(Graphics g)
-                {
-                    throw new RuntimeException();
-                    //System.err.println("a");
-                    //super.paintComponent(g);
-//                       ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-                    //   g.drawImage(screenBuffer, 0, 0, getWidth(), getHeight(), null);
+                    add(Box.createVerticalGlue());
                 }
             });
 
+
+            boolean fullscreen = false;
+            if (fullscreen)
+            {
+                disp.setUndecorated(true);
+                disp.setExtendedState(JFrame.MAXIMIZED_BOTH);
+            }
             disp.pack();
             disp.setResizable(false);
             disp.setLocationRelativeTo(null);
@@ -1775,8 +1817,14 @@ public class Emulator
                     }
                 }
             });
+
             disp.setVisible(true);
+//            disp.setIgnoreRepaint(true);
+
+
             core.lcd.initializeRenderers();
+            //          core.lcd.currentRenderer.getGraphics().getDeviceConfiguration().getDevice().setFullScreenWindow(disp);
+
             codeExecutionThread.start();
         });
 
@@ -1813,6 +1861,9 @@ public class Emulator
 
     public void setIO(int addr, int data)
     {
+        ac += 4;
+        executed += 4;
+        cycle += 4;
         mmu.setIO(addr, data);
     }
 
@@ -1831,6 +1882,9 @@ public class Emulator
 
     public int getIO(int addr)
     {
+        ac += 4;
+        executed += 4;
+        cycle += 4;
         return mmu.getIO(addr);
     }
 }
