@@ -32,7 +32,8 @@ public class SquareWaveChannel extends SoundChannel
         this.sweep = sweep;
     }
 
-    public void update() {
+    public void update()
+    {
         /**
          * Duty   Waveform    Ratio  Cycle
          * -------------------------------
@@ -43,10 +44,10 @@ public class SquareWaveChannel extends SoundChannel
          */
         duty = dutyConvert[(core.mmu.registers[ioStart] >> 6) & 0x3];
 
-        length = (64 - (core.mmu.registers[ioStart] & 0x3F)) * 16384;
+        length = (64 - (core.mmu.registers[ioStart] & 0x3F)) * (core.clockSpeed / 256);
         envelopeInitial = (core.mmu.registers[ioStart + 1] >> 4) & 0xF;
         envelopeIncrease = (core.mmu.registers[ioStart + 1] & 0x8) != 0;
-        envelopeSweep = (core.mmu.registers[ioStart + 1] & 0x7) * 65536;
+        envelopeSweep = (core.mmu.registers[ioStart + 1] & 0x7) * (core.clockSpeed / 64);
 
         gbFreq = (core.mmu.registers[ioStart + 2] & 0xFF) |
                 ((core.mmu.registers[ioStart + 3] & 0x7) << 8);
@@ -55,7 +56,8 @@ public class SquareWaveChannel extends SoundChannel
         useLength = (core.mmu.registers[ioStart + 3] & 0x40) != 0;
     }
 
-    public void restart() {
+    public void restart()
+    {
         clockStart = core.cycle;
 
         /*System.out.println("Note:");
@@ -65,7 +67,8 @@ public class SquareWaveChannel extends SoundChannel
     }
 
     @Override
-    public int render() {
+    public int render()
+    {
         int delta = (int) (core.cycle - clockStart);
         if (useLength && delta > length)
             return 0;
