@@ -18,8 +18,8 @@ public class RawWaveChannel extends SoundChannel {
     }
 
     public void update() {
-        enabled = (core.mmu.getIO(0x1A) & 0x80) != 0;
-        length = core.mmu.getIO(0x1B) & 0xFF;
+        enabled = (core.mmu.registers[0x1A] & 0x80) != 0;
+        length = core.mmu.registers[0x1B] & 0xFF;
 
         int level = (core.mmu.registers[0x1C] >> 5) & 0x3;
         shift = level == 0 ? 5 : level - 1;
