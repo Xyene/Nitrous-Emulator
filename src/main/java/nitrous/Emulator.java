@@ -383,28 +383,31 @@ public class Emulator
         }
 
         // The Timer is similar to DIV, except that when it overflows it triggers an interrupt
-        if (timerEnabled) {
+        if (timerEnabled)
+        {
             timerCycle += delta;
 
             // The Timer has a settable frequency
-            if (timerCycle >= timerFreq) {
+            if (timerCycle >= timerFreq)
+            {
                 timerCycle -= timerFreq;
 
                 // And it resets to a specific value
                 int tima = (mmu.registers[R.R_TIMA] & 0xff) + 1;
-                if (tima > 0xff) {
+                if (tima > 0xff)
+                {
                     // Reset to the wanted value, and trigger the interrupt
                     tima = mmu.registers[R.R_TMA] & 0xff;
                     if (isInterruptEnabled(R.TIMER_OVERFLOW_BIT))
                         setInterruptTriggered(R.TIMER_OVERFLOW_BIT);
                 }
-                mmu.registers[R.R_TIMA]= (byte) tima;
+                mmu.registers[R.R_TIMA] = (byte) tima;
             }
         }
 
+        sound.tick(delta);
         // Update the display
         lcd.tick(delta);
-        sound.tick(delta);
     }
 
     public long ac;
@@ -417,12 +420,14 @@ public class Emulator
 
         while (true)
         {
+            long before = cycle;
             long delta = _exec();
+
             cycle += delta;
             ac += delta;
             executed += delta;
 
-            updateInterrupts(delta);
+            updateInterrupts(cycle - before);
 
             if (interruptsEnabled)
             {
@@ -1861,7 +1866,6 @@ public class Emulator
         ac += 4;
         executed += 4;
         cycle += 4;
-        updateInterrupts(4);
         mmu.setAddress(addr, _data);
     }
 
@@ -1870,7 +1874,6 @@ public class Emulator
         ac += 4;
         executed += 4;
         cycle += 4;
-        updateInterrupts(4);
         mmu.setIO(addr, data);
     }
 
@@ -1884,7 +1887,6 @@ public class Emulator
         ac += 4;
         executed += 4;
         cycle += 4;
-        updateInterrupts(4);
         return mmu.getAddress(addr);
     }
 
@@ -1893,7 +1895,6 @@ public class Emulator
         ac += 4;
         executed += 4;
         cycle += 4;
-        updateInterrupts(4);
         return mmu.getIO(addr);
     }
 }
