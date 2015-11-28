@@ -7,6 +7,8 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import java.util.Arrays;
 
+import static nitrous.R.*;
+
 public class SoundManager
 {
     private final Emulator core;
@@ -20,8 +22,9 @@ public class SoundManager
     public SoundManager(Emulator core)
     {
         this.core = core;
-        channel1 = new SquareWaveChannel(core, 0x11, true);
-        channel2 = new SquareWaveChannel(core, 0x16, false);
+
+        channel1 = new SquareWaveChannel(core, R_NR11, true);
+        channel2 = new SquareWaveChannel(core, R_NR21, false);
         channel3 = new RawWaveChannel(core);
 
         buffer = new byte[480];
