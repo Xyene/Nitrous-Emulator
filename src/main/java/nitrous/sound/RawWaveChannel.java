@@ -14,7 +14,7 @@ public class RawWaveChannel extends SoundChannel {
     private boolean useLength;
 
     private long clockStart = 0;
-    private byte[] samples = new byte[32];
+    private int[] samples = new int[32];
 
     public RawWaveChannel(Emulator core) {
         super(core);
@@ -29,8 +29,7 @@ public class RawWaveChannel extends SoundChannel {
         enabled = (registers[R_NR30] & 0x80) != 0;
         length = registers[R_NR31] & 0xFF;
 
-        int level = (registers[R_NR32] >> 5) & 0x3;
-        shift = level == 0 ? 5 : level - 1;
+        shift = 3 - ((core.mmu.registers[0x1C] >> 5) & 0x3);
 
         gbFreq = (registers[R_NR33] & 0xFF) |
                 ((registers[R_NR34] & 0x7) << 8);
@@ -44,32 +43,17 @@ public class RawWaveChannel extends SoundChannel {
     }
 
     public void updateSample(int byteId, byte value) {
-        samples[byteId * 2] = (byte) ((value >> 4) & 0xF);
-        samples[byteId * 2 + 1] = (byte) (value & 0xF);
+        samples[byteId * 2] = ((value >> 4) & 0xF) - 8;
+        samples[byteId * 2 + 1] = (value & 0xF) - 8;
     }
 
     @Override
     public int render() {
-        if (enabled)
-            return samples[((int) (((core.cycle - clockStart) / period) & 0x1F))] << 1 >> shift;
-        else
+        if (!enabled || shift == 3)
             return 0;
-    }
-
-    public void render(byte[] output, int off, int len) {
-        if (!enabled)
-            return;
-
-        float samplePeriod = core.clockSpeed / AUDIO_FORMAT.getSampleRate();
-
-        for (int i = 0; i < len; ++i)
-        {
-            /*int clock = clockStart + (int) (i * samplePeriod);
-            if (useLength && clock > length)
-                break;
-
-            output[i] += (byte) (samples[(clock / period) & 0x1F] << 1 >> shift);*/
-        }
-        clockStart += len * samplePeriod;
+        long delta = core.cycle - clockStart;
+        if (useLength && delta > length)
+            return 0;
+        return samples[(int) (delta / period) & 0x1F] << shift;
     }
 }
