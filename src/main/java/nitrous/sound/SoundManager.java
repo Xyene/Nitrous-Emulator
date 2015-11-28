@@ -24,7 +24,7 @@ public class SoundManager
         channel2 = new SquareWaveChannel(core, 0x16, false);
         channel3 = new RawWaveChannel(core);
 
-        buffer = new byte[1];
+        buffer = new byte[480];
         try
         {
             sdl = AudioSystem.getSourceDataLine(SoundChannel.AUDIO_FORMAT);
@@ -44,9 +44,10 @@ public class SoundManager
     }
 
     public void updateClockSpeed(int clockSpeed) {
-        sampleClocks = core.clockSpeed / SoundChannel.AUDIO_FORMAT.getSampleRate();
+        sampleClocks = clockSpeed / SoundChannel.AUDIO_FORMAT.getSampleRate();
     }
 
+    private int usedSamples = 0;
     private double clockTicks = 0;
 
     public void tick(long delta) {
@@ -55,13 +56,23 @@ public class SoundManager
         while (clockTicks >= sampleClocks) {
             clockTicks -= sampleClocks;
 
-            buffer[0] = 0;
-            buffer[0] += channel1.render();
-            buffer[0] += channel2.render();
-            buffer[0] += channel3.render();
-            sdl.write(buffer, 0, 1);
+            int index = usedSamples++;
+            buffer[index] = 0;
+            buffer[index] += channel1.render();
+            buffer[index] += channel2.render();
+            buffer[index] += channel3.render();
+
+            if (usedSamples >= buffer.length) {
+                sdl.write(buffer, 0, buffer.length);
+                usedSamples = 0;
+            }
         }
     }
+
+    //public void play() {
+    //sdl.write(buffer, 0, usedSamples);
+    //usedSamples = 0;
+    //}
 
 //    public void render(int cycles) {
 //        if (sdl == null)
