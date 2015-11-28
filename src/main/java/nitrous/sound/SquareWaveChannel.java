@@ -1,6 +1,7 @@
 package nitrous.sound;
 
 import nitrous.Emulator;
+import nitrous.R;
 
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
@@ -34,6 +35,10 @@ public class SquareWaveChannel extends SoundChannel
 
     public void update()
     {
+        byte[] registers = core.mmu.registers;
+
+        if ((registers[R.R_NR24] & 0x80) != 0)
+           restart();
         /**
          * Duty   Waveform    Ratio  Cycle
          * -------------------------------
@@ -42,18 +47,18 @@ public class SquareWaveChannel extends SoundChannel
          * 2      10000111    50%        3
          * 3      01111110    75%        1
          */
-        duty = dutyConvert[(core.mmu.registers[ioStart] >> 6) & 0x3];
+        duty = dutyConvert[(registers[ioStart] >> 6) & 0x3];
 
-        length = (64 - (core.mmu.registers[ioStart] & 0x3F)) * core.clockSpeed / 256;
-        envelopeInitial = (core.mmu.registers[ioStart + 1] >> 4) & 0xF;
-        envelopeIncrease = (core.mmu.registers[ioStart + 1] & 0x8) != 0;
-        envelopeSweep = (core.mmu.registers[ioStart + 1] & 0x7) * core.clockSpeed / 64;
+        length = (64 - (registers[ioStart] & 0x3F)) * core.clockSpeed / 256;
+        envelopeInitial = (registers[ioStart + 1] >> 4) & 0xF;
+        envelopeIncrease = (registers[ioStart + 1] & 0x8) != 0;
+        envelopeSweep = (registers[ioStart + 1] & 0x7) * core.clockSpeed / 64;
 
-        gbFreq = (core.mmu.registers[ioStart + 2] & 0xFF) |
-                ((core.mmu.registers[ioStart + 3] & 0x7) << 8);
+        gbFreq = (registers[ioStart + 2] & 0xFF) |
+                ((registers[ioStart + 3] & 0x7) << 8);
         period = gbFreqToCycles(gbFreq);
 
-        useLength = (core.mmu.registers[ioStart + 3] & 0x40) != 0;
+        useLength = (registers[ioStart + 3] & 0x40) != 0;
     }
 
     public void restart()
@@ -80,7 +85,7 @@ public class SquareWaveChannel extends SoundChannel
             volume = Math.min(15, Math.max(0, envelopeInitial + delta / envelopeSweep * (envelopeIncrease ? 1 : -1))) * 2;
         int cycle = (delta * 8 / period) & 7;
 
-        return cycle > duty ? volume : -volume;
+        return cycle > 1 ? volume : -volume;
     }
 
 //    public void render(byte[] output, int off, int len)
