@@ -371,10 +371,10 @@ public class Emulator
     public int clockSpeed = 4194304;
     public boolean emulateSpeed = true;
 
-    public void updateInterrupts(long cycles)
+    public void updateInterrupts(long delta)
     {
         // The DIV register increments at 16KHz, and resets to 0 after
-        divCycle += cycle;
+        divCycle += delta;
         if (divCycle >= 16384)
         {
             divCycle -= 16384;
@@ -383,29 +383,28 @@ public class Emulator
         }
 
         // The Timer is similar to DIV, except that when it overflows it triggers an interrupt
-        if (timerEnabled)
-            timerCycle += cycle;
+        if (timerEnabled) {
+            timerCycle += delta;
 
-        // The Timer has a settable frequency
-        if (timerCycle >= timerFreq)
-        {
-            timerCycle -= timerFreq;
+            // The Timer has a settable frequency
+            if (timerCycle >= timerFreq) {
+                timerCycle -= timerFreq;
 
-            // And it resets to a specific value
-            int tima = (getIO(R.R_TIMA) & 0xff) + 1;
-            if (tima > 0xff)
-            {
-                // Reset to the wanted value, and trigger the interrupt
-                tima = getIO(R.R_TMA) & 0xff;
-                if (isInterruptEnabled(R.TIMER_OVERFLOW_BIT))
-                    setInterruptTriggered(R.TIMER_OVERFLOW_BIT);
+                // And it resets to a specific value
+                int tima = (mmu.registers[R.R_TIMA] & 0xff) + 1;
+                if (tima > 0xff) {
+                    // Reset to the wanted value, and trigger the interrupt
+                    tima = mmu.registers[R.R_TMA] & 0xff;
+                    if (isInterruptEnabled(R.TIMER_OVERFLOW_BIT))
+                        setInterruptTriggered(R.TIMER_OVERFLOW_BIT);
+                }
+                mmu.registers[R.R_TIMA]= (byte) tima;
             }
-            setIO(R.R_TIMA, tima);
         }
 
         // Update the display
-        lcd.tick(cycles);
-        sound.tick(cycles);
+        lcd.tick(delta);
+        sound.tick(delta);
     }
 
     public long ac;
@@ -1862,8 +1861,7 @@ public class Emulator
         ac += 4;
         executed += 4;
         cycle += 4;
-        lcd.tick(4);
-        sound.tick(4);
+        updateInterrupts(4);
         mmu.setAddress(addr, _data);
     }
 
@@ -1872,8 +1870,7 @@ public class Emulator
         ac += 4;
         executed += 4;
         cycle += 4;
-        lcd.tick(4);
-        sound.tick(4);
+        updateInterrupts(4);
         mmu.setIO(addr, data);
     }
 
@@ -1887,8 +1884,7 @@ public class Emulator
         ac += 4;
         executed += 4;
         cycle += 4;
-        lcd.tick(4);
-        sound.tick(4);
+        updateInterrupts(4);
         return mmu.getAddress(addr);
     }
 
@@ -1897,8 +1893,7 @@ public class Emulator
         ac += 4;
         executed += 4;
         cycle += 4;
-        lcd.tick(4);
-        sound.tick(4);
+        updateInterrupts(4);
         return mmu.getIO(addr);
     }
 }
