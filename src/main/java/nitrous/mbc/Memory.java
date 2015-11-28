@@ -322,10 +322,10 @@ public class Memory
                 break;
             }
             case R.R_NR14:
-                /*if ((registers[R.R_NR14] & 0x80) != 0) {
-                    core.sound.channel1.enabled = true;
-                    core.sound.channel1.update();
-                }*/
+//                if ((registers[R.R_NR14] & 0x80) != 0) {
+//                    core.sound.channel1.enabled = true;
+//                    core.sound.channel1.update();
+//                }
                 break;
             case R.R_NR24:
                 if ((registers[R.R_NR24] & 0x80) != 0)
@@ -336,8 +336,6 @@ public class Memory
                 core.sound.channel2.update();
                 break;
             case R.R_NR34:
-                if ((registers[R.R_NR34] & 0x80) != 0)
-                    core.sound.channel3.restart();
             case R.R_NR30:
             case R.R_NR31:
             case R.R_NR32:
@@ -399,7 +397,7 @@ public class Memory
              */
             case R.R_TAC:
                 System.err.println("Timer ctrl - " + core.cycle);
-                if (((data >> 2) & 0b1) == 1)
+                if ((data & 0b100) != 0)
                 {
                     System.err.println("Enabled timer");
                     core.timerEnabled = true;

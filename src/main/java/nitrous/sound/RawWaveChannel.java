@@ -1,6 +1,9 @@
 package nitrous.sound;
 
 import nitrous.Emulator;
+import nitrous.R;
+
+import static nitrous.R.*;
 
 public class RawWaveChannel extends SoundChannel {
     private boolean enabled = false;
@@ -18,17 +21,22 @@ public class RawWaveChannel extends SoundChannel {
     }
 
     public void update() {
-        enabled = (core.mmu.registers[0x1A] & 0x80) != 0;
-        length = core.mmu.registers[0x1B] & 0xFF;
+        byte[] registers = core.mmu.registers;
 
-        int level = (core.mmu.registers[0x1C] >> 5) & 0x3;
+        if ((registers[R.R_NR34] & 0x80) != 0)
+            restart();
+
+        enabled = (registers[R_NR30] & 0x80) != 0;
+        length = registers[R_NR31] & 0xFF;
+
+        int level = (registers[R_NR32] >> 5) & 0x3;
         shift = level == 0 ? 5 : level - 1;
 
-        gbFreq = (core.mmu.registers[0x1D] & 0xFF) |
-                ((core.mmu.registers[0x1E] & 0x7) << 8);
+        gbFreq = (registers[R_NR33] & 0xFF) |
+                ((registers[R_NR34] & 0x7) << 8);
         period = 2 * gbFreqToCycles(gbFreq);
 
-        useLength = (core.mmu.registers[0x1E] & 0x40) != 0;
+        useLength = (registers[R_NR34] & 0x40) != 0;
     }
 
     public void restart() {
@@ -42,7 +50,10 @@ public class RawWaveChannel extends SoundChannel {
 
     @Override
     public int render() {
-        return enabled ? samples[((int) (((core.cycle - clockStart) / period) & 0x1F))] << 1 >> shift : 0;
+        if (enabled)
+            return samples[((int) (((core.cycle - clockStart) / period) & 0x1F))] << 1 >> shift;
+        else
+            return 0;
     }
 
     public void render(byte[] output, int off, int len) {
