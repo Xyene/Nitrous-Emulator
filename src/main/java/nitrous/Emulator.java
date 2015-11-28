@@ -81,8 +81,6 @@ public class Emulator
      */
     public boolean buttonRight, buttonLeft, buttonStart, buttonSelect, buttonUp, buttonDown, buttonA, buttonB;
 
-    public final Op[] instrs = new Op[0x100];
-
     public int getRegisterPair(RegisterPair object)
     {
         switch (object)
