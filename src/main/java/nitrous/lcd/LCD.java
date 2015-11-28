@@ -38,6 +38,8 @@ public class LCD
      */
     private final byte[] gbcSpritePaletteMemory = new byte[0x40];
 
+    private static final int W = 160, H = 144;
+
     private void loadPalettesFromMemory(byte[] from, IPalette[] to)
     {
         for (int i = 0; i < 8; i++)
@@ -121,8 +123,6 @@ public class LCD
                          boolean flipX, boolean flipY, int bank, int basePriority, boolean sprite)
     {
         byte[] vram = core.mmu.vram;
-        int w = 160;
-        int h = 144;
         int line = scanline - y;
         int addressBase = Memory.VRAM_PAGESIZE * bank + tile * 16;
 
@@ -131,10 +131,10 @@ public class LCD
             // Destination pixels
             int dx = x + px;
 
-            if (dx < 0 || dx >= w || scanline >= h)
+            if (dx < 0 || dx >= W || scanline >= H)
                 continue;
 
-            int index = dx + scanline * w;
+            int index = dx + scanline * W;
             if (basePriority != 0 && basePriority < (data[index] & 0xFF000000))
                 continue;
 
@@ -330,47 +330,9 @@ public class LCD
                         graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
                         break;
                 }
-                //graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_ANTIALIAS_ON);
+                
                 graphics.drawImage(screenBuffer, 0, 0, display.getWidth(), display.getHeight(), null);
 
-
-//                    D3DSurfaceData surf = (D3DSurfaceData) ((WComponentPeer) top.getPeer()).getSurfaceData();
-//                    System.err.println(surf);
-//
-//                    D3DSurfaceData n = D3DSurfaceData.createData((WComponentPeer) top.getPeer(), screenBuffer);
-//
-//                    n.makeProxyFor(surf);
-////
-////                    surf.copyArea(new SunGraphics2D(n, Color.red, Color.green, null),
-////                            0, 0, 0, 0, screenBuffer.getWidth(), screenBuffer.getHeight());
-//
-//                    n.flush();
-
-                //  WritableRasterNative wrn = (WritableRasterNative) surf.getRaster(0, 0, screenBuffer.getWidth(), screenBuffer.getHeight());
-                //    D3DDataBufferNative
-//
-//    System.err.println(wrn);
-//                    DataBufferInt dbb = (DataBufferInt) screenBuffer.getRaster().getDataBuffer();
-//                    int[] data = dbb.getData(0);
-//
-////                    surf.
-
-                // surf.markDirty();
-//                    surf.flush();
-//                    D3DDrawImage img =
-
-//                    System.err.println(screenBuffer.conf);
-
-//                    System.err.println(surf);
-//                    if (false)
-//                    {
-//
-////                                ((SunGraphics2D) screenBuffer.getGraphics()).getSurfaceData().copyArea(surf,
-////                                        0, 0, 0, 0, screenBuffer.getWidth(), screenBuffer.getHeight());
-//                        surf.flush();
-//                        System.out.println(surf.getRaster(0, 0, screenBuffer.getWidth(), screenBuffer.getHeight()));
-//                    }
-//            }
                 if (core.isInterruptEnabled(R.VBLANK_BIT) && displayEnabled())
                 {
                     // Trigger VBlank
@@ -386,29 +348,7 @@ public class LCD
         }
     }
 
-
-//    public void BlitBg(SurfaceData srcData, SurfaceData dstData, Composite comp, Region clip, Color bgColor, int srcx, int srcy, int dstx, int dsty, int width, int height)
-//    {
-//        ColorModel dstModel = dstData.getColorModel();
-//        if (!dstModel.hasAlpha() && bgColor.getTransparency() != Transparency.OPAQUE)
-//        {
-//            dstModel = ColorModel.getRGBdefault();
-//        }
-//        WritableRaster wr = dstModel.createCompatibleWritableRaster(width, height);
-//        boolean isPremult = dstModel.isAlphaPremultiplied();
-//        BufferedImage bimg = new BufferedImage(dstModel, wr, isPremult, null);
-//        SurfaceData tmpData = BufImgSurfaceData.createData(bimg);
-//        SunGraphics2D sg2d = new SunGraphics2D(tmpData, bgColor, bgColor, defaultFont);
-//        FillRect fillop = FillRect.locate(SurfaceType.AnyColor, CompositeType.SrcNoEa, tmpData.getSurfaceType());
-//        Blit combineop = Blit.getFromCache(srcData.getSurfaceType(), CompositeType.SrcOverNoEa, tmpData.getSurfaceType());
-//        Blit blitop = Blit.getFromCache(tmpData.getSurfaceType(), compositeType, dstData.getSurfaceType());
-//        fillop.FillRect(sg2d, tmpData, 0, 0, width, height);
-//        combineop.Blit(srcData, tmpData, AlphaComposite.SrcOver, null, srcx, srcy, 0, 0, width, height);
-//        blitop.Blit(tmpData, dstData, comp, clip, 0, 0, dstx, dsty, width, height);
-//    }
-
-
-    static final int[] BLANK = new int[160 * 144];
+    static final int[] BLANK = new int[W * H];
 
     public void draw(BufferedImage buffer, int scanline)
     {
@@ -420,7 +360,6 @@ public class LCD
 
         spritesDrawn[scanline] = 0;
 
-        int W = buffer.getWidth();
         DataBufferInt dbb = (DataBufferInt) buffer.getRaster().getDataBuffer();
         int[] data = dbb.getData(0);
 
@@ -472,44 +411,14 @@ public class LCD
         if (spritesEnabled())
             drawSprites(data, scanline);
 
-        /*if (backgroundEnabled())
-        {
-            int y = (scanline + getScrollY() % 8) / 8;
-            int scrollY = getScrollY();
-            int scrollX = getScrollX();
-            int offset = getBackgroundTileMapOffset();
-
-            // 20 8x8 tiles fit in a 160px-wide screen
-            for (int x = 0; x < 21; x++)
-            {
-                int addressBase = offset + ((y + scrollY / 8) % 32 * 32) + ((x + scrollX / 8) % 32);
-                // add 256 to jump into second tile pattern table
-                int tile = tileDataOffset == 0 ? vram[addressBase] & 0xff : vram[addressBase] + 256;
-                int gbcVramBank = 0;
-                boolean flipX = false;
-                boolean flipY = false;
-                int gbcPalette = 0;
-                if (core.cartridge.isColorGB)
-                {
-                    int attribs = vram[Memory.VRAM_PAGESIZE + addressBase];
-                    if ((attribs & 0x8) != 0) gbcVramBank = 1;
-                    flipX = (attribs & 0x20) != 0;
-                    flipY = (attribs & 0x40) != 0;
-                    gbcPalette = (attribs & 0x07);
-                }
-                drawTile(bgPalettes[gbcPalette],
-                        buffer, data, -(scrollX % 8) + x * 8, -(scrollY % 8) + y * 8, tile, scanline, flipX, flipY, gbcVramBank, false);
-            }
-        }*/
-//        System.out.printf("WX=%d, WY=%d\n", getWindowPosY(), getW)
         if (windowEnabled() &&
                 scanline >= getWindowPosY() &&
-                getWindowPosX() < buffer.getWidth() && getWindowPosY() >= 0)
+                getWindowPosX() < W && getWindowPosY() >= 0)
         {
             int posX = getWindowPosX();
 
             int bg = bgPalettes[0].getColor(0);
-            for (int x = Math.max(posX, 0); x < buffer.getWidth(); x++)
+            for (int x = Math.max(posX, 0); x < W; x++)
                 data[x + scanline * W] = bg;
 
             int posY = getWindowPosY();
