@@ -78,7 +78,7 @@ public abstract class AbstractRenderManager implements IRenderManager
     @Override
     public Graphics2D getGraphics()
     {
-        if (((SunGraphics2D) graphics2D).surfaceData.isSurfaceLost())
+        if (graphics2D != null && ((SunGraphics2D) graphics2D).surfaceData.isSurfaceLost())
         {
             createGraphics();
             new RuntimeException("surface lost").printStackTrace();

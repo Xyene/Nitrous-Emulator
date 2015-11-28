@@ -318,20 +318,23 @@ public class LCD
             {
                 Graphics2D graphics = currentRenderer.getGraphics();
 
-                switch (interpolator)
+                if(graphics != null)
                 {
-                    case NEAREST:
-                        graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-                        break;
-                    case BILINEAR:
-                        graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-                        break;
-                    case BICUBIC:
-                        graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-                        break;
+                    switch (interpolator)
+                    {
+                        case NEAREST:
+                            graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+                            break;
+                        case BILINEAR:
+                            graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                            break;
+                        case BICUBIC:
+                            graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+                            break;
+                    }
+
+                    graphics.drawImage(screenBuffer, 0, 0, display.getWidth(), display.getHeight(), null);
                 }
-                
-                graphics.drawImage(screenBuffer, 0, 0, display.getWidth(), display.getHeight(), null);
 
                 if (core.isInterruptEnabled(R.VBLANK_BIT) && displayEnabled())
                 {
