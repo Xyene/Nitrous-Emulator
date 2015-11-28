@@ -9,8 +9,8 @@ public interface IRenderManager
 {
     Class<? extends IRenderManager>[] RENDERERS = new Class[]{
             GDIRenderManager.class, // GDI is fastest for drawing just one image
-            WGLRenderManager.class, // Some cards may do GL better than D3D, but this is unlikely
             D3DRenderManager.class, // Followed by D3D (on most cards)
+            WGLRenderManager.class, // Some cards may do GL better than D3D, but this is unlikely
             XRenderManager.class, // Linux!
     };
 
