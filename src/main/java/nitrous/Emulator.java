@@ -383,24 +383,23 @@ public class Emulator
         }
 
         // The Timer is similar to DIV, except that when it overflows it triggers an interrupt
-        if (timerEnabled)
+        if (timerEnabled) {
             timerCycle += cycle;
 
-        // The Timer has a settable frequency
-        if (timerCycle >= timerFreq)
-        {
-            timerCycle -= timerFreq;
+            // The Timer has a settable frequency
+            if (timerCycle >= timerFreq) {
+                timerCycle -= timerFreq;
 
-            // And it resets to a specific value
-            int tima = (getIO(R.R_TIMA) & 0xff) + 1;
-            if (tima > 0xff)
-            {
-                // Reset to the wanted value, and trigger the interrupt
-                tima = getIO(R.R_TMA) & 0xff;
-                if (isInterruptEnabled(R.TIMER_OVERFLOW_BIT))
-                    setInterruptTriggered(R.TIMER_OVERFLOW_BIT);
+                // And it resets to a specific value
+                int tima = (getIO(R.R_TIMA) & 0xff) + 1;
+                if (tima > 0xff) {
+                    // Reset to the wanted value, and trigger the interrupt
+                    tima = getIO(R.R_TMA) & 0xff;
+                    if (isInterruptEnabled(R.TIMER_OVERFLOW_BIT))
+                        setInterruptTriggered(R.TIMER_OVERFLOW_BIT);
+                }
+                setIO(R.R_TIMA, tima);
             }
-            setIO(R.R_TIMA, tima);
         }
 
         // Update the display
