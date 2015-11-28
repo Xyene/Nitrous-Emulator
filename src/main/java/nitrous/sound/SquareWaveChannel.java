@@ -44,10 +44,10 @@ public class SquareWaveChannel extends SoundChannel
          */
         duty = dutyConvert[(core.mmu.registers[ioStart] >> 6) & 0x3];
 
-        length = (64 - (core.mmu.registers[ioStart] & 0x3F)) * (core.clockSpeed / 256);
+        length = (64 - (core.mmu.registers[ioStart] & 0x3F)) * core.clockSpeed / 256;
         envelopeInitial = (core.mmu.registers[ioStart + 1] >> 4) & 0xF;
         envelopeIncrease = (core.mmu.registers[ioStart + 1] & 0x8) != 0;
-        envelopeSweep = (core.mmu.registers[ioStart + 1] & 0x7) * (core.clockSpeed / 64);
+        envelopeSweep = (core.mmu.registers[ioStart + 1] & 0x7) * core.clockSpeed / 64;
 
         gbFreq = (core.mmu.registers[ioStart + 2] & 0xFF) |
                 ((core.mmu.registers[ioStart + 3] & 0x7) << 8);
