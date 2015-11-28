@@ -415,15 +415,17 @@ public class Emulator
     {
         long last = System.nanoTime();
         long _last = System.nanoTime();
+        long lastCycle = cycle;
 
         while (true)
         {
-            long delta = _exec();
-            cycle += delta;
+            cycle += _exec();
+
+            long delta = cycle - lastCycle;
             ac += delta;
             executed += delta;
-
-            updateInterrupts(delta);
+            updateInterrupts(cycle - lastCycle);
+            lastCycle = cycle;
 
             if (interruptsEnabled)
             {
@@ -1859,19 +1861,13 @@ public class Emulator
 
     public void setByte(int addr, int _data)
     {
-        ac += 4;
-        executed += 4;
         cycle += 4;
-        updateInterrupts(4);
         mmu.setAddress(addr, _data);
     }
 
     public void setIO(int addr, int data)
     {
-        ac += 4;
-        executed += 4;
         cycle += 4;
-        updateInterrupts(4);
         mmu.setIO(addr, data);
     }
 
@@ -1882,19 +1878,13 @@ public class Emulator
 
     public int getByte(int addr)
     {
-        ac += 4;
-        executed += 4;
         cycle += 4;
-        updateInterrupts(4);
         return mmu.getAddress(addr);
     }
 
     public int getIO(int addr)
     {
-        ac += 4;
-        executed += 4;
         cycle += 4;
-        updateInterrupts(4);
         return mmu.getIO(addr);
     }
 }
