@@ -328,7 +328,7 @@ public class Memory
 //                }
                 break;
             case R.R_NR24:
-                if ((registers[R.R_NR14] & 0x80) != 0) {
+                if ((data & 0x80) != 0) {
                     core.sound.channel2.restart();
                     data &= 0x7F;
                 }
