@@ -318,7 +318,7 @@ public class LCD
             {
                 Graphics2D graphics = currentRenderer.getGraphics();
 
-                if(graphics != null)
+                if (graphics != null)
                 {
                     switch (interpolator)
                     {
@@ -376,38 +376,36 @@ public class LCD
         // All sprites show up above BG 0, so just fill the scanline with BG 0 to start with
         if (backgroundEnabled())
         {
-            if (core.cartridge.isColorGB)
-            {
-                int y = (scanline + getScrollY() % 8) / 8;
-                int scrollY = getScrollY();
-                int scrollX = getScrollX();
+
+            int y = (scanline + getScrollY() % 8) / 8;
+            int scrollY = getScrollY();
+            int scrollX = getScrollX();
 
 //                System.out.printf("SCX=%d, SCY=%d\n", scrollX, scrollY);
 
-                int offset = getBackgroundTileMapOffset();
+            int offset = getBackgroundTileMapOffset();
 
-                // 20 8x8 tiles fit in a 160px-wide screen
-                for (int x = 0; x < 21; x++)
+            // 20 8x8 tiles fit in a 160px-wide screen
+            for (int x = 0; x < 21; x++)
+            {
+                int addressBase = offset + ((y + scrollY / 8) % 32 * 32) + ((x + scrollX / 8) % 32);
+                // add 256 to jump into second tile pattern table
+                int tile = tileDataOffset == 0 ? vram[addressBase] & 0xff : vram[addressBase] + 256;
+
+                int gbcVramBank = 0;
+                int gbcPalette = 0;
+                boolean flipX = false;
+                boolean flipY = false;
+                if (core.cartridge.isColorGB)
                 {
-                    int addressBase = offset + ((y + scrollY / 8) % 32 * 32) + ((x + scrollX / 8) % 32);
-                    // add 256 to jump into second tile pattern table
-                    int tile = tileDataOffset == 0 ? vram[addressBase] & 0xff : vram[addressBase] + 256;
-
                     int attribs = vram[Memory.VRAM_PAGESIZE + addressBase];
 
-                    int gbcVramBank = 0;
                     if ((attribs & 0x8) != 0) gbcVramBank = 1;
-                    boolean flipX = (attribs & 0x40) != 0;
-                    boolean flipY = (attribs & 0x20) != 0;
-                    int gbcPalette = (attribs & 0x7);
-
-                    drawTile(bgPalettes[gbcPalette], data, -(scrollX % 8) + x * 8, -(scrollY % 8) + y * 8, tile, scanline, flipX, flipY, gbcVramBank, 0, false);
+                    flipX = (attribs & 0x40) != 0;
+                    flipY = (attribs & 0x20) != 0;
+                    gbcPalette = (attribs & 0x7);
                 }
-            } else
-            {
-                int bg = bgPalettes[0].getColor(0);
-                for (int x = 0; x < W; x++)
-                    data[x + scanline * W] = bg;
+                drawTile(bgPalettes[gbcPalette], data, -(scrollX % 8) + x * 8, -(scrollY % 8) + y * 8, tile, scanline, flipX, flipY, gbcVramBank, 0, false);
             }
         }
 
@@ -420,9 +418,9 @@ public class LCD
         {
             int posX = getWindowPosX();
 
-            int bg = bgPalettes[0].getColor(0);
-            for (int x = Math.max(posX, 0); x < W; x++)
-                data[x + scanline * W] = bg;
+//            int bg = bgPalettes[0].getColor(0);
+//            for (int x = Math.max(posX, 0); x < W; x++)
+//                data[x + scanline * W] = bg;
 
             int posY = getWindowPosY();
             int tileMapOffset = getWindowTileMapOffset();
