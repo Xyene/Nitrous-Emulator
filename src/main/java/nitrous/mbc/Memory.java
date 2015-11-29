@@ -334,10 +334,15 @@ public class Memory
                 core.sound.channel2.update();
                 break;
             case R.R_NR34:
+                if ((data & 0x80) != 0) {
+                    core.sound.channel3.restart();
+                    data &= 0x7F;
+                }
             case R.R_NR30:
             case R.R_NR31:
             case R.R_NR32:
             case R.R_NR33:
+                registers[addr] = (byte) data;
                 core.sound.channel3.update();
                 break;
             //case 0x1a: // Channel 3 sound on/off

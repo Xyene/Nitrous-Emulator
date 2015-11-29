@@ -23,9 +23,6 @@ public class RawWaveChannel extends SoundChannel {
     public void update() {
         byte[] registers = core.mmu.registers;
 
-        if ((registers[R.R_NR34] & 0x80) != 0)
-            restart();
-
         enabled = (registers[R_NR30] & 0x80) != 0;
         length = (256 - (registers[R_NR31] & 0xFF)) * 16384;
 
