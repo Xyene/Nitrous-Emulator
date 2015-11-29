@@ -27,7 +27,7 @@ public class RawWaveChannel extends SoundChannel {
             restart();
 
         enabled = (registers[R_NR30] & 0x80) != 0;
-        length = registers[R_NR31] & 0xFF;
+        length = (256 - (registers[R_NR31] & 0xFF)) * 16384;
 
         shift = 3 - ((core.mmu.registers[0x1C] >> 5) & 0x3);
 
