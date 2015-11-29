@@ -328,9 +328,14 @@ public class Memory
 //                }
                 break;
             case R.R_NR24:
+                if ((registers[R.R_NR14] & 0x80) != 0) {
+                    core.sound.channel2.restart();
+                    data &= 0x7F;
+                }
             case R.R_NR21:
             case R.R_NR22:
             case R.R_NR23:
+                registers[addr] = (byte) data;
                 core.sound.channel2.update();
                 break;
             case R.R_NR34:
