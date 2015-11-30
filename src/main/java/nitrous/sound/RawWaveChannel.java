@@ -99,9 +99,6 @@ public class RawWaveChannel extends SoundChannel
         if (useLength && delta > length)
             return 0;
 
-        int sample1 = samples[(int) (delta / period) & 0x1F] << shift;
-        int sample2 = samples[(int) (delta / period + 1) & 0x1F] << shift;
-        double ratio = 1.0 * (delta % period) / period;
-        return (int) (sample1 * (1 - ratio) + sample2 * ratio);
+        return samples[(int) (delta / period) & 0x1F] << shift;
     }
 }
