@@ -25,6 +25,10 @@ public interface R
     int R_NR32 = 0x1C;
     int R_NR33 = 0x1D;
     int R_NR34 = 0x1E;
+    int R_NR41 = 0x20;
+    int R_NR42 = 0x21;
+    int R_NR43 = 0x22;
+    int R_NR44 = 0x23;
     int R_WRAM_BANK = 0x70;
     int R_VRAM_BANK = 0x4f;
     int R_LCDC = 0x40;
