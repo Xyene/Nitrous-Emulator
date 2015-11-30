@@ -88,7 +88,7 @@ public class SoundManager
 
             int index = usedSamples++;
             buffer[index] = 0;
-            //buffer[index] += channel1.render();
+            buffer[index] += channel1.render();
             buffer[index] += channel2.render();
             buffer[index] += channel3.render();
             buffer[index] += channel4.render();
@@ -104,27 +104,4 @@ public class SoundManager
             }
         }
     }
-
-    //public void play() {
-    //sdl.write(buffer, 0, usedSamples);
-    //usedSamples = 0;
-    //}
-
-//    public void render(int cycles) {
-//        if (sdl == null)
-//            return;
-//
-//        int samples = (int) (cycles * sampleClocks);
-//
-//        System.arraycopy(BLANK, 0, buffer, 0, samples);
-//        /*channel1.render(buffer, 0, samples);
-//        channel2.render(buffer, 0, samples);
-//        channel3.render(buffer, 0, samples);*/
-//
-//        /*byte[] temp = new byte[samples];
-//        System.arraycopy(buffer, 0, temp, 0, samples);
-//        System.out.println(Arrays.toString(temp));*/
-//
-//        sdl.write(buffer, 0, samples);
-//    }
 }

@@ -23,6 +23,11 @@ public class SquareWaveChannel extends SoundChannel
     private int envelopeSweep = 0;
     public int duty = 0;
 
+    private long lastSweep = 0;
+    private int sweepCycles = 0;
+    private boolean sweepIncrease = true;
+    private int sweepShift = 0;
+
     public SquareWaveChannel(Emulator core, int ioStart, boolean sweep)
     {
         super(core);
@@ -37,6 +42,15 @@ public class SquareWaveChannel extends SoundChannel
     {
         updateRequest = false;
         byte[] registers = core.mmu.registers;
+
+        if (sweep) {
+            int newTime = ((registers[ioStart - 1] >> 4) & 0x7) * 32768;
+            if (sweepCycles != newTime)
+                lastSweep = core.clockSpeed;
+            sweepCycles = newTime;
+            sweepIncrease = (registers[ioStart - 1] & 0x8) != 0;
+            sweepShift = registers[ioStart - 1] & 0x7;
+        }
 
         duty = (registers[ioStart] >> 6) & 0x3;
         length = (64 - (registers[ioStart] & 0x3F)) * 16384;
@@ -113,6 +127,20 @@ public class SquareWaveChannel extends SoundChannel
             lastCycle = cycle;
 
         lastCycle = cycle;
+
+        if (sweep && sweepCycles > 0 && core.cycle - lastSweep >= sweepCycles) {
+            int d = gbFreq >> sweepShift;
+            if (sweepIncrease)
+                gbFreq += d;
+            else
+                gbFreq -= d;
+            gbFreq &= 0x7FF;
+
+            period = gbFreqToCycles(gbFreq);
+            if (period == 0)
+                throw new RuntimeException();
+            lastSweep = core.cycle;
+        }
 
         if (cycle == 0)
         {
