@@ -1,10 +1,9 @@
 package nitrous.sound;
 
+import com.sun.media.sound.WaveFileWriter;
 import nitrous.Emulator;
 
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.SourceDataLine;
+import javax.sound.sampled.*;
 import java.io.*;
 import java.util.Arrays;
 
@@ -59,16 +58,22 @@ public class SoundManager
     private int usedSamples = 0;
     private double clockTicks = 0;
 
-    private static DataOutputStream out;
+    private static ByteArrayOutputStream out = null;
 
     static
     {
-        try
-        {
-            out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(new File("wave.bin"))));
-        } catch (FileNotFoundException e)
-        {
-            e.printStackTrace();
+        if (System.getProperty("nox.soundFile") != null) {
+            out = new ByteArrayOutputStream();
+
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                try {
+                    out.close();
+                    new WaveFileWriter().write(new AudioInputStream(new ByteArrayInputStream(out.toByteArray()), SoundChannel.AUDIO_FORMAT, out.size()),
+                            AudioFileFormat.Type.WAVE, new FileOutputStream(System.getProperty("nox.soundFile")));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }));
         }
     }
 
@@ -82,36 +87,18 @@ public class SoundManager
 
             int index = usedSamples++;
             buffer[index] = 0;
-//            buffer[index] += channel1.render();
+            //buffer[index] += channel1.render();
             buffer[index] += channel2.render();
-//            buffer[index] += channel4.render();
-
-
-//            System.out.print(buffer[index] + " ");
-
-//            if(buffer[index] == 0) System.err.println("uhoh");
-
-//            buffer[index] += channel3.render();
-//            System.out.print(buffer[index] + " ");
+            buffer[index] += channel3.render();
+            //buffer[index] += channel4.render();
 
             if (usedSamples >= buffer.length)
             {
-                if (core.mmu.ICARE)
-                {
-                    System.out.println(Arrays.toString(buffer));
-                    core.mmu.ICARE = false;
-                }
+                if (out != null)
+                    out.write(buffer, 0, buffer.length);
+
                 int written = 0;
-                for (int i = 0; i < buffer.length; i++)
-                    try
-                    {
-                        out.writeByte(buffer[i]);
-                    } catch (IOException e)
-                    {
-                        e.printStackTrace();
-                    }
-                while ((written += sdl.write(buffer, written, buffer.length)) != buffer.length)
-                    System.out.printf("Added some more data");
+                while ((written += sdl.write(buffer, written, buffer.length)) != buffer.length);
                 usedSamples = 0;
             }
         }
