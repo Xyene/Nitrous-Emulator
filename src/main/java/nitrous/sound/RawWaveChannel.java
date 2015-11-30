@@ -35,7 +35,7 @@ public class RawWaveChannel extends SoundChannel
         useLength = (registers[R_NR34] & 0x40) != 0;
         length = (256 - (registers[R_NR31] & 0xFF)) * 16384;
 
-        shift = 0;//((core.mmu.registers[R_NR32] >> 5) & 0x3);
+        shift = 3 - ((core.mmu.registers[0x1C] >> 5) & 0x3);
 
         gbFreq = (registers[R_NR33] & 0xFF) |
                 ((registers[R_NR34] & 0x7) << 8);
@@ -83,7 +83,7 @@ public class RawWaveChannel extends SoundChannel
 
     public int render()
     {
-        if (core.cycle - lastUpdate >= period)
+        if (core.cycle - lastUpdate > period)
         {
             if (requestUpdate)
                 handleUpdateRequest();
@@ -99,6 +99,6 @@ public class RawWaveChannel extends SoundChannel
         if (useLength && delta > length)
             return 0;
 
-        return samples[(int) (delta / period) & 0x1F] << shift;
+        return (samples[(int) (delta / period) & 0x1F] << shift) & 0xf;
     }
 }
