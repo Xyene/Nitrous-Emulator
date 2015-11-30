@@ -238,6 +238,8 @@ public class Memory
         }
     }
 
+    public boolean ICARE = false;
+
     public void setIO(int addr, int data)
     {
 //        if(addr == R.R_SCX) {
@@ -322,13 +324,29 @@ public class Memory
                 break;
             }
             case R.R_NR14:
-//                if ((registers[R.R_NR14] & 0x80) != 0) {
-//                    core.sound.channel1.enabled = true;
-//                    core.sound.channel1.update();
-//                }
+                if ((registers[R.R_NR14] & 0x80) != 0) {
+                    core.sound.channel1.restart();
+                    data &= 0x7f;
+                }
+            case R.R_NR10:
+            case R.R_NR11:
+            case R.R_NR12:
+            case R.R_NR13:
+                registers[addr] = (byte) data;
+                core.sound.channel1.update();
                 break;
+
             case R.R_NR24:
-                if ((data & 0x80) != 0) {
+                if ((data & 0x80) != 0)
+                {
+                    core.sound.channel2.___++;
+                    core.sound.channel2.___ %= 10;
+//                    System.out.printf("%speriod=%d, length=%d, duty=%d, volume=%d, clock=%d\n", (core.sound.channel2.___ == 0) ? "*" : " ",
+//                            core.sound.channel2.period, core.sound.channel2.useLength ? core.sound.channel2.length : -1, core.sound.channel2.duty,
+//                            core.sound.channel2.envelopeInitial, core.cycle);
+                    ICARE = true;
+//                    System.out.println();
+
                     core.sound.channel2.restart();
                     data &= 0x7F;
                 }
@@ -339,7 +357,8 @@ public class Memory
                 core.sound.channel2.update();
                 break;
             case R.R_NR34:
-                if ((data & 0x80) != 0) {
+                if ((data & 0x80) != 0)
+                {
                     core.sound.channel3.restart();
                     data &= 0x7F;
                 }
@@ -350,6 +369,20 @@ public class Memory
                 registers[addr] = (byte) data;
                 core.sound.channel3.update();
                 break;
+
+            case R.R_NR44:
+                if ((data & 0x80) != 0)
+                {
+                    core.sound.channel4.restart();
+                    data &= 0x7F;
+                }
+            case R.R_NR41:
+            case R.R_NR42:
+            case R.R_NR43:
+                registers[addr] = (byte) data;
+                core.sound.channel4.update();
+                break;
+
             //case 0x1a: // Channel 3 sound on/off
 //                System.err.print("Channel 3 sound: ");
 //                if ((data & 0x80) != 0)
@@ -362,7 +395,7 @@ public class Memory
 //                    // Channel3.stop();
 //                }
 //                System.err.println();
-                //break;
+            //break;
             /**
              * Writing to this register launches a DMA transfer from ROM or RAM to OAM memory (sprite attribute table).
              * The written value specifies the transfer source address divided by 100h, ie. source & destination are:
