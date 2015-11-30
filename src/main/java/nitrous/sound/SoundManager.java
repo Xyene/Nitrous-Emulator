@@ -5,6 +5,7 @@ import nitrous.Emulator;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
+import java.io.*;
 import java.util.Arrays;
 
 import static nitrous.R.*;
@@ -18,6 +19,7 @@ public class SoundManager
     public SquareWaveChannel channel1;
     public SquareWaveChannel channel2;
     public RawWaveChannel channel3;
+    public NoiseChannel channel4;
 
     public SoundManager(Emulator core)
     {
@@ -26,8 +28,10 @@ public class SoundManager
         channel1 = new SquareWaveChannel(core, R_NR11, true);
         channel2 = new SquareWaveChannel(core, R_NR21, false);
         channel3 = new RawWaveChannel(core);
+        channel4 = new NoiseChannel(core);
 
-        buffer = new byte[480];
+        buffer = new byte[480 * 4];
+        System.out.println(buffer.length);
         try
         {
             sdl = AudioSystem.getSourceDataLine(SoundChannel.AUDIO_FORMAT);
@@ -42,31 +46,72 @@ public class SoundManager
 
     private double sampleClocks;
 
-    public double getSampleClocks() {
+    public double getSampleClocks()
+    {
         return sampleClocks;
     }
 
-    public void updateClockSpeed(int clockSpeed) {
+    public void updateClockSpeed(int clockSpeed)
+    {
         sampleClocks = clockSpeed / SoundChannel.AUDIO_FORMAT.getSampleRate();
     }
 
     private int usedSamples = 0;
     private double clockTicks = 0;
 
-    public void tick(long delta) {
+    private static DataOutputStream out;
+
+    static
+    {
+        try
+        {
+            out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(new File("wave.bin"))));
+        } catch (FileNotFoundException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public void tick(long delta)
+    {
         clockTicks += delta;
 
-        while (clockTicks >= sampleClocks) {
+        while (clockTicks >= sampleClocks)
+        {
             clockTicks -= sampleClocks;
 
             int index = usedSamples++;
             buffer[index] = 0;
-            buffer[index] += channel1.render();
+//            buffer[index] += channel1.render();
             buffer[index] += channel2.render();
-            buffer[index] += channel3.render();
+//            buffer[index] += channel4.render();
 
-            if (usedSamples >= buffer.length) {
-                sdl.write(buffer, 0, buffer.length);
+
+//            System.out.print(buffer[index] + " ");
+
+//            if(buffer[index] == 0) System.err.println("uhoh");
+
+//            buffer[index] += channel3.render();
+//            System.out.print(buffer[index] + " ");
+
+            if (usedSamples >= buffer.length)
+            {
+                if (core.mmu.ICARE)
+                {
+                    System.out.println(Arrays.toString(buffer));
+                    core.mmu.ICARE = false;
+                }
+                int written = 0;
+                for (int i = 0; i < buffer.length; i++)
+                    try
+                    {
+                        out.writeByte(buffer[i]);
+                    } catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
+                while ((written += sdl.write(buffer, written, buffer.length)) != buffer.length)
+                    System.out.printf("Added some more data");
                 usedSamples = 0;
             }
         }
