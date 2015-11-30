@@ -1,11 +1,11 @@
 package nitrous.sound;
 
 import nitrous.Emulator;
-import nitrous.R;
 
 import static nitrous.R.*;
 
-public class RawWaveChannel extends SoundChannel {
+public class RawWaveChannel extends SoundChannel
+{
     private boolean enabled = false;
     private int length;
     private int gbFreq;
@@ -15,42 +15,93 @@ public class RawWaveChannel extends SoundChannel {
 
     private long clockStart = 0;
     private int[] samples = new int[32];
+    private int[] updated = new int[32];
 
-    public RawWaveChannel(Emulator core) {
+    public RawWaveChannel(Emulator core)
+    {
         super(core);
     }
 
-    public void update() {
+    private boolean requestUpdate = false;
+    private boolean requestRestart = false;
+    private boolean requestCopy = false;
+
+    public void handleUpdateRequest() {
+        requestUpdate = false;
         byte[] registers = core.mmu.registers;
 
         enabled = (registers[R_NR30] & 0x80) != 0;
+
+        useLength = (registers[R_NR34] & 0x40) != 0;
         length = (256 - (registers[R_NR31] & 0xFF)) * 16384;
 
-        shift = 3 - ((core.mmu.registers[0x1C] >> 5) & 0x3);
+        shift = 0;//((core.mmu.registers[R_NR32] >> 5) & 0x3);
 
         gbFreq = (registers[R_NR33] & 0xFF) |
                 ((registers[R_NR34] & 0x7) << 8);
-        period = 2 * gbFreqToCycles(gbFreq);
+        int n = gbFreqToCycles(gbFreq) / 32;
 
-        useLength = (registers[R_NR34] & 0x40) != 0;
+        if (period != n) {
+            period = n;
+            clockStart = core.cycle;
+        }
+
+        //System.out.printf("period=%d, length=%d, enabled=%b, shift=%d\n", period, useLength ? length : -1, enabled, shift);
     }
 
-    public void restart() {
+    public void update()
+    {
+        requestUpdate = true;
+    }
+
+    public void handleRestartRequest()
+    {
         clockStart = core.cycle;
+        requestRestart = false;
     }
 
-    public void updateSample(int byteId, byte value) {
-        samples[byteId * 2] = ((value >> 4) & 0xF) - 8;
-        samples[byteId * 2 + 1] = (value & 0xF) - 8;
+    public void restart()
+    {
+        requestRestart = true;
     }
 
-    @Override
-    public int render() {
-        if (!enabled || shift == 3)
+    public void handleCopyRequest()
+    {
+        System.arraycopy(updated, 0, samples, 0, samples.length);
+        requestCopy = false;
+    }
+
+    public void updateSample(int byteId, byte value)
+    {
+        if (enabled) return;
+        updated[byteId * 2] = ((value >> 4) & 0xF);
+        updated[byteId * 2 + 1] = (value & 0xF);
+        requestCopy = true;
+    }
+
+    private long lastUpdate = Integer.MIN_VALUE;
+
+    public int render()
+    {
+        if (core.cycle - lastUpdate >= period)
+        {
+            if (requestUpdate)
+                handleUpdateRequest();
+            if (requestCopy)
+                handleCopyRequest();
+            if (requestRestart)
+                handleRestartRequest();
+            lastUpdate = core.cycle;
+        }
+        if (!enabled)
             return 0;
         long delta = core.cycle - clockStart;
         if (useLength && delta > length)
             return 0;
-        return samples[(int) (delta / period) & 0x1F] << shift;
+
+        int sample1 = samples[(int) (delta / period) & 0x1F] << shift;
+        int sample2 = samples[(int) (delta / period + 1) & 0x1F] << shift;
+        double ratio = 1.0 * (delta % period) / period;
+        return (int) (sample1 * (1 - ratio) + sample2 * ratio);
     }
 }
