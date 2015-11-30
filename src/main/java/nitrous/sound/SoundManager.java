@@ -67,6 +67,7 @@ public class SoundManager
 
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 try {
+                    System.out.println("Saving: " + System.getProperty("nox.soundFile"));
                     out.close();
                     new WaveFileWriter().write(new AudioInputStream(new ByteArrayInputStream(out.toByteArray()), SoundChannel.AUDIO_FORMAT, out.size()),
                             AudioFileFormat.Type.WAVE, new FileOutputStream(System.getProperty("nox.soundFile")));
@@ -90,7 +91,7 @@ public class SoundManager
             //buffer[index] += channel1.render();
             buffer[index] += channel2.render();
             buffer[index] += channel3.render();
-            //buffer[index] += channel4.render();
+            buffer[index] += channel4.render();
 
             if (usedSamples >= buffer.length)
             {

@@ -48,8 +48,6 @@ public class NoiseChannel extends SoundChannel
         int freq = (r == 0 ? 1048576 : 524288 * r) >> (s + 1);
         period = 4194304 / freq;
 
-        System.out.println(period);
-
         useLength = (registers[R_NR44] & 0x40) != 0;
     }
 
@@ -86,10 +84,10 @@ public class NoiseChannel extends SoundChannel
         int amplitude;
         if (envelopeSweep == 0)
         {
-            amplitude = currentVolume;
+            amplitude = currentVolume * 2;
         } else
         {
-            currentVolume = amplitude = Math.min(15, Math.max(0, envelopeInitial + delta / envelopeSweep * (envelopeIncrease ? 1 : -1)));
+            currentVolume = amplitude = Math.min(15, Math.max(0, envelopeInitial + delta / envelopeSweep * (envelopeIncrease ? 1 : -1))) * 2;
         }
 
         if (core.cycle - lastToggle >= period)
@@ -104,6 +102,6 @@ public class NoiseChannel extends SoundChannel
             lastToggle = core.cycle;
         }
 
-        return high ? 2 * amplitude : 0;
+        return high ? amplitude : -amplitude;
     }
 }

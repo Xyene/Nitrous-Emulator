@@ -39,7 +39,7 @@ public class RawWaveChannel extends SoundChannel
 
         gbFreq = (registers[R_NR33] & 0xFF) |
                 ((registers[R_NR34] & 0x7) << 8);
-        int n = gbFreqToCycles(gbFreq) / 32;
+        int n = gbFreqToCycles(gbFreq) / 16;
 
         if (period != n) {
             period = n;
@@ -74,8 +74,8 @@ public class RawWaveChannel extends SoundChannel
     public void updateSample(int byteId, byte value)
     {
         if (enabled) return;
-        updated[byteId * 2] = ((value >> 4) & 0xF);
-        updated[byteId * 2 + 1] = (value & 0xF);
+        updated[byteId * 2] = ((value >> 4) & 0xF) - 8;
+        updated[byteId * 2 + 1] = (value & 0xF) - 8;
         requestCopy = true;
     }
 
@@ -93,12 +93,14 @@ public class RawWaveChannel extends SoundChannel
                 handleRestartRequest();
             lastUpdate = core.cycle;
         }
+
         if (!enabled)
             return 0;
+
         long delta = core.cycle - clockStart;
         if (useLength && delta > length)
             return 0;
 
-        return (samples[(int) (delta / period) & 0x1F] << shift) & 0xf;
+        return shift == 3 ? 0 : (samples[(int) (delta / period) & 0x1F] << shift);
     }
 }
