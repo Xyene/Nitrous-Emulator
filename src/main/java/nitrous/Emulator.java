@@ -28,7 +28,7 @@ public class Emulator
     }
 
     public boolean timerEnabled;
-    public int timerFreq;
+    public int timerPeriod;
 
     public final Memory mmu;
     public final LCD lcd;
@@ -373,9 +373,10 @@ public class Emulator
     {
         // The DIV register increments at 16KHz, and resets to 0 after
         divCycle += delta;
-        if (divCycle >= 16384)
+
+        if (divCycle >= 256)
         {
-            divCycle -= 16384;
+            divCycle -= 256;
             // This is... probably correct
             mmu.registers[R.R_DIV]++;
         }
@@ -386,9 +387,9 @@ public class Emulator
             timerCycle += delta;
 
             // The Timer has a settable frequency
-            if (timerCycle >= timerFreq)
+            if (timerCycle >= timerPeriod)
             {
-                timerCycle -= timerFreq;
+                timerCycle -= timerPeriod;
 
                 // And it resets to a specific value
                 int tima = (mmu.registers[R.R_TIMA] & 0xff) + 1;
@@ -398,6 +399,7 @@ public class Emulator
                     tima = mmu.registers[R.R_TMA] & 0xff;
                     if (isInterruptEnabled(R.TIMER_OVERFLOW_BIT))
                         setInterruptTriggered(R.TIMER_OVERFLOW_BIT);
+//                        System.out.println("triggered TIMA");
                 }
                 mmu.registers[R.R_TIMA] = (byte) tima;
             }
@@ -407,6 +409,8 @@ public class Emulator
         // Update the display
         lcd.tick(delta);
     }
+
+    boolean inTima;
 
     public long ac;
     public long executed;
@@ -705,6 +709,8 @@ public class Emulator
         }
 
         int op = nextUByte();
+
+//        System.out.println(pc);
 
         outer:
         switch (op)
@@ -1762,11 +1768,14 @@ public class Emulator
                                                     }
                                                 }
                                             });
-                                            menu.add(new JMenu("Speed") {
+                                            menu.add(new JMenu("Speed")
+                                            {
                                                 {
                                                     ButtonGroup group = new ButtonGroup();
-                                                    for (final EmulateSpeed speed : EmulateSpeed.values()) {
-                                                        add(new JRadioButtonMenuItem(speed.name) {
+                                                    for (final EmulateSpeed speed : EmulateSpeed.values())
+                                                    {
+                                                        add(new JRadioButtonMenuItem(speed.name)
+                                                        {
                                                             {
                                                                 group.add(this);
                                                                 if (core.clockSpeed == speed.clockSpeed)

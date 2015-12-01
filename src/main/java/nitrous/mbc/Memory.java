@@ -242,6 +242,12 @@ public class Memory
 
     public void setIO(int addr, int data)
     {
+        //  System.out.printf("IO WRITE %04X=%02X\n", addr&0xffff, data&0xff);
+        _setIO(addr, data);
+    }
+
+    public void _setIO(int addr, int data)
+    {
 //        if(addr == R.R_SCX) {
 //            if(data == 0) return;//new IOException().printStackTrace();
 //            core.lcd.scrollx = data;
@@ -324,7 +330,8 @@ public class Memory
                 break;
             }
             case R.R_NR14:
-                if ((registers[R.R_NR14] & 0x80) != 0) {
+                if ((registers[R.R_NR14] & 0x80) != 0)
+                {
                     core.sound.channel1.restart();
                     data &= 0x7f;
                 }
@@ -442,27 +449,31 @@ public class Memory
                 {
                     System.err.println("Enabled timer");
                     core.timerEnabled = true;
+                    core.timerCycle = 0;
                 } else
                 {
                     core.timerEnabled = false;
                     System.err.println("Disabled timer");
                     core.timerCycle = 0;
                 }
-                switch (addr & 0b11)
+                switch (data & 0b11)
                 {
                     case 0b00:
-                        core.timerFreq = 4096;
+                        core.timerPeriod = 1024;
                         break;
                     case 0b01:
-                        core.timerFreq = 262144;
+                        core.timerPeriod = 16;
                         break;
                     case 0b10:
-                        core.timerFreq = 65536;
+                        core.timerPeriod = 64;
                         break;
                     case 0b11:
-                        core.timerFreq = 16384;
+                        core.timerPeriod = 256;
                         break;
                 }
+                break;
+            case R.R_TIMA:
+                core.timerCycle = 0;
                 break;
             case R.R_LCD_STAT:
                 break;
@@ -476,7 +487,7 @@ public class Memory
     public short getAddress(int addr)
     {
         short ret = _mapMemory(addr);
-        // System.out.printf("memread %04X=%02X\n", addr, ret & 0xFF);
+//        System.out.printf("memread %04X=%02X\n", addr, ret & 0xFF);
         return ret;
     }
 
@@ -531,7 +542,7 @@ public class Memory
     public short getIO(int addr)
     {
         short ret = _readReg(addr);
-        // System.out.printf("IO READ %04X=%02X\n", addr&0xFFFF, (byte)ret);
+        //     System.out.printf("IO READ %04X=%02X\n", addr&0xFFFF, (byte)ret);
         return ret;
     }
 
