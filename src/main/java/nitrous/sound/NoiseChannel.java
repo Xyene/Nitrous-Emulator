@@ -51,7 +51,8 @@ public class NoiseChannel extends SoundChannel
         useLength = (registers[R_NR44] & 0x40) != 0;
     }
 
-    public void update() {
+    public void update()
+    {
         updateRequest = true;
     }
 
@@ -61,7 +62,8 @@ public class NoiseChannel extends SoundChannel
         restartRequest = false;
     }
 
-    public void restart() {
+    public void restart()
+    {
         restartRequest = true;
     }
 
@@ -92,11 +94,20 @@ public class NoiseChannel extends SoundChannel
 
         if (core.cycle - lastToggle >= period)
         {
-            if (updateRequest)
-                handleUpdateRequest();
+            boolean didSomething = false;
 
+            if (updateRequest)
+            {
+                handleUpdateRequest();
+                didSomething = true;
+            }
             if (restartRequest)
+            {
                 handleRestartRequest();
+                didSomething = true;
+            }
+
+            if(didSomething) return render();
 
             high ^= Math.random() >= 0.5;
             lastToggle = core.cycle;
