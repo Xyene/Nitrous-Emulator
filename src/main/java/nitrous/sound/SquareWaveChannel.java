@@ -46,7 +46,7 @@ public class SquareWaveChannel extends SoundChannel
         if (sweep) {
             int newTime = ((registers[ioStart - 1] >> 4) & 0x7) * 32768;
             if (sweepCycles != newTime)
-                lastSweep = core.clockSpeed;
+                lastSweep = core.cycle;
             sweepCycles = newTime;
             sweepIncrease = (registers[ioStart - 1] & 0x8) != 0;
             sweepShift = registers[ioStart - 1] & 0x7;
@@ -144,10 +144,19 @@ public class SquareWaveChannel extends SoundChannel
 
         if (cycle == 0)
         {
+            boolean didSomething = false;
             if (updateRequest)
+            {
+                didSomething = true;
                 handleUpdateRequest();
+            }
             if (restartRequest)
+            {
+                didSomething = true;
                 handleRestartRequest();
+            }
+            if (didSomething)
+                return render();
         }
 
         /**
