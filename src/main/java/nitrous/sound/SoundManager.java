@@ -2,6 +2,7 @@ package nitrous.sound;
 
 import com.sun.media.sound.WaveFileWriter;
 import nitrous.Emulator;
+import nitrous.R;
 
 import javax.sound.sampled.*;
 import java.io.*;
@@ -87,13 +88,32 @@ public class SoundManager
             clockTicks -= sampleClocks;
 
             int index = usedSamples++;
-            buffer[index] = 0;
-            buffer[index] += channel1.render();
-            buffer[index] += channel2.render();
-            buffer[index] += channel3.render();
-            buffer[index] += channel4.render();
+            int left = index * 2;
+            int right = index * 2 + 1;
 
-            if (usedSamples >= buffer.length)
+            buffer[left] = 0;
+            buffer[right] = 0;
+
+            int a = channel1.render();
+            int b = channel2.render();
+            int c = channel3.render();
+            int d = channel4.render();
+
+            int flags = core.mmu.registers[R.R_NR51];
+
+            if ((flags & 0x80) != 0) buffer[left] += d;
+            if ((flags & 0x40) != 0) buffer[left] += c;
+            if ((flags & 0x20) != 0) buffer[left] += b;
+            if ((flags & 0x10) != 0) buffer[left] += a;
+
+            if ((flags & 0x08) != 0) buffer[right] += d;
+            if ((flags & 0x04) != 0) buffer[right] += c;
+            if ((flags & 0x02) != 0) buffer[right] += b;
+            if ((flags & 0x01) != 0) buffer[right] += a;
+
+            //System.out.println(Integer.toBinaryString(flags & 0xff));
+
+            if (usedSamples >= buffer.length / 2)
             {
                 if (out != null)
                     out.write(buffer, 0, buffer.length);
