@@ -1762,6 +1762,25 @@ public class Emulator
                                                     }
                                                 }
                                             });
+                                            menu.add(new JMenu("Speed") {
+                                                {
+                                                    ButtonGroup group = new ButtonGroup();
+                                                    for (final EmulateSpeed speed : EmulateSpeed.values()) {
+                                                        add(new JRadioButtonMenuItem(speed.name) {
+                                                            {
+                                                                group.add(this);
+                                                                if (core.clockSpeed == speed.clockSpeed)
+                                                                    group.setSelected(getModel(), true);
+                                                                addActionListener(e -> {
+                                                                    core.clockSpeed = speed.clockSpeed;
+                                                                    core.sound.updateClockSpeed(speed.clockSpeed);
+                                                                    group.setSelected(getModel(), true);
+                                                                });
+                                                            }
+                                                        });
+                                                    }
+                                                }
+                                            });
 
                                             menu.add(new JSeparator());
                                             menu.add(new JMenuItem("Options"));
