@@ -435,45 +435,11 @@ public class Memory
             case R.R_DIV:
                 data = 0;
                 break;
-            /**
-             * Bit 2    - Timer Stop  (0=Stop, 1=Start)
-             * Bits 1-0 - Input Clock Select
-             * 00:   4096 Hz    (~4194 Hz SGB)
-             * 01: 262144 Hz  (~268400 Hz SGB)
-             * 10:  65536 Hz   (~67110 Hz SGB)
-             * 11:  16384 Hz   (~16780 Hz SGB)
-             */
             case R.R_TAC:
-                System.err.println("Timer ctrl - " + core.cycle);
-                if ((data & 0b100) != 0)
-                {
-                    System.err.println("Enabled timer");
-                    core.timerEnabled = true;
+                if(((registers[R.R_TAC] ^ data) & 0x03) != 0) {
                     core.timerCycle = 0;
-                } else
-                {
-                    core.timerEnabled = false;
-                    System.err.println("Disabled timer");
-                    core.timerCycle = 0;
+                    registers[R.R_TIMA] = registers[R.R_TMA];
                 }
-                switch (data & 0b11)
-                {
-                    case 0b00:
-                        core.timerPeriod = 1024;
-                        break;
-                    case 0b01:
-                        core.timerPeriod = 16;
-                        break;
-                    case 0b10:
-                        core.timerPeriod = 64;
-                        break;
-                    case 0b11:
-                        core.timerPeriod = 256;
-                        break;
-                }
-                break;
-            case R.R_TIMA:
-                core.timerCycle = 0;
                 break;
             case R.R_LCD_STAT:
                 break;
@@ -609,7 +575,7 @@ public class Memory
                 }
                 // Add whatever else might've been set in the other bits
                 reg |= registers[R.R_LCD_STAT] & 0xF8;
-                return reg;
+                return 0;
         }
         return registers[addr];
     }

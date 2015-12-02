@@ -382,23 +382,50 @@ public class Emulator
         }
 
         // The Timer is similar to DIV, except that when it overflows it triggers an interrupt
-        if (timerEnabled)
+        int tac = mmu.registers[R.R_TAC];
+        if ((tac & 0b100) != 0)
         {
             timerCycle += delta;
 
             // The Timer has a settable frequency
-            if (timerCycle >= timerPeriod)
-            {
-                timerCycle -= timerPeriod;
+            int timerPeriod = 0;
 
+            /**
+             * Bit 2    - Timer Stop  (0=Stop, 1=Start)
+             * Bits 1-0 - Input Clock Select
+             * 00:   4096 Hz    (~4194 Hz SGB)
+             * 01: 262144 Hz  (~268400 Hz SGB)
+             * 10:  65536 Hz   (~67110 Hz SGB)
+             * 11:  16384 Hz   (~16780 Hz SGB)
+             */
+            switch (tac & 0b11)
+            {
+                case 0b00:
+                    timerPeriod = clockSpeed / 4096;
+                    break;
+                case 0b01:
+                    timerPeriod = clockSpeed / 262144;
+                    break;
+                case 0b10:
+                    timerPeriod = clockSpeed / 65536;
+                    break;
+                case 0b11:
+                    timerPeriod = clockSpeed / 16384;
+                    break;
+            }
+
+            while (timerCycle >= timerPeriod)
+            {
+                //  System.out.println(timerPeriod);
+                timerCycle -= timerPeriod;
                 // And it resets to a specific value
                 int tima = (mmu.registers[R.R_TIMA] & 0xff) + 1;
                 if (tima > 0xff)
                 {
                     // Reset to the wanted value, and trigger the interrupt
                     tima = mmu.registers[R.R_TMA] & 0xff;
-                    if (isInterruptEnabled(R.TIMER_OVERFLOW_BIT))
-                        setInterruptTriggered(R.TIMER_OVERFLOW_BIT);
+                    //     if (isInterruptEnabled(R.TIMER_OVERFLOW_BIT))
+                    setInterruptTriggered(R.TIMER_OVERFLOW_BIT);
 //                        System.out.println("triggered TIMA");
                 }
                 mmu.registers[R.R_TIMA] = (byte) tima;
@@ -409,8 +436,6 @@ public class Emulator
         // Update the display
         lcd.tick(delta);
     }
-
-    boolean inTima;
 
     public long ac;
     public long executed;
@@ -444,7 +469,7 @@ public class Emulator
             }
             // The idea here is that we cap the amount of cycles we execute per second to 4194304
             // it doesn't actually do this since some timing is off
-            int t = 27360;///6000;//4194304;
+            int t = 100000;///6000;//4194304;
             if (ac >= t)
             {
                 // System.err.println(cycle + "..." + oldCycle);
@@ -647,8 +672,9 @@ public class Emulator
 
     public int LD_HLD_A(int op)
     {
-        setByte(getRegisterPair(HL) & 0xFFFF, A);
-        setRegisterPair(HL, (getRegisterPair(HL) - 1) & 0xFFFF);
+        int hl = getRegisterPair(HL);
+        setByte(hl, A);
+        setRegisterPair(HL, (hl - 1) & 0xFFFF);
 
         return 0;
     }
@@ -698,6 +724,9 @@ public class Emulator
 //        instrs[0x10] = this::STOP;
     }
 
+    public static int[] opcount = new int[0x100];
+    public static int curop = 0;
+
     public int _exec()
     {
         instr++;
@@ -709,6 +738,9 @@ public class Emulator
         }
 
         int op = nextUByte();
+
+        opcount[op]++;
+        curop++;
 
 //        System.out.println(pc);
 
