@@ -61,6 +61,8 @@ public class SoundManager
 
     private static ByteArrayOutputStream out = null;
 
+    public int volume = 100;
+
     static
     {
         if (System.getProperty("nox.soundFile") != null) {
@@ -72,6 +74,7 @@ public class SoundManager
                     out.close();
                     new WaveFileWriter().write(new AudioInputStream(new ByteArrayInputStream(out.toByteArray()), SoundChannel.AUDIO_FORMAT, out.size()),
                             AudioFileFormat.Type.WAVE, new FileOutputStream(System.getProperty("nox.soundFile")));
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -88,8 +91,8 @@ public class SoundManager
             clockTicks -= sampleClocks;
 
             int index = usedSamples++;
-            int left = index * 2;
-            int right = index * 2 + 1;
+            int left = index * 4;
+            int right = index * 4 + 2;
 
             buffer[left] = 0;
             buffer[right] = 0;
@@ -101,19 +104,30 @@ public class SoundManager
 
             int flags = core.mmu.registers[R.R_NR51];
 
-            if ((flags & 0x80) != 0) buffer[left] += d;
-            if ((flags & 0x40) != 0) buffer[left] += c;
-            if ((flags & 0x20) != 0) buffer[left] += b;
-            if ((flags & 0x10) != 0) buffer[left] += a;
+            int dataLeft = 0;
+            int dataRight = 0;
 
-            if ((flags & 0x08) != 0) buffer[right] += d;
-            if ((flags & 0x04) != 0) buffer[right] += c;
-            if ((flags & 0x02) != 0) buffer[right] += b;
-            if ((flags & 0x01) != 0) buffer[right] += a;
+            if ((flags & 0x80) != 0) dataLeft += d;
+            if ((flags & 0x40) != 0) dataLeft += c;
+            if ((flags & 0x20) != 0) dataLeft += b;
+            if ((flags & 0x10) != 0) dataLeft += a;
+
+            if ((flags & 0x08) != 0) dataRight += d;
+            if ((flags & 0x04) != 0) dataRight += c;
+            if ((flags & 0x02) != 0) dataRight += b;
+            if ((flags & 0x01) != 0) dataRight += a;
+
+            dataLeft = (dataLeft << 8) * volume / 100;
+            dataRight = (dataRight << 8) * volume / 100;
+
+            buffer[left] = (byte) (dataLeft >> 8);
+            buffer[left+1] = (byte) (dataLeft & 0xFF);
+            buffer[right] = (byte) (dataRight >> 8);
+            buffer[right+1] = (byte) (dataRight & 0xFF);
 
             //System.out.println(Integer.toBinaryString(flags & 0xff));
 
-            if (usedSamples >= buffer.length / 2)
+            if (usedSamples >= buffer.length/4)
             {
                 if (out != null)
                     out.write(buffer, 0, buffer.length);
