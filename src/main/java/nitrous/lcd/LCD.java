@@ -68,6 +68,7 @@ public class LCD
         color[j] = (((int) (red / 31f * 255 + 0.5) & 0xFF) << 16) |
                 (((int) (green / 31f * 255 + 0.5) & 0xFF) << 8) |
                 ((int) (blue / 31f * 255 + 0.5) & 0xFF);
+        ///System.out.println("updated a palette");
     }
 
     public void setBackgroundPalette(int reg, int data)
@@ -259,6 +260,10 @@ public class LCD
             }});
     }
 
+    int vblankcount = 0;
+    long lastsecond = -1;
+    long lastclock;
+
     public void tick(long cycles)
     {
         lcdCycles += cycles;
@@ -275,7 +280,19 @@ public class LCD
             int LY = core.mmu.registers[R.R_LY] & 0xFF;
             // draw the scanline
             if (display != null) draw(screenBuffer, LY);
-            core.mmu.registers[R.R_LY] = (byte) (((LY + 1) % 153) & 0xff);
+            core.mmu.registers[R.R_LY] = (byte) (((LY + 1) % 154) & 0xff);
+
+            if(LY == 0) {
+                if(lastsecond == -1) {lastsecond=System.nanoTime();lastclock=core.cycle;}
+                vblankcount++;
+                if(vblankcount == 60) {
+                    System.out.println("Took " + ((System.nanoTime() - lastsecond) / 1_000_000_000.0) +
+                            " seconds for 60 frames - " + (core.cycle - lastclock) / 60 + " clks/frames");
+                    lastclock=core.cycle;
+                    vblankcount=0;
+                    lastsecond = System.nanoTime();
+                }
+            }
 
             boolean isVBlank = 144 <= LY;
 
