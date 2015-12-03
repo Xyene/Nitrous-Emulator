@@ -41,7 +41,7 @@ public interface R
     int R_BGP = 0x47;
     int R_OBP0 = 0x48;
     int R_OBP1 = 0x49;
-    int R_TRIGGERED_INTERRUPTS = 0x0F;
+    int R_TRIGGERED_INTERRUPTS = 0x0F; // IF
     int R_ENABLED_INTERRUPTS = 0xFF;
     int R_DMA = 0x46;
     int R_WY = 0x4a;
@@ -83,6 +83,7 @@ public interface R
         int VBLANK_MODE_BIT = 0x10;
         int HBLANK_MODE_BIT = 0x8;
         int COINCIDENCE_BIT = 0x4;
+        int COINCIDENCE_INTERRUPT_ENABLED_BIT = 0x40;
         int MODE_MASK = 0b11;
 
         /**
