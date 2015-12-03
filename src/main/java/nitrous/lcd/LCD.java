@@ -279,17 +279,24 @@ public class LCD
              */
             int LY = core.mmu.registers[R.R_LY] & 0xFF;
             // draw the scanline
-            if (display != null) draw(screenBuffer, LY);
+            if (displayEnabled())
+                if (display != null) draw(screenBuffer, LY);
             core.mmu.registers[R.R_LY] = (byte) (((LY + 1) % 154) & 0xff);
 
-            if(LY == 0) {
-                if(lastsecond == -1) {lastsecond=System.nanoTime();lastclock=core.cycle;}
+            if (LY == 0)
+            {
+                if (lastsecond == -1)
+                {
+                    lastsecond = System.nanoTime();
+                    lastclock = core.cycle;
+                }
                 vblankcount++;
-                if(vblankcount == 60) {
+                if (vblankcount == 60)
+                {
                     System.out.println("Took " + ((System.nanoTime() - lastsecond) / 1_000_000_000.0) +
                             " seconds for 60 frames - " + (core.cycle - lastclock) / 60 + " clks/frames");
-                    lastclock=core.cycle;
-                    vblankcount=0;
+                    lastclock = core.cycle;
+                    vblankcount = 0;
                     lastsecond = System.nanoTime();
                 }
             }
@@ -323,6 +330,13 @@ public class LCD
                 core.setInterruptTriggered(R.LCDC_BIT);
             }
 
+            if (((core.mmu.registers[R.R_ENABLED_INTERRUPTS] & R.LCDC_BIT) != 0) &&
+                    ((core.mmu.registers[R.R_LCD_STAT] & R.LCD_STAT.HBLANK_MODE_BIT) != 0) &&
+                    ((core.mmu.registers[0x40] & 0x80) != 0) && !isVBlank)
+            {
+                core.setInterruptTriggered(R.LCDC_BIT);
+            }
+
             /**
              * INT 40 - V-Blank Interrupt
              *
@@ -331,7 +345,8 @@ public class LCD
              * During this period video hardware is not using video ram so it may be freely accessed.
              * This period lasts approximately 1.1 milliseconds.
              */
-            if (LY == 144)
+            // use 143 here as we've just finished processing line 143 and will start 144
+            if (LY == 143)
             {
                 Graphics2D graphics = currentRenderer.getGraphics();
 
