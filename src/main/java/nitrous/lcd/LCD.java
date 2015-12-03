@@ -328,12 +328,14 @@ public class LCD
                 if ((lcdStat & LCD_STAT.COINCIDENCE_INTERRUPT_ENABLED_BIT) != 0)
                 {
                     int lyc = (core.mmu.registers[R_LYC] & 0xff);
-                    if ((lcdStat & LCD_STAT.COINCIDENCE_BIT) != 0 && lyc == LY)
-                        // Fire when LYC == LY
+                    // Fire when LYC == LY
+                    if (lyc == LY)
+                    {
                         core.setInterruptTriggered(LCDC_BIT);
-                    else if (lyc != LY)
-                        // Fire when LYC <> LY
-                        core.setInterruptTriggered(LCDC_BIT);
+                        core.mmu.registers[R_LYC] |= LCD_STAT.COINCIDENCE_BIT;
+                    } else {
+                        core.mmu.registers[R_LYC] &= ~LCD_STAT.COINCIDENCE_BIT;
+                    }
                 }
 
                 if ((lcdStat & LCD_STAT.HBLANK_MODE_BIT) != 0)
