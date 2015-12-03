@@ -22,12 +22,9 @@ public class RawWaveChannel extends SoundChannel
         super(core);
     }
 
-    private boolean requestUpdate = false;
-    private boolean requestRestart = false;
     private boolean requestCopy = false;
 
     public void handleUpdateRequest() {
-        requestUpdate = false;
         byte[] registers = core.mmu.registers;
 
         enabled = (registers[R_NR30] & 0x80) != 0;
@@ -49,23 +46,13 @@ public class RawWaveChannel extends SoundChannel
         //System.out.printf("period=%d, length=%d, enabled=%b, shift=%d\n", period, useLength ? length : -1, enabled, shift);
     }
 
-    public void update()
-    {
-        requestUpdate = true;
-    }
-
-    public void handleRestartRequest()
+    @Override
+    protected void handleRestartRequest()
     {
         clockStart = core.cycle;
-        requestRestart = false;
     }
 
-    public void restart()
-    {
-        requestRestart = true;
-    }
-
-    public void handleCopyRequest()
+    private void handleCopyRequest()
     {
         System.arraycopy(updated, 0, samples, 0, samples.length);
         requestCopy = false;
@@ -85,12 +72,10 @@ public class RawWaveChannel extends SoundChannel
     {
         if (core.cycle - lastUpdate > period)
         {
-            if (requestUpdate)
-                handleUpdateRequest();
+            handleRequests();
             if (requestCopy)
                 handleCopyRequest();
-            if (requestRestart)
-                handleRestartRequest();
+
             lastUpdate = core.cycle;
         }
 

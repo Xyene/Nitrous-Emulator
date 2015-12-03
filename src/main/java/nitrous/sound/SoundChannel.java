@@ -18,5 +18,33 @@ public abstract class SoundChannel
         return 32 * (2048 - gbFreq);
     }
 
+    private boolean updateRequest = false;
+    private boolean restartRequest = false;
+
+    public void update() {
+        updateRequest = true;
+    }
+
+    public void restart() {
+        restartRequest = true;
+    }
+
+    protected boolean handleRequests() {
+        boolean didSomething = updateRequest || restartRequest;
+
+        if (updateRequest)
+            handleUpdateRequest();
+
+        if (restartRequest)
+            handleRestartRequest();
+
+        updateRequest = restartRequest = false;
+
+        return didSomething;
+    }
+
+    protected abstract void handleRestartRequest();
+    protected abstract void handleUpdateRequest();
+
     public abstract int render();
 }

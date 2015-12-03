@@ -40,7 +40,6 @@ public class SquareWaveChannel extends SoundChannel
 
     public void handleUpdateRequest()
     {
-        updateRequest = false;
         byte[] registers = core.mmu.registers;
 
         if (sweep) {
@@ -77,27 +76,11 @@ public class SquareWaveChannel extends SoundChannel
         useLength = (registers[ioStart + 3] & 0x40) != 0;
     }
 
-    boolean updateRequest = false;
-
-    public void update()
-    {
-        updateRequest = true;
-        requestedClockStart = core.cycle;
-    }
-
-    boolean restartRequest = false;
-    long requestedClockStart;
-
-    public void handleRestartRequest()
+    @Override
+    protected void handleRestartRequest()
     {
         clockStart = core.cycle;
-        restartRequest = false;
         lastCycle = -1;
-    }
-
-    public void restart()
-    {
-        restartRequest = true;
     }
 
     int currentVolume = -1;
@@ -142,22 +125,8 @@ public class SquareWaveChannel extends SoundChannel
             lastSweep = core.cycle;
         }
 
-        if (cycle == 0)
-        {
-            boolean didSomething = false;
-            if (updateRequest)
-            {
-                didSomething = true;
-                handleUpdateRequest();
-            }
-            if (restartRequest)
-            {
-                didSomething = true;
-                handleRestartRequest();
-            }
-            if (didSomething)
-                return render();
-        }
+        if (cycle == 0 && handleRequests())
+            return render();
 
         /**
          * Duty   Waveform    Ratio  Cycle
@@ -179,33 +148,5 @@ public class SquareWaveChannel extends SoundChannel
                 return (byte) (cycle != 0 && cycle != 7 ? amplitude : -amplitude);
         }
         return -1;
-    }
-
-    public static void main(String... args) throws LineUnavailableException, InterruptedException
-    {
-        SourceDataLine sdl = AudioSystem.getSourceDataLine(AUDIO_FORMAT);
-        byte[] data = new byte[48000];
-
-        SquareWaveChannel channel = new SquareWaveChannel(null, 0, false);
-        channel.period = 4096;
-        channel.length = 1048576;
-        channel.useLength = false;
-        channel.clockStart = 0;
-        channel.envelopeInitial = 15;
-        channel.envelopeIncrease = true;
-        channel.envelopeSweep = 7 * 65536;
-        channel.duty = 3;
-        //channel.render(data, 0, data.length);
-
-        byte[] sample = new byte[1000];
-        System.arraycopy(data, 0, sample, 0, sample.length);
-        System.out.println(Arrays.toString(sample));
-
-        sdl.open(AUDIO_FORMAT);
-        sdl.start();
-        sdl.write(data, 0, data.length);
-        sdl.drain();
-        sdl.stop();
-        sdl.close();
     }
 }
