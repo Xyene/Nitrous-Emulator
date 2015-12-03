@@ -3,6 +3,7 @@ package nitrous.lcd;
 import nitrous.Emulator;
 import nitrous.PaletteColors;
 import nitrous.R;
+import nitrous.R.LCD_STAT;
 import nitrous.mbc.Memory;
 import nitrous.renderer.IRenderManager;
 
@@ -17,6 +18,8 @@ import java.util.Collections;
 import java.util.List;
 
 import static nitrous.Emulator.*;
+import static nitrous.R.*;
+import static nitrous.R.R_LCD_STAT;
 
 public class LCD
 {
@@ -111,9 +114,9 @@ public class LCD
              * Note: Initially all background colors are initialized as white.
              */
             PaletteColors colors = PaletteColors.byHash[core.cartridge.checksum];
-            bgPalettes[0] = new DMGPalette(this, colors.bg, R.R_BGP);
-            spritePalettes[0] = new DMGPalette(this, colors.obj0, R.R_OBP0);
-            spritePalettes[1] = new DMGPalette(this, colors.obj1, R.R_OBP1);
+            bgPalettes[0] = new DMGPalette(this, colors.bg, R_BGP);
+            spritePalettes[0] = new DMGPalette(this, colors.obj0, R_OBP0);
+            spritePalettes[1] = new DMGPalette(this, colors.obj1, R_OBP1);
         }
     }
 
@@ -277,11 +280,12 @@ public class LCD
              * The LY can take on any value between 0 through 153. The values between 144 and 153 indicate the
              * V-Blank period.
              */
-            int LY = core.mmu.registers[R.R_LY] & 0xFF;
+            int LY = core.mmu.registers[R_LY] & 0xFF;
             // draw the scanline
-            if (displayEnabled())
+            boolean displayEnabled = displayEnabled();
+            if (displayEnabled)
                 if (display != null) draw(screenBuffer, LY);
-            core.mmu.registers[R.R_LY] = (byte) (((LY + 1) % 154) & 0xff);
+            core.mmu.registers[R_LY] = (byte) (((LY + 1) % 154) & 0xff);
 
             if (LY == 0)
             {
@@ -309,32 +313,33 @@ public class LCD
                 core.mmu.hdma.tick();
             }
 
-            /**
-             * INT 48 - LCDC Status Interrupt
-             *
-             * There are various reasons for this interrupt to occur as described by the STAT register ($FF40).
-             * One very popular reason is to indicate to the user when the video hardware is about to redraw
-             * a given LCD line.
-             *
-             * This is determined with an LY == LYC comparison.
-             */
-            if (core.isInterruptEnabled(R.LCDC_BIT) &&
-                    // LYC=LY Coincidence
-                    (core.mmu.registers[R.R_LCD_STAT] & 0x40) != 0 &&
-                    // Fire when LYC == LY
-                    (core.mmu.registers[R.R_LYC] & 0xff) == LY &&
-                    displayEnabled() &&
-                    // the range [144, 153] is Vblank, don't run there
-                    !isVBlank)
+            int lcdStat = core.mmu.registers[R_LCD_STAT];
+            if(displayEnabled && !isVBlank)
             {
-                core.setInterruptTriggered(R.LCDC_BIT);
-            }
+                /**
+                 * INT 48 - LCDC Status Interrupt
+                 *
+                 * There are various reasons for this interrupt to occur as described by the STAT register ($FF40).
+                 * One very popular reason is to indicate to the user when the video hardware is about to redraw
+                 * a given LCD line.
+                 *
+                 * This is determined with an LY == LYC comparison.
+                 */
+                if ((lcdStat & LCD_STAT.COINCIDENCE_INTERRUPT_ENABLED_BIT) != 0)
+                {
+                    int lyc = (core.mmu.registers[R_LYC] & 0xff);
+                    if ((lcdStat & LCD_STAT.COINCIDENCE_BIT) != 0 && lyc == LY)
+                        // Fire when LYC == LY
+                        core.setInterruptTriggered(LCDC_BIT);
+                    else if (lyc != LY)
+                        // Fire when LYC <> LY
+                        core.setInterruptTriggered(LCDC_BIT);
+                }
 
-            if (((core.mmu.registers[R.R_ENABLED_INTERRUPTS] & R.LCDC_BIT) != 0) &&
-                    ((core.mmu.registers[R.R_LCD_STAT] & R.LCD_STAT.HBLANK_MODE_BIT) != 0) &&
-                    ((core.mmu.registers[0x40] & 0x80) != 0) && !isVBlank)
-            {
-                core.setInterruptTriggered(R.LCDC_BIT);
+                if ((lcdStat & LCD_STAT.HBLANK_MODE_BIT) != 0)
+                {
+                    core.setInterruptTriggered(LCDC_BIT);
+                }
             }
 
             /**
@@ -368,15 +373,15 @@ public class LCD
                     graphics.drawImage(screenBuffer, 0, 0, display.getWidth(), display.getHeight(), null);
                 }
 
-                if (core.isInterruptEnabled(R.VBLANK_BIT) && displayEnabled())
+                if (core.isInterruptEnabled(VBLANK_BIT) && displayEnabled)
                 {
                     // Trigger VBlank
-                    core.setInterruptTriggered(R.VBLANK_BIT);
+                    core.setInterruptTriggered(VBLANK_BIT);
 
                     // Trigger LCDC if enabled
-                    if (core.isInterruptEnabled(R.LCDC_BIT) && (core.mmu.registers[R.R_LCD_STAT] & R.LCD_STAT.VBLANK_MODE_BIT) != 0)
+                    if (core.isInterruptEnabled(LCDC_BIT) && (lcdStat & LCD_STAT.VBLANK_MODE_BIT) != 0)
                     {
-                        core.setInterruptTriggered(R.LCDC_BIT);
+                        core.setInterruptTriggered(LCDC_BIT);
                     }
                 }
             }
@@ -503,41 +508,41 @@ public class LCD
      */
     public boolean displayEnabled()
     {
-        return (core.mmu.registers[R.R_LCDC] & R.LCDC.CONTROL_OPERATION_BIT) != 0;
+        return (core.mmu.registers[R_LCDC] & LCDC.CONTROL_OPERATION_BIT) != 0;
     }
 
     public boolean backgroundEnabled()
     {
-        return (core.mmu.registers[R.R_LCDC] & 0x01) == 1;
+        return (core.mmu.registers[R_LCDC] & 0x01) == 1;
     }
 
     public int getWindowTileMapOffset()
     {
-        if ((core.mmu.registers[R.R_LCDC] & R.LCDC.WINDOW_TILE_MAP_DISPLAY_SELECT_BIT) != 0)
+        if ((core.mmu.registers[R_LCDC] & LCDC.WINDOW_TILE_MAP_DISPLAY_SELECT_BIT) != 0)
             return 0x1c00;
         return 0x1800;
     }
 
     public int getBackgroundTileMapOffset()
     {
-        if ((core.mmu.registers[R.R_LCDC] & R.LCDC.BG_TILE_MAP_DISPLAY_SELECT_BIT) != 0)
+        if ((core.mmu.registers[R_LCDC] & LCDC.BG_TILE_MAP_DISPLAY_SELECT_BIT) != 0)
             return 0x1c00;
         return 0x1800;
     }
 
     public boolean isUsingTallSprites()
     {
-        return (core.mmu.registers[R.R_LCDC] & R.LCDC.SPRITE_SIZE_BIT) != 0;
+        return (core.mmu.registers[R_LCDC] & LCDC.SPRITE_SIZE_BIT) != 0;
     }
 
     public boolean spritesEnabled()
     {
-        return (core.mmu.registers[R.R_LCDC] & R.LCDC.SPRITE_DISPLAY_BIT) != 0;
+        return (core.mmu.registers[R_LCDC] & LCDC.SPRITE_DISPLAY_BIT) != 0;
     }
 
     public boolean windowEnabled()
     {
-        return (core.mmu.registers[R.R_LCDC] & R.LCDC.WINDOW_DISPLAY_BIT) != 0;
+        return (core.mmu.registers[R_LCDC] & LCDC.WINDOW_DISPLAY_BIT) != 0;
     }
 
     /**
@@ -549,7 +554,7 @@ public class LCD
      */
     public int getTileDataOffset()
     {
-        if ((core.mmu.registers[R.R_LCDC] & R.LCDC.BGWINDOW_TILE_DATA_SELECT_BIT) != 0)
+        if ((core.mmu.registers[R_LCDC] & LCDC.BGWINDOW_TILE_DATA_SELECT_BIT) != 0)
             return 0;
         return 0x0800;
     }
@@ -557,21 +562,21 @@ public class LCD
     //    public int scrollx;
     public int getScrollX()
     {
-        return (core.mmu.registers[R.R_SCX] & 0xFF);
+        return (core.mmu.registers[R_SCX] & 0xFF);
     }
 
     public int getScrollY()
     {
-        return (core.mmu.registers[R.R_SCY] & 0xff);
+        return (core.mmu.registers[R_SCY] & 0xff);
     }
 
     public int getWindowPosX()
     {
-        return (core.mmu.registers[R.R_WX] & 0xFF) - 7;
+        return (core.mmu.registers[R_WX] & 0xFF) - 7;
     }
 
     public int getWindowPosY()
     {
-        return (core.mmu.registers[R.R_WY] & 0xFF);
+        return (core.mmu.registers[R_WY] & 0xFF);
     }
 }
