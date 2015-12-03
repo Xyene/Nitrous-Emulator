@@ -440,6 +440,15 @@ public class Emulator
     public long ac;
     public long executed;
 
+    public void tick(long delta)
+    {
+        cycle += delta;
+        ac += delta;
+        executed += delta;
+
+        updateInterrupts(delta);
+    }
+
     public void exec()
     {
         long last = System.nanoTime();
@@ -447,14 +456,7 @@ public class Emulator
 
         while (true)
         {
-            long before = cycle;
-            long delta = _exec();
-
-            cycle += delta;
-            ac += delta;
-            executed += delta;
-
-            updateInterrupts(cycle - before);
+            tick(_exec());
 
             if (interruptsEnabled)
             {
@@ -1348,7 +1350,7 @@ public class Emulator
                 // maskable interrupts are disabled.
 
                 // we still need to increment div etc
-                updateInterrupts(4);
+                tick(4);
                 return _exec();
             }
             // AND nn
@@ -1921,17 +1923,13 @@ public class Emulator
 
     public void setByte(int addr, int _data)
     {
-        ac += 4;
-        executed += 4;
-        cycle += 4;
+        tick(4);
         mmu.setAddress(addr, _data);
     }
 
     public void setIO(int addr, int data)
     {
-        ac += 4;
-        executed += 4;
-        cycle += 4;
+        tick(4);
         mmu.setIO(addr, data);
     }
 
@@ -1942,17 +1940,13 @@ public class Emulator
 
     public int getByte(int addr)
     {
-        ac += 4;
-        executed += 4;
-        cycle += 4;
+        tick(4);
         return mmu.getAddress(addr);
     }
 
     public int getIO(int addr)
     {
-        ac += 4;
-        executed += 4;
-        cycle += 4;
+        tick(4);
         return mmu.getIO(addr);
     }
 }
