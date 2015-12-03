@@ -67,12 +67,12 @@ public interface R
 
     interface LCDC
     {
-        int BGWINDOW_DISPLAY_BIT = 0x00;
+        int BGWINDOW_DISPLAY_BIT = 0x01;
         int SPRITE_DISPLAY_BIT = 0x02;
         int SPRITE_SIZE_BIT = 0x04;
-        int BG_TILE_MAP_DISPLAY_SELECT_BIT = 0b1000;
+        int BG_TILE_MAP_DISPLAY_SELECT_BIT = 0x08;
         int BGWINDOW_TILE_DATA_SELECT_BIT = 0x10;
-        int WINDOW_DISPLAY_BIT = 0b100000;
+        int WINDOW_DISPLAY_BIT = 0x20;
         int WINDOW_TILE_MAP_DISPLAY_SELECT_BIT = 0x40;
         int CONTROL_OPERATION_BIT = 0x80;
     }
