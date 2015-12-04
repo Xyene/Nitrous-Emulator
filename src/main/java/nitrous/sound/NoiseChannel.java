@@ -72,12 +72,9 @@ public class NoiseChannel extends SoundChannel
         super(core);
     }
 
-    boolean updateRequest = false;
-    boolean restartRequest = false;
-
-    private void handleUpdateRequest()
+    @Override
+    protected void handleUpdateRequest()
     {
-        updateRequest = false;
         byte[] registers = core.mmu.registers;
 
         length = (64 - (registers[R_NR41] & 0x3F)) * 16384;
@@ -103,20 +100,10 @@ public class NoiseChannel extends SoundChannel
         useLength = (registers[R_NR44] & 0x40) != 0;
     }
 
-    public void update()
-    {
-        updateRequest = true;
-    }
-
-    public void handleRestartRequest()
+    @Override
+    protected void handleRestartRequest()
     {
         clockStart = core.cycle;
-        restartRequest = false;
-    }
-
-    public void restart()
-    {
-        restartRequest = true;
     }
 
     int currentVolume = -1;
@@ -146,20 +133,8 @@ public class NoiseChannel extends SoundChannel
 
         if (core.cycle - lastToggle >= period)
         {
-            boolean didSomething = false;
-
-            if (updateRequest)
-            {
-                handleUpdateRequest();
-                didSomething = true;
-            }
-            if (restartRequest)
-            {
-                handleRestartRequest();
-                didSomething = true;
-            }
-
-            if(didSomething) return render();
+            if (handleRequests())
+                return render();
 
             high ^= Math.random() >= 0.5;
             lastToggle = core.cycle;
