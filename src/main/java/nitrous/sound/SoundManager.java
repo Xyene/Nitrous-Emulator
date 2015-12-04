@@ -70,8 +70,6 @@ public class SoundManager
     {
         if (System.getProperty("nox.soundFile") != null)
         {
-
-
             PipedInputStream in = new PipedInputStream();
             try
             {
@@ -90,7 +88,14 @@ public class SoundManager
                 {
                     try
                     {
-                        new WaveFileWriter().write(new AudioInputStream(in, SoundChannel.AUDIO_FORMAT, 1000000000 /* this value is sketchy */),
+                        // Internally, line 122 of WaveFileWriter casts the long length into an int, causing an overflow
+                        // with some values
+                        // Particularly, the operation it does is
+                        // (int) stream.getFrameLength() * format.getFrameSize() + WaveFileFormat.getHeaderSize(...)
+                        // getHeaderSize returns at most 46, so we can calculate the maximum length we can have without
+                        // overflowing int - if we do, the entire application hangs for some obscure reason
+                        int length = Integer.MAX_VALUE / SoundChannel.AUDIO_FORMAT.getFrameSize() - 46;
+                        new WaveFileWriter().write(new AudioInputStream(in, SoundChannel.AUDIO_FORMAT, length),
                                 AudioFileFormat.Type.WAVE, new FileOutputStream(wav));
                     } catch (IOException e)
                     {
