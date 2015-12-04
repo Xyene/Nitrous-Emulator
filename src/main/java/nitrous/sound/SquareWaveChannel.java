@@ -91,10 +91,18 @@ public class SquareWaveChannel extends SoundChannel
     public int render()
     {
         int delta = (int) (core.cycle - clockStart);
+
+        int cycle = (delta * 8 / period) & 7;
+        if (lastCycle == -1)
+            lastCycle = cycle;
+
+        lastCycle = cycle;
+
+        if (cycle == 0 && handleRequests())
+            return render();
+
         if (useLength && delta > length)
-        {
             return 0;
-        }
 
         if (currentVolume == -1)
             currentVolume = envelopeInitial;
@@ -104,12 +112,6 @@ public class SquareWaveChannel extends SoundChannel
             amplitude = currentVolume * 2;
         else
             currentVolume = amplitude = Math.min(15, Math.max(0, envelopeInitial + delta / envelopeSweep * (envelopeIncrease ? 1 : -1))) * 2;
-
-        int cycle = (delta * 8 / period) & 7;
-        if (lastCycle == -1)
-            lastCycle = cycle;
-
-        lastCycle = cycle;
 
         if (sweep && sweepCycles > 0 && core.cycle - lastSweep >= sweepCycles) {
             int d = gbFreq >> sweepShift;
@@ -124,9 +126,6 @@ public class SquareWaveChannel extends SoundChannel
                 throw new RuntimeException();
             lastSweep = core.cycle;
         }
-
-        if (cycle == 0 && handleRequests())
-            return render();
 
         /**
          * Duty   Waveform    Ratio  Cycle
