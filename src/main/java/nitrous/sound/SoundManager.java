@@ -7,6 +7,7 @@ import nitrous.R;
 import javax.sound.sampled.*;
 import java.io.*;
 import java.util.Arrays;
+import java.util.concurrent.Semaphore;
 
 import static nitrous.R.*;
 
@@ -59,23 +60,63 @@ public class SoundManager
     private int usedSamples = 0;
     private double clockTicks = 0;
 
-    private static ByteArrayOutputStream out = null;
+    private static OutputStream out = null;
+    private static Thread wavWriter;
+    private static long written;
 
     public int volume = 100;
 
     static
     {
-        if (System.getProperty("nox.soundFile") != null) {
-            out = new ByteArrayOutputStream();
+        if (System.getProperty("nox.soundFile") != null)
+        {
+
+
+            PipedInputStream in = new PipedInputStream();
+            try
+            {
+                out = new BufferedOutputStream(new PipedOutputStream(in));
+            } catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+
+            File wav = new File(System.getProperty("nox.soundFile"));
+
+            wavWriter = new Thread("WAV-Writer-Thread")
+            {
+                @Override
+                public void run()
+                {
+                    try
+                    {
+                        new WaveFileWriter().write(new AudioInputStream(in, SoundChannel.AUDIO_FORMAT, 1000000000 /* this value is sketchy */),
+                                AudioFileFormat.Type.WAVE, new FileOutputStream(wav));
+                    } catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+            };
+            wavWriter.start();
 
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                try {
-                    System.out.println("Saving: " + System.getProperty("nox.soundFile"));
+                try
+                {
+                    System.out.println("Saving: " + wav);
                     out.close();
-                    new WaveFileWriter().write(new AudioInputStream(new ByteArrayInputStream(out.toByteArray()), SoundChannel.AUDIO_FORMAT, out.size()),
-                            AudioFileFormat.Type.WAVE, new FileOutputStream(System.getProperty("nox.soundFile")));
-
-                } catch (IOException e) {
+                    RandomAccessFile raf = new RandomAccessFile(wav, "rw");
+                    raf.seek(40);
+                    raf.write(new byte[]{
+                            (byte) (written & 0xff),
+                            (byte) ((written >> 8) & 0xff),
+                            (byte) ((written >> 16) & 0xff),
+                            (byte) ((written >> 24) & 0xff)
+                    });
+                    raf.close();
+//                    }
+                } catch (IOException e)
+                {
                     e.printStackTrace();
                 }
             }));
@@ -121,19 +162,26 @@ public class SoundManager
             dataRight = (dataRight << 8) * volume / 100;
 
             buffer[left] = (byte) (dataLeft >> 8);
-            buffer[left+1] = (byte) (dataLeft & 0xFF);
+            buffer[left + 1] = (byte) (dataLeft & 0xFF);
             buffer[right] = (byte) (dataRight >> 8);
-            buffer[right+1] = (byte) (dataRight & 0xFF);
+            buffer[right + 1] = (byte) (dataRight & 0xFF);
 
             //System.out.println(Integer.toBinaryString(flags & 0xff));
 
-            if (usedSamples >= buffer.length/4)
+            if (usedSamples >= buffer.length / 4)
             {
                 if (out != null)
-                    out.write(buffer, 0, buffer.length);
+                    try
+                    {
+                        out.write(buffer, 0, buffer.length);
+                        written += buffer.length;
+                    } catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
 
                 int written = 0;
-                while ((written += sdl.write(buffer, written, buffer.length)) != buffer.length);
+                while ((written += sdl.write(buffer, written, buffer.length)) != buffer.length) ;
                 usedSamples = 0;
             }
         }
