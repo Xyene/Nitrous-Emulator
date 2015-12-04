@@ -27,9 +27,6 @@ public class Emulator
         reset();
     }
 
-    public boolean timerEnabled;
-    public int timerPeriod;
-
     public final Memory mmu;
     public final LCD lcd;
     public final SoundManager sound;
@@ -217,7 +214,7 @@ public class Emulator
     }
 
     /**
-     * This shit is used for JMP instructions etc.
+     * This is used for JMP instructions etc.
      *
      * @param which the flag mask.
      */
@@ -435,6 +432,9 @@ public class Emulator
         sound.tick(delta);
         // Update the display
         lcd.tick(delta);
+//        if((mmu.registers[R.R_LY]&0xff) == 144) {
+//            debugger.vram.paintImmediately(debugger.vram.getBounds());
+//        }
     }
 
     public long ac;
@@ -504,11 +504,10 @@ public class Emulator
     public long cycle = 0;
     public long instr = 0;
 
-    public int NOP(int op)
+    public int NOP()
     {
         return 0;
     }
-
 
     public int CALL_cc_nn(int op)
     {
@@ -522,7 +521,7 @@ public class Emulator
         return 0;
     }
 
-    public int CALL_nn(int op)
+    public int CALL_nn()
     {
         int jmp = (nextUByte()) | (nextUByte() << 8);
         pushWord(pc);
@@ -544,37 +543,37 @@ public class Emulator
         return 0;
     }
 
-    public int LD_A_BC(int op)
+    public int LD_A_BC()
     {
         A = getUByte(getRegisterPair(BC));
         return 0;
     }
 
-    public int LD_A_DE(int op)
+    public int LD_A_DE()
     {
         A = getUByte(getRegisterPair(DE));
         return 0;
     }
 
-    public int LD_BC_A(int op)
+    public int LD_BC_A()
     {
         setByte(getRegisterPair(BC), A);
         return 0;
     }
 
-    public int LD_DE_A(int op)
+    public int LD_DE_A()
     {
         setByte(getRegisterPair(DE), A);
         return 0;
     }
 
-    public int LD_A_C(int op)
+    public int LD_A_C()
     {
         A = getUByte(0xFF00 | C);
         return 0;
     }
 
-    public int ADD_SP_n(int op)
+    public int ADD_SP_n()
     {
         int offset = nextByte();
         int nsp = (SP + offset);
@@ -590,33 +589,33 @@ public class Emulator
         return 4;
     }
 
-    public int SCF(int op)
+    public int SCF()
     {
         F &= F_Z;
         F |= F_C;
         return 0;
     }
 
-    public int CCF(int op)
+    public int CCF()
     {
         F = (F & F_C) != 0 ? (F & F_Z) : ((F & F_Z) | F_C);
         return 0;
     }
 
-    public int LD_A_n(int op)
+    public int LD_A_n()
     {
         A = getUByte(getRegisterPair(HL) & 0xffff);
         setRegisterPair(HL, (getRegisterPair(HL) - 1) & 0xFFFF);
         return 0;
     }
 
-    public int LD_nn_A(int op)
+    public int LD_a16_A()
     {
         setByte(nextUByte() | (nextUByte() << 8), A);
         return 0;
     }
 
-    public int LDHL_SP_n(int op)
+    public int LDHL_SP_n()
     {
         int offset = nextByte();
         //   offset = (short) ((offset & 0x7f) - (offset & 0x80));
@@ -632,47 +631,47 @@ public class Emulator
         return 0;
     }
 
-    public int CPL(int op)
+    public int CPL()
     {
         A = (~A) & 0xFF;
         F = (F & (F_C | F_Z)) | F_H | F_N;
         return 0;
     }
 
-    public int LD_FFn_A(int op)
+    public int LD_FFn_A()
     {
         setByte(0xff00 | nextUByte(), A);
         return 0;
     }
 
-    public int LDH_FFC_A(int op)
+    public int LDH_FFC_A()
     {
         setByte(0xFF00 | (C & 0xFF), A);
         return 0;
     }
 
-    public int LD_A_nn(int op)
+    public int LD_A_a16()
     {
         int nn = nextUByte() | (nextUByte() << 8);
         A = getUByte(nn);
         return 0;
     }
 
-    public int LD_A_HLI(int op)
+    public int LD_A_HLI()
     {
         A = getUByte(getRegisterPair(HL) & 0xffff);
         setRegisterPair(HL, (getRegisterPair(HL) + 1) & 0xFFFF);
         return 0;
     }
 
-    public int LD_HLI_A(int op)
+    public int LD_HLI_A()
     {
         setByte(getRegisterPair(HL) & 0xFFFF, A);
         setRegisterPair(HL, (getRegisterPair(HL) + 1) & 0xFFFF);
         return 0;
     }
 
-    public int LD_HLD_A(int op)
+    public int LD_HLD_A()
     {
         int hl = getRegisterPair(HL);
         setByte(hl, A);
@@ -681,49 +680,697 @@ public class Emulator
         return 0;
     }
 
-    public int STOP(int op)
+    public int STOP()
     {
-        return NOP(op);
+        return NOP();
     }
 
+    private int DEC_rr(int op)
     {
-//        instrs[0x00] = this::NOP;
-//        instrs[0xC4] = this::CALL_cc_nn;
-//        instrs[0xCC] = this::CALL_cc_nn;
-//        instrs[0xD4] = this::CALL_cc_nn;
-//        instrs[0xDC] = this::CALL_cc_nn;
-//        instrs[0xCD] = this::CALL_nn;
-//        instrs[0x01] = this::LD_dd_nn;
-//        instrs[0x11] = this::LD_dd_nn;
-//        instrs[0x21] = this::LD_dd_nn;
-//        instrs[0x31] = this::LD_dd_nn;
-//        instrs[0x06] = this::LD_r_n;
-//        instrs[0x0E] = this::LD_r_n;
-//        instrs[0x16] = this::LD_r_n;
-//        instrs[0x1E] = this::LD_r_n;
-//        instrs[0x26] = this::LD_r_n;
-//        instrs[0x2E] = this::LD_r_n;
-//        instrs[0x36] = this::LD_r_n;
-//        instrs[0x3E] = this::LD_r_n;
-//        instrs[0x0A] = this::LD_A_BC;
-//        instrs[0x1A] = this::LD_A_DE;
-//        instrs[0x02] = this::LD_BC_A;
-//        instrs[0x12] = this::LD_DE_A;
-//        instrs[0xF2] = this::LD_A_C;
-//        instrs[0xE8] = this::ADD_SP_n;
-//        instrs[0x37] = this::SCF;
-//        instrs[0x3F] = this::CCF;
-//        instrs[0x3A] = this::LD_A_n;
-//        instrs[0xEA] = this::LD_nn_A;
-//        instrs[0xF8] = this::LDHL_SP_n;
-//        instrs[0x2F] = this::CPL;
-//        instrs[0xE0] = this::LD_FFn_A;
-//        instrs[0xE2] = this::LDH_FFC_A;
-//        instrs[0xFA] = this::LD_A_nn;
-//        instrs[0x2A] = this::LD_A_HLI;
-//        instrs[0x22] = this::LD_HLI_A;
-//        instrs[0x32] = this::LD_HLD_A;
-//        instrs[0x10] = this::STOP;
+        RegisterPair p = RegisterPair.byValue[(op >> 4) & 0x3];
+        int o = getRegisterPair(p);
+        setRegisterPair(p, o - 1);
+        doOamBug();
+        return 0;
+    }
+
+    private int RLA()
+    {
+        boolean carryflag = (F & F_C) != 0;
+        F = 0;//&= F_Z;
+        // we'll be shifting left, so if bit 7 is set we set carry
+        if ((A & 0x80) == 0x80) F |= F_C;
+        A <<= 1;
+        A &= 0xff;
+        // move old C into bit 0
+        if (carryflag) A |= 1;
+        return 0;
+    }
+
+    private int RRA()
+    {
+        boolean carryflag = (F & F_C) != 0;
+        F = 0;
+        // we'll be shifting right, so if bit 1 is set we set carry
+        if ((A & 0x1) == 0x1) F |= F_C;
+        A >>= 1;
+        // move old C into bit 7
+        if (carryflag) A |= 0x80;
+        return 0;
+    }
+
+    private int RRCA()
+    {
+        F = 0;//F_Z;
+        if ((A & 0x1) == 0x1) F |= F_C;
+        A >>= 1;
+        // we're shifting circular right, add back bit 7
+        if ((F & F_C) != 0) A |= 0x80;
+        return 0;
+    }
+
+    private int SBC_r(int op)
+    {
+        int carry = (F & F_C) != 0 ? 1 : 0;
+        int reg = getRegister(op & 0x7) & 0xff;
+
+        F = F_N;
+        if ((A & 0x0f) - (reg & 0x0f) - carry < 0) F |= F_H;
+        A -= reg + carry;
+        if (A < 0)
+        {
+            F |= F_C;
+            A &= 0xFF;
+        }
+        if (A == 0) F |= F_Z;
+        return 0;
+    }
+
+    private int ADC_n()
+    {
+        int val = nextUByte();
+        int carry = ((F & F_C) != 0 ? 1 : 0);
+        int n = val + carry;
+
+        F = 0;
+        if ((((A & 0xf) + (val & 0xf)) + carry & 0xF0) != 0) F |= F_H;
+        A += n;
+        if (A > 0xFF)
+        {
+            F |= F_C;
+            A &= 0xFF;
+        }
+        if (A == 0) F |= F_Z;
+        return 0;
+    }
+
+    private int RET()
+    {
+        pc = (getUByte(SP + 1) << 8) | getUByte(SP);
+        SP += 2;
+        return 4;
+    }
+
+    private int XOR_n()
+    {
+        A ^= nextUByte();
+        F = 0;
+        if (A == 0) F |= F_Z;
+        return 0;
+    }
+
+    private int AND_n()
+    {
+        A &= nextUByte();
+        F = F_H;
+        if (A == 0) F |= F_Z;
+        return 0;
+    }
+
+    private int EI()
+    {
+        interruptsEnabled = true;
+        // Note that during the execution of this instruction and the following instruction,
+        // maskable interrupts are disabled.
+
+        // we still need to increment div etc
+        tick(4);
+        return _exec();
+    }
+
+    private int DI()
+    {
+        //   System.err.println("Disabled interrupts");
+        interruptsEnabled = false;
+        return 0;
+    }
+
+    private int RST_p(int op)
+    {
+    /*
+
+    short hi = (short) ((val >> 8) & 0xFF);
+    short lo = (short) (val & 0xFF);
+    setMemory(SP - 2, lo);
+    setMemory(SP - 1, hi);
+     */
+        pushWord(pc);
+        pc = op & 0b00111000;
+        return 4;
+    }
+
+    private int RET_c(int op)
+    {
+        if (getConditionalFlag(0x4 | ((op >> 3) & 0x7)))
+        {
+            //pc = ((memory[SP] & 0xff) << 8) | (memory[SP+1] & 0xff);
+            pc = (getUByte(SP + 1) << 8) | getUByte(SP);
+            SP += 2;
+        }
+        return 4;
+    }
+
+    private int HALT()
+    {
+        cpuHalted = true;
+        return 0;
+    }
+
+    private int LDH_FFn()
+    {
+        A = getUByte(0xFF00 | nextUByte());
+        return 0;
+    }
+
+    private int JR_c_e(int op)
+    {
+        int e = nextByte();
+        if (getConditionalFlag((op >> 3) & 0x7))
+        {
+            //     System.out.printf("> branching to %04X (%d)\n", (pc + e), e);
+            pc += e;
+            return 4;
+        }
+        return 0;
+    }
+
+    private int JP_c_nn(int op)
+    {
+        int npc = nextUByte() | (nextUByte() << 8);
+        if (getConditionalFlag(0x4 | ((op >> 3) & 0x7)))
+        {
+            pc = npc;
+            return 4;
+        }
+        return 0;
+    }
+
+    private int DAA()
+    {
+        // TODO warning: this might be implemented wrong!
+        /**
+         * <code><pre>tmp := a,
+         * if nf then
+         *      if hf or [a AND 0x0f > 9] then tmp -= 0x06
+         *      if cf or [a > 0x99] then tmp -= 0x60
+         * else
+         *      if hf or [a AND 0x0f > 9] then tmp += 0x06
+         *      if cf or [a > 0x99] then tmp += 0x60
+         * endif,
+         * tmp => flags, cf := cf OR [a > 0x99],
+         * hf := a.4 XOR tmp.4, a := tmp
+         * </pre>
+         * </code>
+         */
+        int tmp = A;
+        if ((F & F_N) == 0)
+        {
+            if ((F & F_H) != 0 || ((tmp & 0x0f) > 9)) tmp += 0x06;
+            if ((F & F_C) != 0 || ((tmp > 0x9f))) tmp += 0x60;
+        } else
+        {
+            if ((F & F_H) != 0) tmp = ((tmp - 6) & 0xff);
+            if ((F & F_C) != 0) tmp -= 0x60;
+        }
+        F &= F_N | F_C;
+
+        if (tmp > 0xff)
+        {
+            F |= F_C;
+            tmp &= 0xff;
+        }
+
+        if (tmp == 0) F |= F_Z;
+
+        A = tmp;
+        return 0;
+    }
+
+    private int JR_e()
+    {
+        int e = nextByte();
+        //  System.out.printf("> branching to %04X\n", (pc + e));
+
+        pc += e;
+        return 4;
+    }
+
+    private void OR(int n)
+    {
+        A |= n;
+        F = 0;
+        if (A == 0) F |= F_Z;
+    }
+
+    private int OR_r(int op)
+    {
+        OR(getRegister(op & 0x7) & 0xff);
+        return 0;
+    }
+
+    private int OR_n()
+    {
+        int n = nextUByte();
+        OR(n);
+        return 0;
+    }
+
+    private int XOR_r(int op)
+    {
+        A = (A ^ getRegister(op & 0x7)) & 0xff;
+        F = 0;
+        if (A == 0) F |= F_Z;
+        return 0;
+    }
+
+    private int AND_r(int op)
+    {
+        A = (A & getRegister(op & 0x7)) & 0xff;
+        F = F_H;
+        if (A == 0) F |= F_Z;
+        return 0;
+    }
+
+    private int ADC_r(int op)
+    {
+        int carry = (F & F_C) != 0 ? 1 : 0;
+        int reg = (getRegister(op & 0x7) & 0xff);
+
+        int d = carry + reg;
+        F = 0;
+        if ((((A & 0xf) + (reg & 0xf) + carry) & 0xF0) != 0) F |= F_H;
+
+        A += d;
+        if (A > 0xFF)
+        {
+            F |= F_C;
+            A &= 0xFF;
+        }
+        if (A == 0) F |= F_Z;
+        return 0;
+    }
+
+    private void ADD(int n)
+    {
+        F = 0;
+        if ((((A & 0xf) + (n & 0xf)) & 0xF0) != 0) F |= F_H;
+        A += n;
+        if (A > 0xFF)
+        {
+            F |= F_C;
+            A &= 0xFF;
+        }
+        if (A == 0) F |= F_Z;
+    }
+
+    private int ADD_r(int op)
+    {
+        int n = getRegister(op & 0x7) & 0xff;
+        ADD(n);
+        return 0;
+    }
+
+    private int ADD_n()
+    {
+        int n = nextUByte();
+        ADD(n);
+        return 0;
+    }
+
+    private void SUB(int n)
+    {
+        F = F_N;
+        if ((A & 0xf) - (n & 0xf) < 0) F |= F_H;
+        A -= n;
+        if ((A & 0xFF00) != 0) F |= F_C;
+        A &= 0xFF;
+        if (A == 0) F |= F_Z;
+    }
+
+    private int SUB_r(int op)
+    {
+        int n = getRegister(op & 0x7) & 0xff;
+        SUB(n);
+        return 0;
+    }
+
+    private int SUB_n()
+    {
+        int n = nextUByte();
+        SUB(n);
+        return 0;
+    }
+
+    private int SBC_n()
+    {
+        int val = nextUByte();
+        int carry = (F & F_C) != 0 ? 1 : 0;
+        int n = val + carry;
+
+        F = F_N;
+        if ((A & 0xf) - (val & 0xf) - carry < 0) F |= F_H;
+        A -= n;
+        if (A < 0)
+        {
+            F |= F_C;
+            A &= 0xff;
+        }
+        if (A == 0) F |= F_Z;
+        return 0;
+    }
+
+    private int JP_HL()
+    {
+        pc = getRegisterPair(HL) & 0xFFFF;
+        return 0;
+    }
+
+    private int ADD_HL_rr(int op)
+    {
+        /**
+         * Z is not affected
+         * H is set if carry out of bit 11; reset otherwise
+         * N is reset
+         * C is set if carry from bit 15; reset otherwise
+         */
+        int ss = getRegisterPair(RegisterPair.byValue[(op >> 4) & 0x3]);
+        int hl = getRegisterPair(HL);
+
+        F &= F_Z;
+
+        if (((hl & 0xFFF) + (ss & 0xFFF)) > 0xFFF)
+        {
+            F |= F_H;
+        }
+
+        hl += ss;
+
+        if (hl > 0xFFFF)
+        {
+            F |= F_C;
+            hl &= 0xFFFF;
+        }
+
+        setRegisterPair(HL, hl);
+        return 0;
+    }
+
+    private void CP(int n)
+    {
+        F = F_N;
+        if (A < n) F |= F_C;
+        if (A == n) F |= F_Z;
+        if ((A & 0xf) < ((A - n) & 0xf)) F |= F_H;
+    }
+
+    private int CP_n()
+    {
+        int n = nextUByte();
+        CP(n);
+        return 0;
+    }
+
+    private int CP_r(int op)
+    {
+        int n = getRegister(op & 0x7) & 0xFF;
+        CP(n);
+        return 0;
+    }
+
+    private int INC_rr(int op)
+    {
+        RegisterPair pair = RegisterPair.byValue[(op >> 4) & 0x3];
+        int o = getRegisterPair(pair) & 0xffff;
+        setRegisterPair(pair, o + 1);
+        doOamBug();
+        return 0;
+    }
+
+    private int DEC_r(int op)
+    {
+        int reg = (op >> 3) & 0x7;
+        int a = getRegister(reg) & 0xff;
+
+        F = (F & F_C) | Tables.DEC[a];
+
+        a = (a - 1) & 0xff;
+
+        setRegister(reg, a);
+        return 0;
+    }
+
+    private int INC_r(int op)
+    {
+        int reg = (op >> 3) & 0x7;
+        int a = getRegister(reg) & 0xff;
+
+        F = (F & F_C) | Tables.INC[a];
+
+        a = (a + 1) & 0xff;
+
+        setRegister(reg, a);
+        return 0;
+    }
+
+    private int RLCA()
+    {
+        boolean carry = (A & 0x80) != 0;
+        A <<= 1;
+        F = 0;//&= F_Z;
+        if (carry)
+        {
+            F |= F_C;
+            A |= 0x01;
+        } else F = 0;
+        A &= 0xff;
+        return 0;
+    }
+
+    private int JP_nn()
+    {
+        // n n n n n n n n
+        // n n n n n n n n
+        pc = (nextUByte()) | (nextUByte() << 8);
+        // System.out.printf("> branching to %04X\n", pc);
+        return 4;
+    }
+
+    private int RETI()
+    {
+        interruptsEnabled = true;
+        pc = (getUByte(SP + 1) << 8) | getUByte(SP);
+        SP += 2;
+        return 4;
+    }
+
+    private int LD_a16_SP()
+    {
+        int pos = ((nextUByte()) | (nextUByte() << 8));
+        setByte(pos + 1, (SP & 0xFF00) >> 8);
+        setByte(pos, (SP & 0x00FF));
+        return 0;
+    }
+
+    private int POP_rr(int op)
+    {
+        setRegisterPair2(RegisterPair.byValue[(op >> 4) & 0x3], getByte(SP + 1), getByte(SP));
+//                if(op == 0xc1)
+//                    System.err.println("POPPED " + Integer.toHexString(getRegisterPair2(P_BC) & 0xFFFF));
+//                System.err.println("POPPED " + Integer.toHexString(getRegisterPair2((op >> 4) & 0x3) & 0xFFFF));
+        SP += 2;
+        return 0;
+    }
+
+    private int PUSH_rr(int op)
+    {
+        int val = getRegisterPair2(RegisterPair.byValue[(op >> 4) & 0x3]);
+        pushWord(val);
+        return 4;
+    }
+
+    private int LD_SP_HL()
+    {
+        setRegisterPair(RegisterPair.SP, getRegisterPair(HL));
+        return 0;
+    }
+
+    private int LD_r_r(int op)
+    {
+        // 0 1 r r r r' r' r'
+        int from = op & 0x7;
+        int to = (op >> 3) & 0x7;
+        // important note: getIO(6) fetches (HL)
+        setRegister(to, getRegister(from) & 0xFF);
+        return 0;
+    }
+
+    private int SWAP(int r, int d)
+    {
+        d = ((d & 0xF0) >> 4) | ((d & 0x0F) << 4);
+        F = d == 0 ? F_Z : 0;
+        setRegister(r, d);
+        return 0;
+    }
+
+    private int SRA(int r, int d)
+    {
+        boolean bit7 = (d & 0x80) != 0;
+        F = 0;
+        if ((d & 0b1) != 0) F |= F_C;
+        d >>= 1;
+        if (bit7) d |= 0x80;
+        if (d == 0) F |= F_Z;
+        setRegister(r, d);
+        return 0;
+    }
+
+    private int SLA(int r, int d)
+    {
+        F = 0;
+        // we'll be shifting right, so if bit 1 is set we set carry
+        if ((d & 0x80) != 0) F |= F_C;
+        d <<= 1;
+        d &= 0xff;
+        if (d == 0) F |= F_Z;
+        setRegister(r, d);
+        return 0;
+    }
+
+    private int SRL(int r, int d)
+    {
+        F = 0;
+        // we'll be shifting right, so if bit 1 is set we set carry
+        if ((d & 0x1) != 0) F |= F_C;
+        d >>= 1;
+        if (d == 0) F |= F_Z;
+        setRegister(r, d);
+        return 0;
+    }
+
+    private int RR(int r, int d)
+    {
+        boolean carryflag = (F & F_C) != 0;
+        F = 0;
+        // we'll be shifting right, so if bit 1 is set we set carry
+        if ((d & 0x1) == 0x1) F |= F_C;
+        d >>= 1;
+        // move old C into bit 7
+        if (carryflag) d |= 0b10000000;
+        if (d == 0) F |= F_Z;
+        setRegister(r, d);
+        return 0;
+    }
+
+    private int RL(int r, int d)
+    {
+        boolean carryflag = (F & F_C) != 0;
+        F = 0;
+        // we'll be shifting left, so if bit 7 is set we set carry
+        if ((d & 0x80) == 0x80) F |= F_C;
+        d <<= 1;
+        d &= 0xff;
+        // move old C into bit 0
+        if (carryflag) d |= 0b1;
+        if (d == 0) F |= F_Z;
+        setRegister(r, d);
+        return 0;
+    }
+
+    private int RRC(int r, int d)
+    {
+        F = 0;
+        if ((d & 0b1) != 0) F |= F_C;
+        d >>= 1;
+        // we're shifting circular right, add back bit 7
+        if ((F & F_C) != 0) d |= 0x80;
+        d &= 0xff;
+        if (d == 0) F |= F_Z;
+        setRegister(r, d);
+        return 0;
+    }
+
+    private int RLC(int r, int d)
+    {
+        F = 0;
+        if ((d & 0x80) != 0) F |= F_C;
+        d <<= 1;
+        // we're shifting circular left, add back bit 7
+        if ((F & F_C) != 0) d |= 0x01;
+        d &= 0xff;
+        if (d == 0) F |= F_Z;
+        setRegister(r, d);
+        return 0;
+    }
+
+    private int BIT(int cbop, int d)
+    {
+        F &= F_C;
+        F |= F_H;
+        if ((d & (0x1 << (cbop >> 3 & 0x7))) == 0) F |= F_Z;
+        return 0;
+    }
+
+    private int SET(int cbop, int r, int d)
+    {
+        setRegister(r, d | (0x1 << (cbop >> 3 & 0x7)));
+        return 0;
+    }
+
+    private int RES(int cbop, int r, int d)
+    {
+        setRegister(r, d & ~(0x1 << (cbop >> 3 & 0x7)));
+        return 0;
+    }
+
+    private int CBPrefix()
+    {
+        int x = pc++;
+
+        int cbop = getUByte(x);
+        int r = cbop & 0x7;
+        int d = getRegister(r) & 0xff;
+
+        switch ((cbop & 0b11000000))
+        {
+            // RES b, r
+            // 1 0 b b b r r r
+            case 0x80:
+                return RES(cbop, r, d);
+            // SET b, r
+            // 1 1 b b b r r r
+            case 0xc0:
+                return SET(cbop, r, d);
+            // BIT b, r
+            // 0 1 b b b r r r
+            case 0x40:
+                return BIT(cbop, d);
+            case 0x0:
+            {
+                switch (cbop & 0xf8)
+                {
+                    case 0x00: // RLC m
+                        return RLC(r, d);
+                    case 0x08: // RRC m
+                        return RRC(r, d);
+                    case 0x10: // RL m
+                        return RL(r, d);
+                    case 0x18: // RR m
+                        return RR(r, d);
+                    case 0x38: // SRL m
+                        return SRL(r, d);
+                    case 0x20: // SLA m
+                        return SLA(r, d);
+                    case 0x28: // SRA m
+                        return SRA(r, d);
+                    case 0x30: // SWAP m
+                        return SWAP(r, d);
+                    default:
+                        throw new UnsupportedOperationException("cb-&f8-" + Integer.toHexString(cbop));
+                }
+            }
+            default:
+                throw new UnsupportedOperationException("cb-" + Integer.toHexString(cbop));
+        }
     }
 
     public static int[] opcount = new int[0x100];
@@ -746,153 +1393,96 @@ public class Emulator
 
 //        System.out.println(pc);
 
-        outer:
         switch (op)
         {
             case 0x00:
-                return NOP(op);
+                return NOP();
             case 0xC4:
-                return CALL_cc_nn(op);
             case 0xCC:
-                return CALL_cc_nn(op);
             case 0xD4:
-                return CALL_cc_nn(op);
             case 0xDC:
                 return CALL_cc_nn(op);
             case 0xCD:
-                return CALL_nn(op);
+                return CALL_nn();
             case 0x01:
-                return LD_dd_nn(op);
             case 0x11:
-                return LD_dd_nn(op);
             case 0x21:
-                return LD_dd_nn(op);
             case 0x31:
                 return LD_dd_nn(op);
             case 0x06:
-                return LD_r_n(op);
             case 0x0E:
-                return LD_r_n(op);
             case 0x16:
-                return LD_r_n(op);
             case 0x1E:
-                return LD_r_n(op);
             case 0x26:
-                return LD_r_n(op);
             case 0x2E:
-                return LD_r_n(op);
             case 0x36:
-                return LD_r_n(op);
             case 0x3E:
                 return LD_r_n(op);
             case 0x0A:
-                return LD_A_BC(op);
+                return LD_A_BC();
             case 0x1A:
-                return LD_A_DE(op);
+                return LD_A_DE();
             case 0x02:
-                return LD_BC_A(op);
+                return LD_BC_A();
             case 0x12:
-                return LD_DE_A(op);
+                return LD_DE_A();
             case 0xF2:
-                return LD_A_C(op);
+                return LD_A_C();
             case 0xE8:
-                return ADD_SP_n(op);
+                return ADD_SP_n();
             case 0x37:
-                return SCF(op);
+                return SCF();
             case 0x3F:
-                return CCF(op);
+                return CCF();
             case 0x3A:
-                return LD_A_n(op);
+                return LD_A_n();
             case 0xEA:
-                return LD_nn_A(op);
+                return LD_a16_A();
             case 0xF8:
-                return LDHL_SP_n(op);
+                return LDHL_SP_n();
             case 0x2F:
-                return CPL(op);
+                return CPL();
             case 0xE0:
-                return LD_FFn_A(op);
+                return LD_FFn_A();
             case 0xE2:
-                return LDH_FFC_A(op);
+                return LDH_FFC_A();
             case 0xFA:
-                return LD_A_nn(op);
+                return LD_A_a16();
             case 0x2A:
-                return LD_A_HLI(op);
+                return LD_A_HLI();
             case 0x22:
-                return LD_HLI_A(op);
+                return LD_HLI_A();
             case 0x32:
-                return LD_HLD_A(op);
+                return LD_HLD_A();
             case 0x10:
-                return STOP(op);
+                return STOP();
             // LD SP, HL
             case 0xf9:
-            {
-                setRegisterPair(RegisterPair.SP, getRegisterPair(HL));
-                break;
-            }
+                return LD_SP_HL();
             // PUSH qq
             case 0xc5: // BC
             case 0xd5: // DE
             case 0xe5: // HL
             case 0xf5: // AF
-            {
-                int val = getRegisterPair2(RegisterPair.byValue[(op >> 4) & 0x3]);
-                pushWord(val);
-                return 4;
-            }
+                return PUSH_rr(op);
             // POP qq
             case 0xc1: // BC
             case 0xd1: // DE
             case 0xe1: // HL
             case 0xf1: // AF
-            {
-
-                // System.out.println(">>>" + SP);
-                setRegisterPair2(RegisterPair.byValue[(op >> 4) & 0x3], getByte(SP + 1), getByte(SP));
-//                if(op == 0xc1)
-//                    System.err.println("POPPED " + Integer.toHexString(getRegisterPair2(P_BC) & 0xFFFF));
-//                System.err.println("POPPED " + Integer.toHexString(getRegisterPair2((op >> 4) & 0x3) & 0xFFFF));
-                SP += 2;
-                break;
-            }
+                return POP_rr(op);
             // LD (a16), SP
             case 0x08:
-            {
-                int pos = ((nextUByte()) | (nextUByte() << 8));
-                setByte(pos + 1, (SP & 0xFF00) >> 8);
-                setByte(pos, (SP & 0x00FF));
-                break;
-            }
+                return LD_a16_SP();
             // RETI (EXX on z80)
             case 0xd9:
-            {
-                interruptsEnabled = true;
-                pc = (getUByte(SP + 1) << 8) | getUByte(SP);
-                SP += 2;
-                return 4;
-            }
+                return RETI();
             // JP nn
             case 0xc3:
-            {
-                // n n n n n n n n
-                // n n n n n n n n
-                pc = (nextUByte()) | (nextUByte() << 8);
-                // System.out.printf("> branching to %04X\n", pc);
-                return 4;
-            }
+                return JP_nn();
             // RLCA
             case 0x07:
-            {
-                boolean carry = (A & 0x80) != 0;
-                A <<= 1;
-                F = 0;//&= F_Z;
-                if (carry)
-                {
-                    F |= F_C;
-                    A |= 1;
-                } else F = 0;
-                A &= 0xff;
-                break;
-            }
+                return RLCA();
             // INC r
             case 0x3c: // A
             case 0x4: // B
@@ -902,17 +1492,7 @@ public class Emulator
             case 0x24: // F
             case 0x34: // (HL)
             case 0x2c: // G
-            {
-                int reg = (op >> 3) & 0x7;
-                int a = getRegister(reg) & 0xff;
-
-                F = (F & F_C) | Tables.INC[a];
-
-                a = (a + 1) & 0xff;
-
-                setRegister(reg, a);
-                break;
-            }
+                return INC_r(op);
             // DEC r
             case 0x3d: // A
             case 0x05: // B
@@ -922,29 +1502,13 @@ public class Emulator
             case 0x25: // H
             case 0x2d: // L
             case 0x35: // (HL)
-            {
-                int reg = (op >> 3) & 0x7;
-                int a = getRegister(reg) & 0xff;
-
-                F = (F & F_C) | Tables.DEC[a];
-
-                a = (a - 1) & 0xff;
-
-                setRegister(reg, a);
-                break;
-            }
+                return DEC_r(op);
             // INC ss
             case 0x3:
             case 0x13:
             case 0x23:
             case 0x33:
-            {
-                RegisterPair pair = RegisterPair.byValue[(op >> 4) & 0x3];
-                int o = getRegisterPair(pair) & 0xffff;
-                setRegisterPair(pair, o + 1);
-                doOamBug(o);
-                break;
-            }
+                return INC_rr(op);
             // CP rr
             case 0xb8:
             case 0xb9:
@@ -954,103 +1518,25 @@ public class Emulator
             case 0xbd:
             case 0xbe:
             case 0xbf:
-            {
-                int n = getRegister(op & 0x7) & 0xFF;
-                F = F_N;
-                if (A < n) F |= F_C;
-                if (A == n) F |= F_Z;
-                if ((A & 0xf) < ((A - n) & 0xf)) F |= F_H;
-                break;
-            }
+                return CP_r(op);
             // CP s
             case 0xfe:
-            {
-                int n = nextUByte();
-
-                F = F_N;
-                if (A < n) F |= F_C;
-                if (A == n) F |= F_Z;
-                if ((A & 0xf) < ((A - n) & 0xf)) F |= F_H;
-                break;
-            }
+                return CP_n();
             // ADD HL, ss
             case 0x09:
             case 0x19:
             case 0x29:
             case 0x39:
-            {
-                /**
-                 * Z is not affected
-                 * H is set if carry out of bit 11; reset otherwise
-                 * N is reset
-                 * C is set if carry from bit 15; reset otherwise
-                 */
-                int ss = getRegisterPair(RegisterPair.byValue[(op >> 4) & 0x3]);
-                int hl = getRegisterPair(HL);
-
-                F &= F_Z;
-
-                if (((hl & 0xFFF) + (ss & 0xFFF)) > 0xFFF)
-                {
-                    F |= F_H;
-                }
-
-                hl += ss;
-
-                if (hl > 0xFFFF)
-                {
-                    F |= F_C;
-                    hl &= 0xFFFF;
-                }
-
-                setRegisterPair(HL, hl);
-                break;
-            }
+                return ADD_HL_rr(op);
             // JP (HL)
             case 0xe9:
-            {
-                pc = getRegisterPair(HL) & 0xFFFF;
-                break;
-            }
+                return JP_HL();
             // SBC A, n
             case 0xde:
-            {
-//                short d = (short) (nextUByte() + ((F & F_C) != 0 ? 1 : 0));
-//                F = 0;
-//                if ((A & 0xf) - (d & 0xf) < 0) F |= F_H;
-//                A -= d;
-//                if ((A & 0xFF00) != 0) F |= F_C;
-//                A &= 0xFF;
-//                if (A == 0) F |= F_Z;
-
-                int val = nextUByte();
-                int carry = ((F & F_C) != 0 ? 1 : 0);
-                int n = val + carry;
-
-                F = F_N;
-                if ((A & 0xf) - (val & 0xf) - carry < 0) F |= F_H;
-                A -= n;
-                if (A < 0)
-                {
-                    F |= F_C;
-                    A &= 0xff;
-                }
-                if (A == 0) F |= F_Z;
-
-                break;
-            }
+                return SBC_n();
             // SUB A, n
             case 0xd6:
-            {
-                int n = nextUByte();
-                F = F_N;
-                if ((A & 0xf) - (n & 0xf) < 0) F |= F_H;
-                A -= n;
-                if ((A & 0xFF00) != 0) F |= F_C;
-                A &= 0xFF;
-                if (A == 0) F |= F_Z;
-                break;
-            }
+                return SUB_n();
             // SUB A, r
             case 0x90:
             case 0x91:
@@ -1060,33 +1546,10 @@ public class Emulator
             case 0x95:
             case 0x96: // (HL)
             case 0x97:
-            {
-                int n = getRegister(op & 0b111) & 0xff;
-                F = F_N;
-                if ((A & 0xf) - (n & 0xf) < 0) F |= F_H;
-                A -= n;
-                if ((A & 0xFF00) != 0) F |= F_C;
-                A &= 0xFF;
-                if (A == 0) F |= F_Z;
-                break;
-            }
+                return SUB_r(op);
             // ADD A, n
             case 0xc6:
-            {
-                int n = nextUByte();
-
-                F = 0;
-                if ((((A & 0xf) + (n & 0xf)) & 0xF0) != 0) F |= F_H;
-                A += n;
-                if (A > 0xFF)
-                {
-                    F |= F_C;
-                    A &= 0xFF;
-                }
-                if (A == 0) F |= F_Z;
-
-                break;
-            }
+                return ADD_n();
             // ADD A, r
             case 0x87:
             case 0x80:
@@ -1096,21 +1559,7 @@ public class Emulator
             case 0x84:
             case 0x85:
             case 0x86: // (HL)
-            {
-                int n = getRegister(op & 0b111) & 0xff;
-
-                F = 0;
-                if ((((A & 0xf) + (n & 0xf)) & 0xF0) != 0) F |= F_H;
-                A += n;
-                if (A > 0xFF)
-                {
-                    F |= F_C;
-                    A &= 0xFF;
-                }
-                if (A == 0) F |= F_Z;
-
-                break;
-            }
+                return ADD_r(op);
             // ADC A, s
             case 0x88:
             case 0x89:
@@ -1120,22 +1569,7 @@ public class Emulator
             case 0x8e:
             case 0x8d:
             case 0x8f:
-            {
-                int carry = ((F & F_C) != 0 ? 1 : 0);
-                int reg = (getRegister(op & 0b111) & 0xff);
-
-                int d = carry + reg;
-                F = 0;
-                if ((((A & 0xf) + (reg & 0xf) + carry) & 0xF0) != 0) F |= F_H;
-                A += d;
-                if (A > 0xFF)
-                {
-                    F |= F_C;
-                    A &= 0xFF;
-                }
-                if (A == 0) F |= F_Z;
-                break;
-            }
+                return ADC_r(op);
             // AND s
             case 0xa0:
             case 0xa1:
@@ -1145,13 +1579,7 @@ public class Emulator
             case 0xa5:
             case 0xa6: // (HL)
             case 0xa7:
-            {
-                A = (A & getRegister(op & 0b111)) & 0xff;
-                F = F_H;
-                if (A == 0) F |= F_Z;
-                break;
-            }
-
+                return AND_r(op);
             // XOR s
             case 0xa8:
             case 0xa9:
@@ -1161,21 +1589,10 @@ public class Emulator
             case 0xad:
             case 0xae:
             case 0xaf:
-            {
-                A = (A ^ getRegister(op & 0b111)) & 0xff;
-                F = 0;
-                if (A == 0) F |= F_Z;
-                break;
-            }
+                return XOR_r(op);
             // OR n
             case 0xf6:
-            {
-                int n = nextUByte();
-                A |= n;
-                F = 0;
-                if (A == 0) F |= F_Z;
-                break;
-            }
+                return OR_n();
             // OR A, s
             case 0xb0:
             case 0xb1:
@@ -1185,135 +1602,37 @@ public class Emulator
             case 0xb5:
             case 0xb6: // (HL)
             case 0xb7:
-            {
-                A |= getRegister(op & 0b111) & 0xff;
-                F = 0;
-                if (A == 0) F |= F_Z;
-                break;
-            }
+                return OR_r(op);
             // JR e
             case 0x18:
-            {
-                int e = nextByte();
-                //  System.out.printf("> branching to %04X\n", (pc + e));
-
-                pc += e;
-                return 4;
-            }
+                return JR_e();
             // DAA
             case 0x27:
-            {
-                // TODO warning: this might be implemented wrong!
-                /**
-                 * <code><pre>tmp := a,
-                 * if nf then
-                 *      if hf or [a AND 0x0f > 9] then tmp -= 0x06
-                 *      if cf or [a > 0x99] then tmp -= 0x60
-                 * else
-                 *      if hf or [a AND 0x0f > 9] then tmp += 0x06
-                 *      if cf or [a > 0x99] then tmp += 0x60
-                 * endif,
-                 * tmp => flags, cf := cf OR [a > 0x99],
-                 * hf := a.4 XOR tmp.4, a := tmp
-                 * </pre>
-                 * </code>
-                 */
-//                short tmp = A;
-//                if ((F & F_N) != 0)
-//                {
-//                    if ((F & F_H) != 0 || (A & 0x0f) > 9) tmp -= 0x06;
-//                    if ((F & F_C) != 0 || A > 0x99) tmp -= 0x60;
-//                } else
-//                {
-//                    if ((F & F_H) != 0 || (A & 0x0f) > 9) tmp += 0x06;
-//                    if ((F & F_C) != 0 || A > 0x99) tmp += 0x60;
-//                }
-//                F = (short) (tmp & (F_C | F_H | F_N | F_Z));
-//                //    F = (short) (tmp & (F_N | F_Z | F_C | F_H));
-//                if (A > 0x99) F |= F_C;
-//                if (((A & 0b10000) ^ (tmp & 0b10000)) != 0) F |= F_H;
-//
-//                if (tmp == 0) F |= F_Z;
-//
-//                A = tmp;
-                int tmp = A;
-                if ((F & F_N) == 0)
-                {
-                    if ((F & F_H) != 0 || ((tmp & 0x0f) > 9)) tmp += 0x06;
-                    if ((F & F_C) != 0 || ((tmp > 0x9f))) tmp += 0x60;
-                } else
-                {
-                    if ((F & F_H) != 0) tmp = ((tmp - 6) & 0xff);
-                    if ((F & F_C) != 0) tmp -= 0x60;
-                }
-                F &= F_N | F_C;
-
-                if (tmp > 0xff)
-                {
-                    F |= F_C;
-                    tmp &= 0xff;
-                }
-
-                if (tmp == 0) F |= F_Z;
-
-                A = tmp;
-                break;
-            }
+                return DAA();
             // JP C, nn
             case 0xca:
             case 0xc2: // NZ
             case 0xd2:
             case 0xda:
-            {
-                int npc = nextUByte() | (nextUByte() << 8);
-                if (getConditionalFlag(0b100 | ((op >> 3) & 0x7)))
-                {
-                    pc = npc;
-                    return 4;
-                }
-                return 0;
-            }
+                return JP_c_nn(op);
             // JR C, e
             case 0x20: // NZ
             case 0x28:
             case 0x30:
             case 0x38:
-            {
-                int e = nextByte();
-                if (getConditionalFlag((op >> 3) & 0b111))
-                {
-                    //     System.out.printf("> branching to %04X (%d)\n", (pc + e), e);
-                    pc += e;
-                    return 4;
-                }
-                return 0;
-            }
+                return JR_c_e(op);
             // LDH A, (FFnn)
             case 0xf0:
-            {
-                A = getUByte(0xFF00 | nextUByte());
-                break;
-            }
-            // HALT
+                LDH_FFn();
+                // HALT
             case 0x76:
-            {
-                cpuHalted = true;
-                return 0;
-            }
+                return HALT();
             // RET cc
             case 0xc0: // NZ non zero (Z)
             case 0xc8: // Z zero (Z)
             case 0xd0: // NC non carry (C)
             case 0xd8: // Carry (C)
-            {
-                if (getConditionalFlag(0b100 | ((op >> 3) & 0x7)))
-                {
-                    //pc = ((memory[SP] & 0xff) << 8) | (memory[SP+1] & 0xff);
-                    pc = (getUByte(SP + 1) << 8) | getUByte(SP);
-                    SP += 2;
-                }
-                return 4;
-            }
+                return RET_c(op);
             // RST p
             case 0xc7:
             case 0xcf:
@@ -1323,78 +1642,25 @@ public class Emulator
             case 0xef:
             case 0xf7:
             case 0xff:
-            {
-                /*
-
-                short hi = (short) ((val >> 8) & 0xFF);
-                short lo = (short) (val & 0xFF);
-                setMemory(SP - 2, lo);
-                setMemory(SP - 1, hi);
-                 */
-                pushWord(pc);
-                pc = op & 0b00111000;
-                return 4;
-            }
+                return RST_p(op);
             // DI
             case 0xf3:
-            {
-                //   System.err.println("Disabled interrupts");
-                interruptsEnabled = false;
-                break;
-            }
+                return DI();
             // EI
             case 0xfb:
-            {
-                interruptsEnabled = true;
-                // Note that during the execution of this instruction and the following instruction,
-                // maskable interrupts are disabled.
-
-                // we still need to increment div etc
-                tick(4);
-                return _exec();
-            }
+                return EI();
             // AND nn
             case 0xE6:
-            {
-                A &= nextUByte();
-                F = F_H;
-                if (A == 0) F |= F_Z;
-                break;
-            }
+                return AND_n();
             // XOR nn
             case 0xEE:
-            {
-                A ^= nextUByte();
-                F = 0;
-                if (A == 0) F |= F_Z;
-                break;
-            }
+                return XOR_n();
             // RET
             case 0xc9:
-            {
-                pc = (getUByte(SP + 1) << 8) | getUByte(SP);
-                SP += 2;
-                return 4;
-            }
+                return RET();
             // ADC A, n
             case 0xce:
-            {
-                int val = nextUByte();
-                int carry = ((F & F_C) != 0 ? 1 : 0);
-                int n = val + carry;
-
-                F = 0;
-                if ((((A & 0xf) + (val & 0xf)) + carry & 0xF0) != 0) F |= F_H;
-                A += n;
-                if (A > 0xFF)
-                {
-                    F |= F_C;
-                    A &= 0xFF;
-                }
-                if (A == 0) F |= F_Z;
-                break;
-            }
-
+                return ADC_n();
             // SBC A, s
             case 0x98:
             case 0x99:
@@ -1404,222 +1670,34 @@ public class Emulator
             case 0x9d:
             case 0x9e: // (HL)
             case 0x9f:
-            {
-                int carry = (F & F_C) != 0 ? 1 : 0;
-                int reg = getRegister(op & 0b111) & 0xff;
-
-                F = F_N;
-                if ((A & 0x0f) - (reg & 0x0f) - carry < 0) F |= F_H;
-                A -= reg + carry;
-                if (A < 0)
-                {
-                    F |= F_C;
-                    A &= 0xFF;
-                }
-                if (A == 0) F |= F_Z;
-                break;
-            }
+                return SBC_r(op);
             case 0x0F: // RRCA
-            {
-                F = 0;//F_Z;
-                if ((A & 0x1) == 0x1) F |= F_C;
-                A >>= 1;
-                // we're shifting circular right, add back bit 7
-                if ((F & F_C) != 0) A |= 0x80;
-                break;
-            }
+                return RRCA();
             case 0x1f: // RRA
-            {
-                boolean carryflag = (F & F_C) != 0;
-                F = 0;
-                // we'll be shifting right, so if bit 1 is set we set carry
-                if ((A & 0x1) == 0x1) F |= F_C;
-                A >>= 1;
-                // move old C into bit 7
-                if (carryflag) A |= 0x80;
-                break;
-            }
+                return RRA();
             case 0x17: // RLA
-            {
-                boolean carryflag = (F & F_C) != 0;
-                F = 0;//&= F_Z;
-                // we'll be shifting left, so if bit 7 is set we set carry
-                if ((A & 0x80) == 0x80) F |= F_C;
-                A <<= 1;
-                A &= 0xff;
-                // move old C into bit 0
-                if (carryflag) A |= 1;
-                break;
-            }
+                return RLA();
             // DEC ss
             case 0x0b:
             case 0x1b:
             case 0x2b:
             case 0x3b:
-            {
-                RegisterPair p = RegisterPair.byValue[(op >> 4) & 0x3];
-                int o = getRegisterPair(p);
-                setRegisterPair(p, o - 1);
-                doOamBug(o);
-                break;
-            }
-
+                return DEC_rr(op);
             // CB prefix group
             case 0xcb:
-            {
-                int x = pc++;
-
-                int cbop = getUByte(x);
-                int r = cbop & 0x7;
-                int d = getRegister(r) & 0xff;
-
-                switch ((cbop & 0b11000000))
-                {
-                    // RES b, r
-                    // 1 0 b b b r r r
-                    case 0x80:
-                    {
-                        setRegister(r, d & ~(0x1 << (cbop >> 3 & 0x7)));
-                        break outer;
-                    }
-                    // SET b, r
-                    // 1 1 b b b r r r
-                    case 0xc0:
-                    {
-                        setRegister(r, d | (0x1 << (cbop >> 3 & 0x7)));
-                        break outer;
-                    }
-                    // BIT b, r
-                    // 0 1 b b b r r r
-                    case 0x40:
-                    {
-                        F &= F_C;
-                        F |= F_H;
-                        if ((d & (0x1 << (cbop >> 3 & 0x7))) == 0) F |= F_Z;
-                        break outer;
-                    }
-                    case 0x0:
-                    {
-                        switch (cbop & 0xf8)
-                        {
-                            case 0x00: // RLC m
-                            {
-                                F = 0;
-                                if ((d & 0x80) != 0) F |= F_C;
-                                d <<= 1;
-                                // we're shifting circular left, add back bit 7
-                                if ((F & F_C) != 0) d |= 0x01;
-                                d &= 0xff;
-                                if (d == 0) F |= F_Z;
-                                setRegister(r, d);
-                                break outer;
-                            }
-                            case 0x08: // RRC m
-                            {
-                                F = 0;
-                                if ((d & 0b1) != 0) F |= F_C;
-                                d >>= 1;
-                                // we're shifting circular right, add back bit 7
-                                if ((F & F_C) != 0) d |= 0x80;
-                                d &= 0xff;
-                                if (d == 0) F |= F_Z;
-                                setRegister(r, d);
-                                break outer;
-                            }
-                            case 0x10: // RL m
-                            {
-                                boolean carryflag = (F & F_C) != 0;
-                                F = 0;
-                                // we'll be shifting left, so if bit 7 is set we set carry
-                                if ((d & 0x80) == 0x80) F |= F_C;
-                                d <<= 1;
-                                d &= 0xff;
-                                // move old C into bit 0
-                                if (carryflag) d |= 0b1;
-                                if (d == 0) F |= F_Z;
-                                setRegister(r, d);
-                                break outer;
-                            }
-                            case 0x18: // RR m
-                            {
-                                boolean carryflag = (F & F_C) != 0;
-                                F = 0;
-                                // we'll be shifting right, so if bit 1 is set we set carry
-                                if ((d & 0x1) == 0x1) F |= F_C;
-                                d >>= 1;
-                                // move old C into bit 7
-                                if (carryflag) d |= 0b10000000;
-                                if (d == 0) F |= F_Z;
-                                setRegister(r, d);
-                                break outer;
-                            }
-                            case 0x38: // SRL m
-                            {
-                                F = 0;
-                                // we'll be shifting right, so if bit 1 is set we set carry
-                                if ((d & 0x1) != 0) F |= F_C;
-                                d >>= 1;
-                                if (d == 0) F |= F_Z;
-                                setRegister(r, d);
-                                break outer;
-                            }
-                            case 0x20: // SLA m
-                            {
-                                F = 0;
-                                // we'll be shifting right, so if bit 1 is set we set carry
-                                if ((d & 0x80) != 0) F |= F_C;
-                                d <<= 1;
-                                d &= 0xff;
-                                if (d == 0) F |= F_Z;
-                                setRegister(r, d);
-                                break outer;
-                            }
-                            case 0x28: // SRA m
-                            {
-                                boolean bit7 = (d & 0x80) != 0;
-                                F = 0;
-                                if ((d & 0b1) != 0) F |= F_C;
-                                d >>= 1;
-                                if (bit7) d |= 0x80;
-                                if (d == 0) F |= F_Z;
-                                setRegister(r, d);
-                                break outer;
-                            }
-                            case 0x30: // SWAP m
-                            {
-                                d = ((d & 0xF0) >> 4) | ((d & 0x0F) << 4);
-                                F = d == 0 ? F_Z : 0;
-                                setRegister(r, d);
-                                break outer;
-                            }
-                            default:
-                                throw new UnsupportedOperationException("cb-&f8-" + Integer.toHexString(cbop));
-                        }
-                    }
-                    default:
-                        throw new UnsupportedOperationException("cb-" + Integer.toHexString(cbop));
-                }
-            }
+                return CBPrefix();
             default:
                 switch (op & 0xC0)
                 {
                     case 0x40: // LD r, r'
-                    {
-                        // 0 1 r r r r' r' r'
-                        int from = op & 0x7;
-                        int to = (op >> 3) & 0x7;
-                        // important note: getIO(6) fetches (HL)
-                        setRegister(to, getRegister(from) & 0xFF);
-                        break;
-                    }
+                        return LD_r_r(op);
                     default:
                         throw new UnsupportedOperationException(cycle + "-" + Integer.toHexString(op));
                 }
         }
-        return 0;
     }
 
-    private void doOamBug(int o)
+    private void doOamBug()
     {
         // TODO
 //        if (o == 0xff00 || o == 0xff04) return;
@@ -1636,6 +1714,7 @@ public class Emulator
 
     public static final BufferedImage screenBuffer = new BufferedImage(160, 144, BufferedImage.TYPE_INT_RGB);
     public static Panel display;
+    public static VRAMViewer debugger;
 
     public static void main(String[] argv) throws IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException
     {
@@ -1670,6 +1749,8 @@ public class Emulator
         Cartridge cartridge = new Cartridge(buf);
 
         Emulator core = new Emulator(cartridge);
+
+//        debugger = new VRAMViewer(core);
 
         File savefile = new File(cartridge.gameTitle + ".sav");
 
