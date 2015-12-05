@@ -1938,6 +1938,21 @@ public class Emulator
                                                     }
                                                 }
                                             });
+                                            menu.add(new JMenu("Sound") {
+                                                {
+                                                    for(int i = 1; i < 5; i++) {
+                                                        int channel = i;
+                                                        add(new JCheckBoxMenuItem("Channel " + i, core.sound.isChannelEnabled(channel)) {
+                                                            {
+                                                                addActionListener((x) ->
+                                                                {
+                                                                    core.sound.setChannelEnabled(channel, !core.sound.isChannelEnabled(channel));
+                                                                });
+                                                            }
+                                                        });
+                                                    }
+                                                }
+                                            });
                                             menu.add(new JMenu("Speed")
                                             {
                                                 {
