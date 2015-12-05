@@ -17,6 +17,8 @@ import static nitrous.Emulator.RegisterPair.*;
 
 public class Emulator
 {
+    private boolean paused = false;
+
     public Emulator(Cartridge cartridge)
     {
         this.cartridge = cartridge;
@@ -1487,8 +1489,9 @@ public class Emulator
         pc += e;
         return 4;
     }
-    
-    private void OR(int n) {
+
+    private void OR(int n)
+    {
         A |= n;
         F = 0;
         if (A == 0) F |= F_Z;
@@ -1527,7 +1530,7 @@ public class Emulator
         int d = carry + reg;
         F = 0;
         if ((((A & 0xf) + (reg & 0xf) + carry) & 0xF0) != 0) F |= F_H;
-        
+
         A += d;
         if (A > 0xFF)
         {
@@ -1805,7 +1808,7 @@ public class Emulator
 
         Emulator core = new Emulator(cartridge);
 
-    //    debugger = new VRAMViewer(core);
+        //    debugger = new VRAMViewer(core);
 
         File savefile = new File(cartridge.gameTitle + ".sav");
 
@@ -1938,11 +1941,14 @@ public class Emulator
                                                     }
                                                 }
                                             });
-                                            menu.add(new JMenu("Sound") {
+                                            menu.add(new JMenu("Sound")
+                                            {
                                                 {
-                                                    for(int i = 1; i < 5; i++) {
+                                                    for (int i = 1; i < 5; i++)
+                                                    {
                                                         int channel = i;
-                                                        add(new JCheckBoxMenuItem("Channel " + i, core.sound.isChannelEnabled(channel)) {
+                                                        add(new JCheckBoxMenuItem("Channel " + i, core.sound.isChannelEnabled(channel))
+                                                        {
                                                             {
                                                                 addActionListener((x) ->
                                                                 {
@@ -1951,6 +1957,19 @@ public class Emulator
                                                             }
                                                         });
                                                     }
+                                                }
+                                            });
+                                           menu. add(new JSeparator());
+                                            menu.add(new JCheckBoxMenuItem("Pause", core.paused)
+                                            {
+                                                {
+                                                    addActionListener((x) ->
+                                                    {
+                                                        if (core.paused) codeExecutionThread.resume();
+                                                        else
+                                                            codeExecutionThread.suspend();
+                                                        core.paused = !core.paused;
+                                                    });
                                                 }
                                             });
                                             menu.add(new JMenu("Speed")
