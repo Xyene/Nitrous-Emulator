@@ -375,13 +375,13 @@ public class LCD
                     graphics.drawImage(screenBuffer, 0, 0, display.getWidth(), display.getHeight(), null);
                 }
 
-                if (core.isInterruptEnabled(VBLANK_BIT) && displayEnabled)
+                if (displayEnabled)
                 {
                     // Trigger VBlank
                     core.setInterruptTriggered(VBLANK_BIT);
 
                     // Trigger LCDC if enabled
-                    if (core.isInterruptEnabled(LCDC_BIT) && (lcdStat & LCD_STAT.VBLANK_MODE_BIT) != 0)
+                    if ((lcdStat & LCD_STAT.VBLANK_MODE_BIT) != 0)
                     {
                         core.setInterruptTriggered(LCDC_BIT);
                     }
@@ -486,8 +486,7 @@ public class LCD
                     gbcPalette = (attribs & 0x07);
                 }
 
-                drawTile(bgPalettes[gbcPalette], data, posX + x * 8, posY + y * 8, tile, scanline, flipX, flipY, gbcVramBank, 4 << 24, false);
-
+                drawTile(bgPalettes[gbcPalette], data, posX + x * 8, posY + y * 8, tile, scanline, flipX, flipY, gbcVramBank, 6 << 24, false);
 
 //                int tile = tileDataOffset == 0 ? vram[addressBase] & 0xff : vram[addressBase] + 256;
 //                drawTile(bgPalettes[0], buffer, data, posX + x * 8, posY + y * 8, tile, scanline, false, false, 0, false);
@@ -515,7 +514,7 @@ public class LCD
 
     public boolean backgroundEnabled()
     {
-        return (core.mmu.registers[R_LCDC] & 0x01) == 1;
+        return (core.mmu.registers[R_LCDC] & LCDC.BGWINDOW_DISPLAY_BIT) != 0;
     }
 
     public int getWindowTileMapOffset()
