@@ -31,7 +31,7 @@ public class SoundManager
         channel3 = new RawWaveChannel(core);
         channel4 = new NoiseChannel(core);
 
-        buffer = new byte[480 * 4];
+        buffer = new byte[480];
         System.out.println(buffer.length);
         try
         {
@@ -66,6 +66,27 @@ public class SoundManager
 
     public int volume = 100;
 
+    public static RandomAccessFile soundFile;
+
+    public static void updateSoundFileLength() throws IOException
+    {
+        soundFile.seek(4);
+        long x = written + 36;
+        soundFile.write(new byte[]{
+                (byte) (x & 0xff),
+                (byte) ((x >> 8) & 0xff),
+                (byte) ((x >> 16) & 0xff),
+                (byte) ((x >> 24) & 0xff)
+        });
+        soundFile.seek(40);
+        soundFile.write(new byte[]{
+                (byte) (written & 0xff),
+                (byte) ((written >> 8) & 0xff),
+                (byte) ((written >> 16) & 0xff),
+                (byte) ((written >> 24) & 0xff)
+        });
+    }
+
     static
     {
         if (System.getProperty("nox.soundFile") != null)
@@ -99,33 +120,76 @@ public class SoundManager
                                 AudioFileFormat.Type.WAVE, new FileOutputStream(wav));
                     } catch (IOException e)
                     {
-                        e.printStackTrace();
+                        // This will only ever exit with a "Pipe closed" exception
                     }
                 }
             };
             wavWriter.start();
+
+            try
+            {
+                soundFile = new RandomAccessFile(wav, "rwd");
+            } catch (FileNotFoundException e)
+            {
+                e.printStackTrace();
+            }
 
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 try
                 {
                     System.out.println("Saving: " + wav);
                     out.close();
-                    RandomAccessFile raf = new RandomAccessFile(wav, "rw");
-                    raf.seek(40);
-                    raf.write(new byte[]{
-                            (byte) (written & 0xff),
-                            (byte) ((written >> 8) & 0xff),
-                            (byte) ((written >> 16) & 0xff),
-                            (byte) ((written >> 24) & 0xff)
-                    });
-                    raf.close();
-//                    }
+                    /**
+                     * header[4] = (byte) (totalDataLen & 0xff);
+                     header[5] = (byte) ((totalDataLen >> 8) & 0xff);
+                     header[6] = (byte) ((totalDataLen >> 16) & 0xff);
+                     header[7] = (byte) ((totalDataLen >> 24) & 0xff);
+                     */
+                    updateSoundFileLength();
+                    soundFile.close();
                 } catch (IOException e)
                 {
                     e.printStackTrace();
                 }
             }));
         }
+    }
+
+    public boolean channel1Enabled = true, channel2Enabled = true, channel3Enabled = true, channel4Enabled = true;
+
+    public void setChannelEnabled(int channel, boolean toggle)
+    {
+        switch (channel)
+        {
+            case 1:
+                channel1Enabled = toggle;
+                break;
+            case 2:
+                channel2Enabled = toggle;
+                break;
+            case 3:
+                channel3Enabled = toggle;
+                break;
+            case 4:
+                channel4Enabled = toggle;
+                break;
+        }
+    }
+
+    public boolean isChannelEnabled(int channel)
+    {
+        switch (channel)
+        {
+            case 1:
+                return channel1Enabled;
+            case 2:
+                return channel2Enabled;
+            case 3:
+                return channel3Enabled;
+            case 4:
+                return channel4Enabled;
+        }
+        throw new IllegalArgumentException();
     }
 
     public void tick(long delta)
@@ -144,9 +208,15 @@ public class SoundManager
             buffer[right] = 0;
 
             int a = channel1.render();
+            if (!channel1Enabled) a ^= a;
             int b = channel2.render();
+            if (!channel2Enabled) b ^= b;
             int c = channel3.render();
+            if (!channel3Enabled) c ^= c;
             int d = channel4.render();
+            if (!channel4Enabled) d ^= d;
+
+            // if(a == 0 || b == 0 || c == 0 || d == 0) System.out.printf("%d %d %d %d\n", a, b, c, d);
 
             int flags = core.mmu.registers[R.R_NR51];
 
@@ -179,10 +249,11 @@ public class SoundManager
                     try
                     {
                         out.write(buffer, 0, buffer.length);
+                        updateSoundFileLength();
                         written += buffer.length;
                     } catch (IOException e)
                     {
-                        e.printStackTrace();
+                        out = null;
                     }
 
                 int written = 0;
