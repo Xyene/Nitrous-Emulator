@@ -440,8 +440,8 @@ public class LCD
                     int attribs = vram[Memory.VRAM_PAGESIZE + addressBase];
 
                     if ((attribs & 0x8) != 0) gbcVramBank = 1;
-                    flipX = (attribs & 0x40) != 0;
-                    flipY = (attribs & 0x20) != 0;
+                    flipX = (attribs & 0x20) != 0;
+                    flipY = (attribs & 0x40) != 0;
                     gbcPalette = (attribs & 0x7);
                 }
                 drawTile(bgPalettes[gbcPalette], data, -(scrollX % 8) + x * 8, -(scrollY % 8) + y * 8, tile, scanline, flipX, flipY, gbcVramBank, 0, false);
@@ -481,8 +481,8 @@ public class LCD
                 {
                     int attribs = vram[Memory.VRAM_PAGESIZE + addressBase];
                     if ((attribs & 0x8) != 0) gbcVramBank = 1;
-                    flipX = (attribs & 0x10) != 0;
-                    flipY = (attribs & 0x20) != 0;
+                    flipX = (attribs & 0x20) != 0;
+                    flipY = (attribs & 0x40) != 0;
                     gbcPalette = (attribs & 0x07);
                 }
 
