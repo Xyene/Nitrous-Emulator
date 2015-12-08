@@ -156,6 +156,7 @@ public class SoundManager
     }
 
     public boolean channel1Enabled = true, channel2Enabled = true, channel3Enabled = true, channel4Enabled = true;
+    public boolean muted = false;
 
     public void setChannelEnabled(int channel, boolean toggle)
     {
@@ -204,37 +205,37 @@ public class SoundManager
             int left = index * 4;
             int right = index * 4 + 2;
 
-            buffer[left] = 0;
-            buffer[right] = 0;
-
-            int a = channel1.render();
-            if (!channel1Enabled) a ^= a;
-            int b = channel2.render();
-            if (!channel2Enabled) b ^= b;
-            int c = channel3.render();
-            if (!channel3Enabled) c ^= c;
-            int d = channel4.render();
-            if (!channel4Enabled) d ^= d;
-
-            // if(a == 0 || b == 0 || c == 0 || d == 0) System.out.printf("%d %d %d %d\n", a, b, c, d);
-
-            int flags = core.mmu.registers[R.R_NR51];
-
             int dataLeft = 0;
             int dataRight = 0;
 
-            if ((flags & 0x80) != 0) dataLeft += d;
-            if ((flags & 0x40) != 0) dataLeft += c;
-            if ((flags & 0x20) != 0) dataLeft += b;
-            if ((flags & 0x10) != 0) dataLeft += a;
+            if (!muted)
+            {
+                int a = channel1.render();
+                if (!channel1Enabled) a ^= a;
+                int b = channel2.render();
+                if (!channel2Enabled) b ^= b;
+                int c = channel3.render();
+                if (!channel3Enabled) c ^= c;
+                int d = channel4.render();
+                if (!channel4Enabled) d ^= d;
 
-            if ((flags & 0x08) != 0) dataRight += d;
-            if ((flags & 0x04) != 0) dataRight += c;
-            if ((flags & 0x02) != 0) dataRight += b;
-            if ((flags & 0x01) != 0) dataRight += a;
+                // if(a == 0 || b == 0 || c == 0 || d == 0) System.out.printf("%d %d %d %d\n", a, b, c, d);
 
-            dataLeft = (dataLeft << 8) * volume / 100;
-            dataRight = (dataRight << 8) * volume / 100;
+                int flags = core.mmu.registers[R.R_NR51];
+
+                if ((flags & 0x80) != 0) dataLeft += d;
+                if ((flags & 0x40) != 0) dataLeft += c;
+                if ((flags & 0x20) != 0) dataLeft += b;
+                if ((flags & 0x10) != 0) dataLeft += a;
+
+                if ((flags & 0x08) != 0) dataRight += d;
+                if ((flags & 0x04) != 0) dataRight += c;
+                if ((flags & 0x02) != 0) dataRight += b;
+                if ((flags & 0x01) != 0) dataRight += a;
+
+                dataLeft = (dataLeft << 8) * volume / 100;
+                dataRight = (dataRight << 8) * volume / 100;
+            }
 
             buffer[left] = (byte) (dataLeft >> 8);
             buffer[left + 1] = (byte) (dataLeft & 0xFF);

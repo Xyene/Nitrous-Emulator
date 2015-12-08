@@ -1980,6 +1980,15 @@ public class Emulator
                                                     });
                                                 }
                                             });
+                                            menu.add(new JCheckBoxMenuItem("Mute", core.sound.muted)
+                                            {
+                                                {
+                                                    addActionListener((x) ->
+                                                    {
+                                                        core.sound.muted = !core.sound.muted;
+                                                    });
+                                                }
+                                            });
                                             menu.add(new JMenu("Speed")
                                             {
                                                 {
