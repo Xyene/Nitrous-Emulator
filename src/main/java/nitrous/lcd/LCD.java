@@ -313,8 +313,15 @@ public class LCD
                 core.mmu.hdma.tick();
             }
 
+            core.mmu.registers[R_LCD_STAT] &= ~0x03;
+
+            int mode = 0;
+            if (isVBlank) mode = 0x01;
+
+            core.mmu.registers[R_LCD_STAT] |= mode;
+
             int lcdStat = core.mmu.registers[R_LCD_STAT];
-            if(displayEnabled && !isVBlank)
+            if (displayEnabled && !isVBlank)
             {
                 /**
                  * INT 48 - LCDC Status Interrupt
@@ -332,9 +339,10 @@ public class LCD
                     if (lyc == LY)
                     {
                         core.setInterruptTriggered(LCDC_BIT);
-                        core.mmu.registers[R_LYC] |= LCD_STAT.COINCIDENCE_BIT;
-                    } else {
-                        core.mmu.registers[R_LYC] &= ~LCD_STAT.COINCIDENCE_BIT;
+                        core.mmu.registers[R_LCD_STAT] |= LCD_STAT.COINCIDENCE_BIT;
+                    } else
+                    {
+                        core.mmu.registers[R_LCD_STAT] &= ~LCD_STAT.COINCIDENCE_BIT;
                     }
                 }
 

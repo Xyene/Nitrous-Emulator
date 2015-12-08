@@ -157,9 +157,9 @@ public class Memory
             {
                 vram[vramPageStart + dest + i] = (byte) (getAddress(source + i) & 0xff);
             }
-            core.cycle += 8;
-            core.ac += 8;
-            core.executed += 8;
+//            core.cycle += 8;
+//            core.ac += 8;
+//            core.executed += 8;
             ptr += 0x10;
             length -= 0x10;
             System.err.printf("Ticked HDMA from %04X-%04X, %02X remaining\n", source, dest, length);
@@ -243,6 +243,11 @@ public class Memory
     public void setIO(int addr, int data)
     {
         //  System.out.printf("IO WRITE %04X=%02X\n", addr&0xffff, data&0xff);
+        if (addr == 0x4d)
+        {
+            if ((addr & 0x01) != 0) doubleSpeed = true;
+            else doubleSpeed = false;
+        }
         _setIO(addr, data);
     }
 
@@ -299,9 +304,9 @@ public class Memory
                     if (hdma != null)
                     {
                         System.err.printf("!!! Terminated HDMA from %04X-%04X, %02X remaining\n", source, dest, length);
-                        hdma = null;
-                        registers[0x55] = (byte) 0x80;
-                        break;
+                        //    hdma = null;
+                        //  registers[0x55] = (byte) 0x80;
+                        //        break;
                     }
                     // General DMA
                     for (int i = 0; i < length; i++)
@@ -505,8 +510,14 @@ public class Memory
     }
 
 
+    boolean doubleSpeed = false;
     public short getIO(int addr)
     {
+        if (addr == 0x4d)
+        {
+            if (doubleSpeed) return 0x80;
+            return 0;
+        }
         short ret = _readReg(addr);
         //     System.out.printf("IO READ %04X=%02X\n", addr&0xFFFF, (byte)ret);
         return ret;
@@ -541,41 +552,6 @@ public class Memory
                 // I'm not sure if this is correct, but if its not it probably doesn't matter
                 return (short) ((0x30 | output | (reg & 0b1100000)) & 0xff);
             }
-            case R.R_LCD_STAT:
-                byte reg = 0;
-                // Bit 2 - Coincidence Flag
-                // 0: LYC not equal to LY
-                // 1: LYC = LY
-                if (registers[R.R_LY] == registers[R.R_LYC])
-                {
-                    reg |= 0x04;
-                }
-                // When 144 <= LY <= 153, we're in vblank
-                if ((registers[R.R_LY] & 0xFF) > 144)
-                {
-                    reg |= 0x01;
-                } else
-                {
-//                    System.out.println("!!!");
-                    // FIXME
-//                    long _cycle = core.cycle % R.INSTRS_PER_HBLANK;
-//                    int section = R.INSTRS_PER_HBLANK / 6;
-//                    if (_cycle < section * 3)
-//                    {
-//                        // We're in hblank
-//                    } else if (_cycle <= section * 4)
-//                    {
-//                        // We're in OAM ram search
-//                        reg |= 0x02;
-//                    } else
-//                    {
-//                        // We're transferring data to LCD Driver
-//                        reg |= 0x03;
-//                    }
-                }
-                // Add whatever else might've been set in the other bits
-                reg |= registers[R.R_LCD_STAT] & 0xF8;
-                return 0;
         }
         return registers[addr];
     }
