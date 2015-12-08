@@ -373,6 +373,24 @@ public class Emulator
     public long timerCycle = 0;
     public int clockSpeed = 4194304;
     public boolean emulateSpeed = true;
+    private boolean doubleSpeed = false;
+
+    public boolean isDoubleSpeed()
+    {
+        return doubleSpeed;
+    }
+
+    public void setDoubleSpeed(boolean doubleSpeed)
+    {
+        if (this.doubleSpeed == doubleSpeed)
+            return;
+
+        this.doubleSpeed = doubleSpeed;
+        if (doubleSpeed)
+            clockSpeed *= 2;
+        else
+            clockSpeed /= 2;
+    }
 
     public void updateInterrupts(long delta)
     {
@@ -437,6 +455,8 @@ public class Emulator
             }
         }
 
+        if (doubleSpeed)
+            delta /= 2;
         sound.tick(delta);
         // Update the display
         lcd.tick(delta);

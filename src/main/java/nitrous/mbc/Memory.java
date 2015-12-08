@@ -245,8 +245,7 @@ public class Memory
         //  System.out.printf("IO WRITE %04X=%02X\n", addr&0xffff, data&0xff);
         if (addr == 0x4d)
         {
-            if ((addr & 0x01) != 0) doubleSpeed = true;
-            else doubleSpeed = false;
+            core.setDoubleSpeed((data & 0x01) != 0);
         }
         _setIO(addr, data);
     }
@@ -509,13 +508,11 @@ public class Memory
         return 0xFF;
     }
 
-
-    boolean doubleSpeed = false;
     public short getIO(int addr)
     {
         if (addr == 0x4d)
         {
-            if (doubleSpeed) return 0x80;
+            if (core.isDoubleSpeed()) return 0x80;
             return 0;
         }
         short ret = _readReg(addr);
