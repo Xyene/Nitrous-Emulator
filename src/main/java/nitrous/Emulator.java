@@ -11,13 +11,13 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.LockSupport;
 
 import static nitrous.Emulator.RegisterPair.*;
 
 public class Emulator
 {
-    private boolean paused = false;
 
     public Emulator(Cartridge cartridge)
     {
@@ -28,6 +28,9 @@ public class Emulator
         sound.updateClockSpeed(clockSpeed);
         reset();
     }
+
+    private boolean paused = false;
+    private Semaphore executeLock = new Semaphore(1);
 
     public boolean timerEnabled;
     public int timerPeriod;
@@ -459,6 +462,8 @@ public class Emulator
         long last = System.nanoTime();
         long _last = System.nanoTime();
 
+        executeLock.acquireUninterruptibly();
+
         while (true)
         {
             tick(_exec());
@@ -483,6 +488,7 @@ public class Emulator
                 // 1 cycle takes 1/4194304 seconds
                 // d cycles take d / 4194304 seconds, or (d / 4194304) * 1000 milliseconds
                 // 1000000000 - (System.nanoTime() - last)
+                executeLock.release();
                 try
                 {
                     //   LockSupport.parkNanos(1000000000 - (System.nanoTime() - _last));
@@ -501,6 +507,7 @@ public class Emulator
                 {
                     e.printStackTrace();
                 }
+                executeLock.acquireUninterruptibly();
                 ac -= t;
             }
         }
@@ -1772,7 +1779,7 @@ public class Emulator
 
     public static final BufferedImage screenBuffer = new BufferedImage(160, 144, BufferedImage.TYPE_INT_RGB);
     public static Panel display;
-    public static VRAMViewer debugger;
+    //public static VRAMViewer debugger;
 
     public static void main(String[] argv) throws IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException
     {
@@ -1959,15 +1966,16 @@ public class Emulator
                                                     }
                                                 }
                                             });
-                                           menu. add(new JSeparator());
+                                            menu.add(new JSeparator());
                                             menu.add(new JCheckBoxMenuItem("Pause", core.paused)
                                             {
                                                 {
                                                     addActionListener((x) ->
                                                     {
-                                                        if (core.paused) codeExecutionThread.resume();
+                                                        if (core.paused)
+                                                            core.executeLock.release();
                                                         else
-                                                            codeExecutionThread.suspend();
+                                                            core.executeLock.acquireUninterruptibly();
                                                         core.paused = !core.paused;
                                                     });
                                                 }
