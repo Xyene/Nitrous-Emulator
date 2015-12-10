@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import static nitrous.R.*;
+
 /**
  * Represents the memory of a Gameboy.
  * <p>
@@ -316,7 +318,7 @@ public class Memory
                 }
                 break;
             }
-            case R.R_VRAM_BANK:
+            case R_VRAM_BANK:
             {
                 if (core.cartridge.isColorGB)
                 {
@@ -325,7 +327,7 @@ public class Memory
                 }
                 break;
             }
-            case R.R_WRAM_BANK:
+            case R_WRAM_BANK:
             {
                 if (core.cartridge.isColorGB)
                 {
@@ -333,21 +335,21 @@ public class Memory
                 }
                 break;
             }
-            case R.R_NR14:
-                if ((registers[R.R_NR14] & 0x80) != 0)
+            case R_NR14:
+                if ((registers[R_NR14] & 0x80) != 0)
                 {
                     core.sound.channel1.restart();
                     data &= 0x7f;
                 }
-            case R.R_NR10:
-            case R.R_NR11:
-            case R.R_NR12:
-            case R.R_NR13:
+            case R_NR10:
+            case R_NR11:
+            case R_NR12:
+            case R_NR13:
                 registers[addr] = (byte) data;
                 core.sound.channel1.update();
                 break;
 
-            case R.R_NR24:
+            case R_NR24:
                 if ((data & 0x80) != 0)
                 {
                     core.sound.channel2.___++;
@@ -361,35 +363,35 @@ public class Memory
                     core.sound.channel2.restart();
                     data &= 0x7F;
                 }
-            case R.R_NR21:
-            case R.R_NR22:
-            case R.R_NR23:
+            case R_NR21:
+            case R_NR22:
+            case R_NR23:
                 registers[addr] = (byte) data;
                 core.sound.channel2.update();
                 break;
-            case R.R_NR34:
+            case R_NR34:
                 if ((data & 0x80) != 0)
                 {
                     core.sound.channel3.restart();
                     data &= 0x7F;
                 }
-            case R.R_NR30:
-            case R.R_NR31:
-            case R.R_NR32:
-            case R.R_NR33:
+            case R_NR30:
+            case R_NR31:
+            case R_NR32:
+            case R_NR33:
                 registers[addr] = (byte) data;
                 core.sound.channel3.update();
                 break;
 
-            case R.R_NR44:
+            case R_NR44:
                 if ((data & 0x80) != 0)
                 {
                     core.sound.channel4.restart();
                     data &= 0x7F;
                 }
-            case R.R_NR41:
-            case R.R_NR42:
-            case R.R_NR43:
+            case R_NR41:
+            case R_NR42:
+            case R_NR43:
                 registers[addr] = (byte) data;
                 core.sound.channel4.update();
                 break;
@@ -418,7 +420,7 @@ public class Memory
              *
              * length:      - always 4*40 (=160 / $a0) bytes
              */
-            case R.R_DMA:
+            case R_DMA:
             {
                 int addressBase = data * 0x100;
 
@@ -436,16 +438,17 @@ public class Memory
              * This register is incremented 16384 times a second.
              * Writing any value sets it to $00
              */
-            case R.R_DIV:
+            case R_DIV:
                 data = 0;
                 break;
-            case R.R_TAC:
-                if(((registers[R.R_TAC] ^ data) & 0x03) != 0) {
+            case R_TAC:
+                if (((registers[R_TAC] ^ data) & 0x03) != 0)
+                {
                     core.timerCycle = 0;
-                    registers[R.R_TIMA] = registers[R.R_TMA];
+                    registers[R_TIMA] = registers[R_TMA];
                 }
                 break;
-            case R.R_LCD_STAT:
+            case R_LCD_STAT:
                 break;
             default:
                 if (0x30 <= addr && addr < 0x40)
@@ -548,6 +551,15 @@ public class Memory
                 // keep the last 2 bits as-is, in case someone wrote to them
                 // I'm not sure if this is correct, but if its not it probably doesn't matter
                 return (short) ((0x30 | output | (reg & 0b1100000)) & 0xff);
+            }
+            case R_NR52:
+            {
+                short reg = (short) (registers[R_NR52] & 0x80);
+                if (core.sound.channel1.isPlaying) reg |= 0x01;
+                if (core.sound.channel2.isPlaying) reg |= 0x02;
+                if (core.sound.channel3.isPlaying) reg |= 0x04;
+                if (core.sound.channel4.isPlaying) reg |= 0x08;
+                return reg;
             }
         }
         return registers[addr];

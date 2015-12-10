@@ -109,6 +109,7 @@ public class NoiseChannel extends SoundChannel
     int currentVolume = -1;
     boolean high = false;
     long lastToggle = Integer.MIN_VALUE;
+    public boolean isPlaying;
 
     @Override
     public int render()
@@ -116,8 +117,10 @@ public class NoiseChannel extends SoundChannel
         int delta = (int) (core.cycle - clockStart);
         if (useLength && delta > length)
         {
+            isPlaying = false;
             return 0;
         }
+        isPlaying = true;
 
         if (currentVolume == -1)
             currentVolume = envelopeInitial;

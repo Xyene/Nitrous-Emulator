@@ -68,6 +68,8 @@ public class RawWaveChannel extends SoundChannel
 
     private long lastUpdate = Integer.MIN_VALUE;
 
+    public boolean isPlaying;
+
     public int render()
     {
         if (core.cycle - lastUpdate > period)
@@ -79,12 +81,14 @@ public class RawWaveChannel extends SoundChannel
             lastUpdate = core.cycle;
         }
 
-        if (!enabled)
-            return 0;
-
         long delta = core.cycle - clockStart;
-        if (useLength && delta > length)
+        if (!enabled || (useLength && delta > length))
+        {
+            isPlaying = false;
             return 0;
+        }
+
+        isPlaying = true;
 
         return shift == 3 ? 0 : (samples[(int) (delta / period) & 0x1F] << shift);
     }

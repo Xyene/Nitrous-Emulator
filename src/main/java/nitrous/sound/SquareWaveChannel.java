@@ -87,6 +87,8 @@ public class SquareWaveChannel extends SoundChannel
 
     int lastCycle = -1;
 
+    public boolean isPlaying;
+
     @Override
     public int render()
     {
@@ -102,7 +104,11 @@ public class SquareWaveChannel extends SoundChannel
             return render();
 
         if (useLength && delta > length)
+        {
+            isPlaying = false;
             return 0;
+        }
+        isPlaying = true;
 
         if (currentVolume == -1)
             currentVolume = envelopeInitial;
