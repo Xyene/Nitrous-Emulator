@@ -371,6 +371,7 @@ public class Emulator
 
     long divCycle = 0;
     public long timerCycle = 0;
+    public static int BASE_CLOCK_SPEED = 4194304;
     public int clockSpeed = 4194304;
     public boolean emulateSpeed = true;
     private boolean doubleSpeed = false;
@@ -387,9 +388,9 @@ public class Emulator
 
         this.doubleSpeed = doubleSpeed;
         if (doubleSpeed)
-            clockSpeed *= 2;
+            clockSpeed = BASE_CLOCK_SPEED * 2;
         else
-            clockSpeed /= 2;
+            clockSpeed = BASE_CLOCK_SPEED;
     }
 
     public void updateInterrupts(long delta)
