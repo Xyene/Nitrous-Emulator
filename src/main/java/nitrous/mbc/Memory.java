@@ -403,13 +403,6 @@ public class Memory
             case R_NR24:
                 if ((data & 0x80) != 0)
                 {
-                    core.sound.channel2.___++;
-                    core.sound.channel2.___ %= 10;
-//                    System.out.printf("%speriod=%d, length=%d, duty=%d, volume=%d, clock=%d\n", (core.sound.channel2.___ == 0) ? "*" : " ",
-//                            core.sound.channel2.period, core.sound.channel2.useLength ? core.sound.channel2.length : -1, core.sound.channel2.duty,
-//                            core.sound.channel2.envelopeInitial, core.cycle);
-//                    System.out.println();
-
                     core.sound.channel2.restart();
                     data &= 0x7F;
                 }

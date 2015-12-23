@@ -1,13 +1,86 @@
 package nitrous.sound;
 
 import nitrous.Emulator;
-import nitrous.R;
 
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.SourceDataLine;
-import java.util.Arrays;
-
+/**
+ * This class implements channel 1 and 2 of the Gameboy's programmable sound chip.
+ *
+ * FF10 - NR10 - Channel 1 Sweep register (R/W)
+ *
+ * <ul>
+ *     <li>Bit 6-4 - Sweep Time</li>
+ *     <li>Bit 3   - Sweep Increase/Decrease (0=frequency increases, 1=frequency decreases)</li>
+ *     <li>Bit 2-0 - Number of sweep shift (n: 0-7)</li>
+ * </ul>
+ *
+ * Sweep Time:
+ *
+ * <ul>
+ *     <li>000: sweep off - no freq change</li>
+ *     <li>001: 7.8 ms  (1/128Hz)</li>
+ *     <li>010: 15.6 ms (2/128Hz)</li>
+ *     <li>011: 23.4 ms (3/128Hz)</li>
+ *     <li>100: 31.3 ms (4/128Hz)</li>
+ *     <li>101: 39.1 ms (5/128Hz)</li>
+ *     <li>110: 46.9 ms (6/128Hz)</li>
+ *     <li>111: 54.7 ms (7/128Hz)</li>
+ * </ul>
+ *
+ * The change of frequency (NR13,NR14) at each shift is calculated by the following formula where X(0)
+ * is initial freq & X(t-1) is last freq:
+ *
+ * X(t) = X(t-1) +/- X(t-1)/2^n
+ *
+ * <strong>FF11 - NR11 - Channel 1 Sound length/Wave pattern duty (R/W)</strong><br>
+ * <strong>FF16 - NR21 - Channel 2 Sound Length/Wave Pattern Duty (R/W)</strong>
+ *
+ * <ul>
+ *     <li>Bit 7-6 - Wave Pattern Duty (Read/Write)</li>
+ *     <li>Bit 5-0 - Sound length data (Write Only) (t1: 0-63)</li>
+ * </ul>
+ *
+ * Wave Duty:
+ *
+ * <ul>
+ *     <li>00: 12.5% ( _-------_-------_------- )</li>
+ *     <li>01: 25%   ( __------__------__------ )</li>
+ *     <li>10: 50%   ( ____----____----____---- ) (normal)</li>
+ *     <li>11: 75%   ( ______--______--______-- )</li>
+ * </ul>
+ *
+ * Sound Length = (64-t1)*(1/256) seconds
+ * The Length value is used only if Bit 6 in NR24 is set.
+ *
+ * <strong>FF12 - NR12 - Channel 1 Volume Envelope (R/W)</strong><br>
+ * <strong>FF17 - NR22 - Channel 2 Volume Envelope (R/W)</strong>
+ *
+ * <ul>
+ *     <li>Bit 7-4 - Initial Volume of envelope (0-0Fh) (0=No Sound)</li>
+ *     <li>Bit 3   - Envelope Direction (0=Decrease, 1=Increase)</li>
+ *     <li>Bit 2-0 - Number of envelope sweep (n: 0-7. If zero, stop envelope operation.)</li>
+ * </ul>
+ *
+ * Length of 1 step = n*(1/64) seconds
+ *
+ * <strong>FF13 - NR13 - Channel 1 Frequency lo (Write Only)</strong><br>
+ * <strong>FF18 - NR23 - Channel 2 Frequency lo data (W)</strong>
+ *
+ * Frequency's lower 8 bits of 11 bit data (x).
+ * Next 3 bits are in NR24 ($FF19).
+ *
+ * <strong>FF14 - NR14 - Channel 1 Frequency hi (R/W)</strong><br>
+ * <strong>FF19 - NR24 - Channel 2 Frequency hi data (R/W)</strong>
+ *
+ * <ul>
+ *     <li>Bit 7   - Initial (1=Restart Sound)     (Write Only)</li>
+ *     <li>Bit 6   - Counter/consecutive selection (Read/Write, 1=Stop output when length in NR21 expires)</li>
+ *     <li>Bit 2-0 - Frequency's higher 3 bits (x) (Write Only)</li>
+ * </ul>
+ *
+ * Frequency = 131072/(2048-x) Hz
+ *
+ * @see <a href="http://bgb.bircd.org/pandocs.htm#soundchannel3waveoutput">Sound Channel 3 - Wave Output - Pandocs</a>
+ */
 public class SquareWaveChannel extends SoundChannel
 {
     private final int ioStart;
@@ -35,8 +108,6 @@ public class SquareWaveChannel extends SoundChannel
         this.ioStart = ioStart;
         this.sweep = sweep;
     }
-
-    public int ___ = 0;
 
     public void handleUpdateRequest()
     {
