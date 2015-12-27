@@ -83,124 +83,258 @@ import nitrous.Emulator;
  */
 public class SquareWaveChannel extends SoundChannel
 {
+    /**
+     * The start index of NRx1, where x is either 1 or 2.
+     *
+     * This allows this class to handle two channels.
+     */
     private final int ioStart;
+
+    /**
+     * Whether frequency sweep is enabled, i.e. whether this is channel 1 or 2.
+     */
     private final boolean sweep;
 
+    /**
+     * The current Gameboy frequency value, for sweeping.
+     */
     private int gbFreq;
-    public int period = -1;
-    public int length = 0x400000;
-    public boolean useLength = false;
-    private long clockStart = 0;
-    public int envelopeInitial = 15;
-    private boolean envelopeIncrease = true;
-    private int envelopeSweep = 0;
-    public int duty = 0;
 
+    /**
+     * The length of each wave cycle, measured in clock cycles.
+     */
+    private int period = -1;
+
+    /**
+     * Length of the sound, in clock cycles.
+     */
+    private int length = 0x400000;
+
+    /**
+     * Whether we should respect the {@link #length} variable, or just play forever.
+     */
+    private boolean useLength = false;
+
+    /**
+     * The clock cycle that marks the start of the current sound.
+     */
+    private long clockStart = 0;
+
+    /**
+     * The initial volume for envelope.
+     */
+    private int envelopeInitial = 15;
+
+    /**
+     * Whether to increase or decrease the volume after {@link #envelopeSweep} cycles later.
+     */
+    private boolean envelopeIncrease = true;
+
+    /**
+     * Time between volume change, measured in clock cycles.
+     */
+    private int envelopeSweep = 0;
+
+    /**
+     * Sound wave duty.
+     *
+     * Duty   Waveform    Ratio  Cycle
+     * -------------------------------
+     * 0      00000001    12.5%      6
+     * 1      10000001    25%        5
+     * 2      10000111    50%        3
+     * 3      01111110    75%        1
+     */
+    private int duty = 0;
+
+    /**
+     * The clock cycle when the last frequency sweep happened.
+     */
     private long lastSweep = 0;
+
+    /**
+     * The amount of CPU cycles between frequency sweeps.
+     */
     private int sweepCycles = 0;
+
+    /**
+     * Whether the frequency sweeping causes an increase or decrease.
+     */
     private boolean sweepIncrease = true;
+
+    /**
+     * The amount of frequency to shift.
+     *
+     * This is the value the original frequency is right shifted by, before increased or decrease.
+     */
     private int sweepShift = 0;
 
+    /**
+     * Current volume field.
+     *
+     * -1 means update, hence recalculate from {@link #envelopeInitial}
+     */
+    int currentVolume = -1;
+
+    /**
+     * Field that shows whether we are still playing the sound.
+     *
+     * i.e. whether {@link #length} is respected and exceeded.
+     */
+    public boolean isPlaying;
+
+    /**
+     * Constructs a {@link SquareWaveChannel} instance.
+     *
+     * @param core the {@link Emulator} instance.
+     * @param ioStart the register index of NRx1, where x is 1 or 2
+     * @param sweep whether sweep is enabled, i.e. whether this instance is channel 1.
+     */
     public SquareWaveChannel(Emulator core, int ioStart, boolean sweep)
     {
         super(core);
 
+        // Store extra parameters.
         this.ioStart = ioStart;
         this.sweep = sweep;
     }
 
+    /**
+     * Handle sound update.
+     *
+     * This method rereads everything from memory.
+     */
     public void handleUpdateRequest()
     {
         byte[] registers = core.mmu.registers;
 
+        // If sweep is enabled:
         if (sweep) {
+            // Get the sweep time.
             int newTime = ((registers[ioStart - 1] >> 4) & 0x7) * 32768;
+
+            // Reset lastSweep if the new time is different.
             if (sweepCycles != newTime)
                 lastSweep = core.cycle;
+
+            // Update sweep time, direction, and shift value.
             sweepCycles = newTime;
             sweepIncrease = (registers[ioStart - 1] & 0x8) != 0;
             sweepShift = registers[ioStart - 1] & 0x7;
         }
 
+        // Update wave duty and sound length.
         duty = (registers[ioStart] >> 6) & 0x3;
         length = (64 - (registers[ioStart] & 0x3F)) * 16384;
 
+        // Calculate the new initial envelope.
         int newInitial = (registers[ioStart + 1] >> 4) & 0xF;
 
+        // If changed, we update and reset the envelope.
         if (envelopeInitial != newInitial)
         {
             envelopeInitial = newInitial;
             currentVolume = -1;
         }
 
+        // Update envelope increase flag and sweep time.
         envelopeIncrease = (registers[ioStart + 1] & 0x8) != 0;
         envelopeSweep = (registers[ioStart + 1] & 0x7) * 65536;
 
+        // Get the Gameboy frequency value.
         gbFreq = (registers[ioStart + 2] & 0xFF) |
                 ((registers[ioStart + 3] & 0x7) << 8);
 
-        int n = gbFreqToCycles(gbFreq);
-        if (period != n)
-            clockStart = core.cycle;
-        period = n;
+        // Convert frequency value to period.
+        int newPeriod = gbFreqToCycles(gbFreq);
 
+        // If the period changed, restart the sound.
+        if (period != newPeriod)
+            clockStart = core.cycle;
+
+        // Update period, and whether length is respected.
+        period = newPeriod;
         useLength = (registers[ioStart + 3] & 0x40) != 0;
     }
 
+
+    /**
+     * Handle restart request: update {@link #clockStart}.
+     */
     @Override
     protected void handleRestartRequest()
     {
         clockStart = core.cycle;
-        lastCycle = -1;
     }
 
-    int currentVolume = -1;
-
-    int lastCycle = -1;
-
-    public boolean isPlaying;
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int render()
     {
+        // Calculate the since start of the note.
         int delta = (int) (core.cycle - clockStart);
 
+        // Calculate the position in the duty cycle.
         int cycle = (delta * 8 / period) & 7;
-        if (lastCycle == -1)
-            lastCycle = cycle;
 
-        lastCycle = cycle;
-
+        // If we are at the beginning of a duty cycle, process requests.
+        // If there were requests, restart rendering.
         if (cycle == 0 && handleRequests())
             return render();
 
+        // If the length is respected and exceeded, we are no longer playing.
+        // Return no sound.
         if (useLength && delta > length)
         {
             isPlaying = false;
             return 0;
         }
+
+        // So we are playing.
         isPlaying = true;
 
+        // If currentVolume == -1, we are updating the envelope, so we reset the volume to initial.
         if (currentVolume == -1)
             currentVolume = envelopeInitial;
 
+        // Calculate the amplitude of the wave.
+        // Note that our amplitude is twice as big Gameboy's since we have more bits of output.
         int amplitude;
         if (envelopeSweep == 0)
+        {
+            // If there is no sweep, use current volume.
             amplitude = currentVolume * 2;
-        else
+        } else
+        {
+            // Otherwise, calculate the amount of sweeping done and predict what the envelope would be at,
+            // then capping it to fit between 0 and 15 inclusive.
             currentVolume = amplitude = Math.min(15, Math.max(0, envelopeInitial + delta / envelopeSweep * (envelopeIncrease ? 1 : -1))) * 2;
+        }
 
+        // If we are channel 1, and frequency sweeping is enabled, and it's time for another sweep:
         if (sweep && sweepCycles > 0 && core.cycle - lastSweep >= sweepCycles) {
+            // Calculate the frequency change, which is the current frequency right shifted by sweepShift.
             int d = gbFreq >> sweepShift;
+
+            // Increase or decrease the freqyency.
             if (sweepIncrease)
                 gbFreq += d;
             else
                 gbFreq -= d;
+
+            // Make frequency wrap around.
             gbFreq &= 0x7FF;
 
+            // Convert the frequency to period.
             period = gbFreqToCycles(gbFreq);
+
+            // If period is zero, fail.
             if (period == 0)
                 throw new RuntimeException();
+
+            // Update last sweep time.
             lastSweep = core.cycle;
         }
 
@@ -211,6 +345,9 @@ public class SquareWaveChannel extends SoundChannel
          * 1      10000001    25%        5
          * 2      10000111    50%        3
          * 3      01111110    75%        1
+         *
+         * Here, we switch on duty, and if cycle (position in duty cycle) is at a place
+         * where the waveform is 1, we return positive amplitude, otherwise, we return negative.
          */
         switch (duty)
         {
