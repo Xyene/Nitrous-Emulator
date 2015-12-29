@@ -1,6 +1,8 @@
 package nitrous;
 
 public enum EmulateSpeed {
+    QUARTER("0.25x", 1048576),
+    HALF("0.5x", 2097152),
     SINGLE("1x", 4194304),
     DOUBLE("2x", 8388608),
     TRIPLE("3x", 12582912),
