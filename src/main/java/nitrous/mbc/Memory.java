@@ -36,22 +36,27 @@ public class Memory
      * Size of a page of Video RAM, in bytes. 8kb.
      */
     public static final int VRAM_PAGESIZE = 0x2000;
+
     /**
      * Size of a page of Work RAM, in bytes. 4kb.
      */
     public static final int WRAM_PAGESIZE = 0x1000;
+
     /**
      * Size of a page of ROM, in bytes. 16kb.
      */
     public static final int ROM_PAGESIZE = 0x4000;
+
     /**
      * Register values, mapped from $FF00-$FF7F + HRAM ($FF80-$FFFE) + Interrupt Enable Register ($FFFF)
      */
     public final byte[] registers = new byte[0x100];
+
     /**
      * Sprite Attribute Table, mapped from $FE00-$FE9F.
      */
     public final byte[] oam = new byte[0xA0];
+
     /**
      * Video RAM, mapped from $8000-$9FFF.
      * <p>
@@ -71,20 +76,28 @@ public class Memory
      * On non-GBC, this is always 0.
      */
     public int vramPageStart = 0;
+
     /**
      * The current page of Work RAM, always multiples of Memory.WRAM_PAGESIZE.
      * <p>
      * On non-GBC, this is always Memory.VRAM_PAGESIZE.
      */
     public int wramPageStart = WRAM_PAGESIZE;
+
     /**
      * The current page of ROM, always multiples of Memory.ROM_PAGESIZE.
      */
     public int romPageStart = ROM_PAGESIZE;
+
     /**
      * Reference to the main Emulator instance.
      */
     protected final Emulator core;
+
+    /**
+     * Current HDMA session (always null on non-CGB).
+     */
+    public HDMA hdma;
 
     /**
      * Instantiate a Memory instance.
@@ -94,7 +107,11 @@ public class Memory
     public Memory(Emulator core)
     {
         this.core = core;
+
+        // The CGB has 16k of wram
         wram = new byte[WRAM_PAGESIZE * (core.cartridge.isColorGB ? 8 : 2)];
+
+        // and 8k of vram
         vram = new byte[VRAM_PAGESIZE * (core.cartridge.isColorGB ? 2 : 1)];
     }
 
@@ -121,15 +138,41 @@ public class Memory
         throw new UnsupportedOperationException("no battery");
     }
 
-    public HDMA hdma;
-
-    public class HDMA
+    /**
+     * Represents a H-Blank DMA transfer session.
+     * <p>
+     * HDMA transfers 16 bytes from source to dest every H-Blank interval,
+     * and can be used for a lot of video effects.
+     */
+    public final class HDMA
     {
+        /**
+         * The source address.
+         */
         private final int source;
+
+        /**
+         * The destination address.
+         */
         private final int dest;
+
+        /**
+         * The length of the transfer.
+         */
         private int length;
+
+        /**
+         * The current offset into the source/dest buffers.
+         */
         private int ptr;
 
+        /**
+         * Creates a new HDMA instance.
+         *
+         * @param source The source address to copy from.
+         * @param dest   The destination address to copy to.
+         * @param length How many bytes to copy.
+         */
         public HDMA(int source, int dest, int length)
         {
             this.source = source;
