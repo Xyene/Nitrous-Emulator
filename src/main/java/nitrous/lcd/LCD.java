@@ -2,7 +2,6 @@ package nitrous.lcd;
 
 import nitrous.Emulator;
 import nitrous.PaletteColors;
-import nitrous.R;
 import nitrous.R.LCD_STAT;
 import nitrous.mbc.Memory;
 import nitrous.renderer.IRenderManager;
@@ -11,7 +10,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.awt.peer.ComponentPeer;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -19,23 +17,26 @@ import java.util.List;
 
 import static nitrous.Emulator.*;
 import static nitrous.R.*;
-import static nitrous.R.R_LCD_STAT;
 
 public class LCD
 {
     protected final Emulator core;
+
     /**
      * Background palettes. On CGB, 0-7 are used. On GB, only 0 is used.
      */
     private final IPalette[] bgPalettes = new IPalette[8];
+
     /**
      * Sprite palettes. 0-7 used on CGB, 0-1 used on GB.
      */
     private final IPalette[] spritePalettes = new IPalette[8];
+
     /**
      * Background palette memory on the CGB, indexed through $FF69.
      */
     private final byte[] gbcBackgroundPaletteMemory = new byte[0x40];
+
     /**
      * Sprite palette memory on the CGB, indexed through $FF6B.
      */
@@ -51,6 +52,7 @@ public class LCD
 
         // System.err.println(Thread.currentThread().getStackTrace()[7]);
     }
+
 
     private void updatePalette(byte[] from, IPalette[] to, int i, int j)
     {
@@ -126,6 +128,7 @@ public class LCD
     public void drawTile(IPalette palette, int[] data, int x, int y, int tile, int scanline,
                          boolean flipX, boolean flipY, int bank, int basePriority, boolean sprite)
     {
+        // Store a local copy to save a lot of load opcodes.
         byte[] vram = core.mmu.vram;
         int line = scanline - y;
         int addressBase = Memory.VRAM_PAGESIZE * bank + tile * 16;
@@ -269,7 +272,7 @@ public class LCD
 
     public void tick(long cycles)
     {
-        lcdCycles += cycles;
+        lcdCycles += cycles;    
         // 4.194304MHz clock, 154 scanlines per frame, 59.7 frames/second
         // = ~456 cycles / line
         if (lcdCycles >= 456)
