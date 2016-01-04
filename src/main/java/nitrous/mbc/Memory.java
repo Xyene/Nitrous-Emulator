@@ -233,6 +233,12 @@ public class Memory
         throw new UnsupportedOperationException("no battery");
     }
 
+    /**
+     * Sets a byte of data.
+     *
+     * @param addr  The address to which to write to.
+     * @param _data The data.
+     */
     public void setAddress(int addr, int _data)
     {
         byte data = (byte) (_data & 0xff);
@@ -283,8 +289,12 @@ public class Memory
         }
     }
 
-    public boolean ICARE = false;
-
+    /**
+     * Sets a register.
+     *
+     * @param addr The address of the register (00h+).
+     * @param data The data to set.
+     */
     public void setIO(int addr, int data)
     {
         //  System.out.printf("IO WRITE %04X=%02X\n", addr&0xffff, data&0xff);
@@ -400,7 +410,6 @@ public class Memory
 //                    System.out.printf("%speriod=%d, length=%d, duty=%d, volume=%d, clock=%d\n", (core.sound.channel2.___ == 0) ? "*" : " ",
 //                            core.sound.channel2.period, core.sound.channel2.useLength ? core.sound.channel2.length : -1, core.sound.channel2.duty,
 //                            core.sound.channel2.envelopeInitial, core.cycle);
-                    ICARE = true;
 //                    System.out.println();
 
                     core.sound.channel2.restart();
@@ -500,6 +509,12 @@ public class Memory
         registers[addr] = (byte) data;
     }
 
+    /**
+     * Fetches a byte from an address.
+     *
+     * @param addr The address to fetch from.
+     * @return The contained signed value.
+     */
     public short getAddress(int addr)
     {
         short ret = _mapMemory(addr);
@@ -554,6 +569,12 @@ public class Memory
         return 0xFF;
     }
 
+    /**
+     * Reads a register.
+     *
+     * @param addr The address of the register.
+     * @return The signed value contained in the register.
+     */
     public short getIO(int addr)
     {
         if (addr == 0x4d)
