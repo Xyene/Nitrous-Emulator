@@ -1,7 +1,6 @@
 package nitrous.mbc;
 
 import nitrous.Emulator;
-import nitrous.R;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -298,10 +297,6 @@ public class Memory
     public void setIO(int addr, int data)
     {
         //  System.out.printf("IO WRITE %04X=%02X\n", addr&0xffff, data&0xff);
-        if (addr == 0x4d)
-        {
-            core.setDoubleSpeed((data & 0x01) != 0);
-        }
         _setIO(addr, data);
     }
 
@@ -313,6 +308,9 @@ public class Memory
 //        }
         switch (addr)
         {
+            case 0x4d:
+                core.setDoubleSpeed((data & 0x01) != 0);
+                break;
             case 0x69:
             {
                 if (!core.cartridge.isColorGB) break;
@@ -577,11 +575,6 @@ public class Memory
      */
     public short getIO(int addr)
     {
-        if (addr == 0x4d)
-        {
-            if (core.isDoubleSpeed()) return 0x80;
-            return 0;
-        }
         short ret = _readReg(addr);
         //     System.out.printf("IO READ %04X=%02X\n", addr&0xFFFF, (byte)ret);
         return ret;
@@ -592,6 +585,9 @@ public class Memory
         addr &= 0xFFFF;
         switch (addr)
         {
+            case 0x4d:
+                if (core.isDoubleSpeed()) return 0x80;
+                return 0;
             case 0x00: // JOYPAD (FIXME not done)
             {
                 byte reg = registers[0x00];
