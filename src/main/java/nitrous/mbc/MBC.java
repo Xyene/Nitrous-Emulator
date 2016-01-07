@@ -5,18 +5,44 @@ import nitrous.Emulator;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * Abstract implementation of features shared by all Memory Banking Chips.
+ */
 public abstract class MBC extends Memory
 {
+    /**
+     * The size of a page of cart RAM, 8k in size.
+     */
     public static final int RAM_PAGESIZE = 0x2000;
+
+    /**
+     * The current offset (page) into cart ram.
+     */
     protected int ramPageStart;
+
+    /**
+     * Whether or not accessing RAM is currently enabled.
+     */
     protected boolean ramEnabled;
+
+    /**
+     * Raw cart ram.
+     */
     protected byte[] cartRam;
 
-    public MBC(Emulator core)
+    /**
+     * Default constructor for all extending classes.
+     *
+     * @param core The Emulator to operate on.
+     */
+    MBC(Emulator core)
     {
         super(core);
     }
 
+    /**
+     * @{inheritDoc}
+     */
     @Override
     public void load(InputStream in) throws IOException
     {
@@ -30,7 +56,9 @@ public abstract class MBC extends Memory
         if (read != cartRam.length) throw new IOException("cart data invalid");
     }
 
-
+    /**
+     * @{inheritDoc}
+     */
     @Override
     public short getAddress(int addr)
     {
