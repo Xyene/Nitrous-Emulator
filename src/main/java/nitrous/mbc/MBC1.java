@@ -5,29 +5,55 @@ import nitrous.Emulator;
 import java.io.IOException;
 import java.io.OutputStream;
 
+/**
+ * Implementation of Memory Bank Chip 1.
+ */
 public class MBC1 extends MBC
 {
+    /**
+     * Flag of whether to access RAM (0) or ROM (1) from 5000h-6000h.
+     */
     private int modeSelect;
+
+    /**
+     * Currently mapped ROM bank.
+     */
     private int romBank = 1;
 
+    /**
+     * {@inheritDoc}
+     */
     public MBC1(Emulator core)
     {
         super(core);
         cartRam = new byte[RAM_PAGESIZE * 4];
     }
 
+    /**
+     * The MBC1 has cart ram.
+     *
+     * @return true.
+     */
     @Override
     public boolean hasBattery()
     {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void save(OutputStream out) throws IOException
     {
         out.write(cartRam);
     }
 
+    /**
+     * Maps a ROM bank to be accessed.
+     *
+     * @param bank The bank number.
+     */
     private void mapRom(int bank)
     {
         /**
@@ -39,6 +65,9 @@ public class MBC1 extends MBC
         romPageStart = Memory.ROM_PAGESIZE * bank;
     }
 
+    /**
+     * @{inheritDoc}
+     */
     @Override
     public void setAddress(int addr, int _data)
     {
