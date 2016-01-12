@@ -10,7 +10,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.LockSupport;
 
@@ -395,6 +398,8 @@ public class Emulator
 
     public void updateInterrupts(long delta)
     {
+        if (doubleSpeed)
+            delta /= 2;
         // The DIV register increments at 16KHz, and resets to 0 after
         divCycle += delta;
 
@@ -456,8 +461,6 @@ public class Emulator
             }
         }
 
-        if (doubleSpeed)
-            delta /= 2;
         sound.tick(delta);
         // Update the display
         lcd.tick(delta);
