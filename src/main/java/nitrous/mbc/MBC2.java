@@ -3,8 +3,14 @@ package nitrous.mbc;
 import nitrous.Emulator;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+/**
+ * Implementation of Memory Bank Chip 2.
+ */
 public class MBC2 extends Memory
 {
+    /**
+     * {@inheritDoc}
+     */
     public MBC2(Emulator core)
     {
         super(core);
