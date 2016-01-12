@@ -6,7 +6,6 @@ import nitrous.renderer.IRenderManager;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -14,7 +13,6 @@ import java.io.IOException;
 
 public class UI
 {
-    public static final BufferedImage screenBuffer = new BufferedImage(160, 144, BufferedImage.TYPE_INT_RGB);
     public static Panel display;
     //public static VRAMViewer debugger;
 
@@ -50,7 +48,7 @@ public class UI
 
         Cartridge cartridge = new Cartridge(buf);
 
-        Emulator core = new Emulator(cartridge);
+        Emulator core = new Emulator(cartridge, display);
 
         //    debugger = new VRAMViewer(core);
 

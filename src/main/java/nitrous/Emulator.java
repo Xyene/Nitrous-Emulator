@@ -4,6 +4,8 @@ import nitrous.lcd.LCD;
 import nitrous.mbc.Memory;
 import nitrous.sound.SoundManager;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.LockSupport;
 
@@ -12,9 +14,12 @@ import static nitrous.Emulator.RegisterPair.*;
 public class Emulator
 {
 
-    public Emulator(Cartridge cartridge)
+    public static final BufferedImage screenBuffer = new BufferedImage(160, 144, BufferedImage.TYPE_INT_RGB);
+
+    public Emulator(Cartridge cartridge, Panel display)
     {
         this.cartridge = cartridge;
+        this.display = display;
         this.mmu = cartridge.createController(this);
         this.lcd = new LCD(this);
         this.sound = new SoundManager(this);
@@ -49,6 +54,7 @@ public class Emulator
     public final SoundManager sound;
 
     public final Cartridge cartridge;
+    public final Panel display;
 
     public boolean interruptsEnabled;
 
