@@ -1,5 +1,6 @@
 package nitrous;
 
+import java.util.HashSet;
 import java.util.prefs.Preferences;
 
 public class Settings
@@ -10,9 +11,17 @@ public class Settings
     private static boolean channel2On;
     private static boolean channel3On;
     private static boolean channel4On;
-    private static EmulateSpeed speed;
 
-    static {
+    public interface SpeedListener
+    {
+        void updateSpeed(EmulateSpeed speed);
+    }
+
+    private static EmulateSpeed speed;
+    private static HashSet<SpeedListener> speedListeners = new HashSet<>();
+
+    static
+    {
         channel1On = storage.getBoolean("channel1", true);
         channel2On = storage.getBoolean("channel2", true);
         channel3On = storage.getBoolean("channel3", true);
@@ -68,6 +77,16 @@ public class Settings
         storage.putBoolean("channel4", channel1On);
     }
 
+    public static void addSpeedListener(SpeedListener listener)
+    {
+        speedListeners.add(listener);
+    }
+
+    public static void removeSpeedListener(SpeedListener listener)
+    {
+        speedListeners.remove(listener);
+    }
+
     public static EmulateSpeed getSpeed()
     {
         return speed;
@@ -77,5 +96,8 @@ public class Settings
     {
         Settings.speed = speed;
         storage.putInt("speed", speed.ordinal());
+
+        for (SpeedListener listener : speedListeners)
+            listener.updateSpeed(speed);
     }
 }
