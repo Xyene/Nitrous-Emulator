@@ -1,11 +1,22 @@
 package nitrous;
 
+import nitrous.lcd.Interpolator;
+
 import java.util.HashSet;
 import java.util.prefs.Preferences;
 
 public class Settings
 {
     private static Preferences storage = Preferences.userNodeForPackage(Settings.class);
+
+    private static <T extends Enum> T getEnum(String name, T def)
+    {
+        T[] values = (T[]) def.getDeclaringClass().getEnumConstants();
+        int index = storage.getInt(name, def.ordinal());
+        if (index < 0 || index >= values.length)
+            index = def.ordinal();
+        return values[index];
+    }
 
     private static boolean channel1On;
     private static boolean channel2On;
@@ -27,10 +38,7 @@ public class Settings
         channel3On = storage.getBoolean("channel3", true);
         channel4On = storage.getBoolean("channel4", true);
 
-        int speedIndex = storage.getInt("speed", EmulateSpeed.SINGLE.ordinal());
-        if (speedIndex < 0 || speedIndex >= EmulateSpeed.values().length)
-            speedIndex = EmulateSpeed.SINGLE.ordinal();
-        speed = EmulateSpeed.values()[speedIndex];
+        speed = getEnum("speed", EmulateSpeed.SINGLE);
     }
 
     public static boolean isChannel1On()
