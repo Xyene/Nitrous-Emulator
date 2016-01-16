@@ -10,9 +10,9 @@ public class Settings
 {
     private static Preferences storage = Preferences.userNodeForPackage(Settings.class);
 
-    private static <T extends Enum> T getEnum(String name, T def)
+    private static <T extends Enum<T>> T getEnum(String name, T def)
     {
-        T[] values = (T[]) def.getDeclaringClass().getEnumConstants();
+        T[] values = def.getDeclaringClass().getEnumConstants();
         int index = storage.getInt(name, def.ordinal());
         if (index < 0 || index >= values.length)
             index = def.ordinal();
