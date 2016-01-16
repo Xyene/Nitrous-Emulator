@@ -10,12 +10,18 @@ public class Settings
     private static boolean channel2On;
     private static boolean channel3On;
     private static boolean channel4On;
+    private static EmulateSpeed speed;
 
     static {
         channel1On = storage.getBoolean("channel1", true);
         channel2On = storage.getBoolean("channel2", true);
         channel3On = storage.getBoolean("channel3", true);
         channel4On = storage.getBoolean("channel4", true);
+
+        int speedIndex = storage.getInt("speed", EmulateSpeed.SINGLE.ordinal());
+        if (speedIndex < 0 || speedIndex >= EmulateSpeed.values().length)
+            speedIndex = EmulateSpeed.SINGLE.ordinal();
+        speed = EmulateSpeed.values()[speedIndex];
     }
 
     public static boolean isChannel1On()
@@ -60,5 +66,16 @@ public class Settings
     {
         Settings.channel4On = channel4On;
         storage.putBoolean("channel4", channel1On);
+    }
+
+    public static EmulateSpeed getSpeed()
+    {
+        return speed;
+    }
+
+    public static void setSpeed(EmulateSpeed speed)
+    {
+        Settings.speed = speed;
+        storage.putInt("speed", speed.ordinal());
     }
 }
