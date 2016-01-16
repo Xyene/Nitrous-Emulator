@@ -18,15 +18,19 @@ public class Emulator
 
     public static final BufferedImage screenBuffer = new BufferedImage(160, 144, BufferedImage.TYPE_INT_RGB);
 
-    public Emulator(Cartridge cartridge, Panel display)
+    public Emulator(Cartridge cartridge)
     {
         this.cartridge = cartridge;
-        this.display = display;
         this.mmu = cartridge.createController(this);
         this.lcd = new LCD(this);
         this.sound = new SoundManager(this);
         sound.updateClockSpeed(clockSpeed);
         reset();
+    }
+
+    public void setDisplay(Panel display)
+    {
+        this.display = display;
     }
 
     private boolean paused = false;
@@ -56,7 +60,7 @@ public class Emulator
     public final SoundManager sound;
 
     public final Cartridge cartridge;
-    public final Panel display;
+    public Panel display;
 
     public boolean interruptsEnabled;
 

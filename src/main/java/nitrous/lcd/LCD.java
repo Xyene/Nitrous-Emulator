@@ -257,7 +257,10 @@ public class LCD
                     {
                         add(renderer);
                         if (currentRenderer == null)
+                        {
+                            System.out.println("Using " + renderer);
                             currentRenderer = renderer;
+                        }
                     } else
                     {
                         System.err.println(renderer + " failed to produce a Graphics2D");
@@ -366,7 +369,7 @@ public class LCD
             // use 143 here as we've just finished processing line 143 and will start 144
             if (LY == 143)
             {
-                Graphics2D graphics = currentRenderer.getGraphics();
+                Graphics2D graphics = currentRenderer != null ? currentRenderer.getGraphics() : null;
 
                 if (graphics != null)
                 {

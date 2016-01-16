@@ -47,30 +47,22 @@ public class UI
 
         Cartridge cartridge = new Cartridge(buf);
 
-        Panel display = new Panel()
-        {
-            {
-                int mag = 2;
-                setBackground(Color.BLACK);
-                setMaximumSize(new Dimension(160 * mag, 144 * mag));
-                setMinimumSize(new Dimension(160 * mag, 144 * mag));
-                setSize(new Dimension(160 * mag, 144 * mag));
-                setPreferredSize(new Dimension(160 * mag, 144 * mag));
-                setIgnoreRepaint(true);
-            }
 
-            @Override
-            public void paint(Graphics g)
-            {
-                throw new RuntimeException();
-            }
-        };
+        Emulator core = new Emulator(cartridge);
 
-        Emulator core = new Emulator(cartridge, display);
+        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+
+        initUI(core, false);
+    }
+
+    private static void initUI(Emulator core, boolean fullscreen)
+    {
+        Panel display = createHeavyDisplay(core);
+        JFrame disp = new JFrame(core.cartridge.gameTitle);
 
         //    debugger = new VRAMViewer(core);
 
-        File savefile = new File(cartridge.gameTitle + ".sav");
+        File savefile = new File(core.cartridge.gameTitle + ".sav");
 
         if (core.mmu.hasBattery())
         {
@@ -236,6 +228,25 @@ public class UI
                     }
                 });
 
+                menu.add(new JCheckBoxMenuItem("Fullscreen", fullscreen)
+                {
+                    {
+                        addActionListener((e) -> {
+                            core.setPaused(true);
+                            disp.setVisible(false);
+
+                            initUI(core, !fullscreen);
+
+                            // I'm not sure why this has to be invoked later, but if it's not, stuff breaks
+                            SwingUtilities.invokeLater(() -> {
+                                core.lcd.currentRenderer = null;
+                                core.lcd.initializeRenderers();
+                                core.setPaused(false);
+                            });
+                        });
+                    }
+                });
+
                 menu.add(new JSeparator());
                 menu.add(new JMenuItem("Options"));
 
@@ -246,36 +257,36 @@ public class UI
 
         Thread codeExecutionThread = new Thread(core::exec);
 
-        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         SwingUtilities.invokeLater(() -> {
-            JFrame disp = new JFrame(cartridge.gameTitle);
-            disp.setContentPane(new Panel()
-            {
+            if (!fullscreen)
+                disp.setContentPane(display);
+            else
+                disp.setContentPane(new Panel()
                 {
-                    setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-                    add(Box.createVerticalGlue());
-                    setBackground(Color.BLACK);
-                    setIgnoreRepaint(true);
-
-                    add(new Panel()
                     {
+                        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+                        add(Box.createVerticalGlue());
+                        setBackground(Color.BLACK);
+                        setIgnoreRepaint(true);
+
+                        add(new Panel()
                         {
-                            setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-                            setBackground(Color.BLACK);
-                            setIgnoreRepaint(true);
+                            {
+                                setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+                                setBackground(Color.BLACK);
+                                setIgnoreRepaint(true);
 
-                            add(Box.createHorizontalGlue());
-                            add(display);
-                            add(Box.createHorizontalGlue());
-                        }
-                    });
+                                add(Box.createHorizontalGlue());
+                                add(display);
+                                add(Box.createHorizontalGlue());
+                            }
+                        });
 
-                    add(Box.createVerticalGlue());
-                }
-            });
+                        add(Box.createVerticalGlue());
+                    }
+                });
 
 
-            boolean fullscreen = false;
             if (fullscreen)
             {
                 disp.setUndecorated(true);
@@ -317,8 +328,37 @@ public class UI
             codeExecutionThread.start();
         });
 
-        System.err.println(cartridge.gameTitle);
-        System.err.println(cartridge);
+        System.err.println(core.cartridge.gameTitle);
+        System.err.println(core.cartridge);
         System.out.flush();
+    }
+
+    private static Panel createHeavyDisplay(Emulator core)
+    {
+        return new Panel()
+        {
+            {
+                int mag = 2;
+                setBackground(Color.BLACK);
+                setMaximumSize(new Dimension(160 * mag, 144 * mag));
+                setMinimumSize(new Dimension(160 * mag, 144 * mag));
+                setSize(new Dimension(160 * mag, 144 * mag));
+                setPreferredSize(new Dimension(160 * mag, 144 * mag));
+                setIgnoreRepaint(true);
+            }
+
+            @Override
+            public void addNotify()
+            {
+                super.addNotify();
+                core.setDisplay(this);
+            }
+
+            @Override
+            public void paint(Graphics g)
+            {
+                throw new RuntimeException();
+            }
+        };
     }
 }
