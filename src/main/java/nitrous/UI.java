@@ -52,12 +52,12 @@ public class UI
 
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
-        initUI(core, false);
+        initUI(core, false, 2);
     }
 
-    private static void initUI(Emulator core, boolean fullscreen)
+    private static void initUI(Emulator core, boolean fullscreen, int mag)
     {
-        Panel display = createHeavyDisplay(core);
+        HeavyDisplayPanel display = new HeavyDisplayPanel(core, mag);
         JFrame disp = new JFrame(core.cartridge.gameTitle);
 
         //    debugger = new VRAMViewer(core);
@@ -232,18 +232,50 @@ public class UI
                 {
                     {
                         addActionListener((e) -> {
+                            boolean wasPaused = core.isPaused();
                             core.setPaused(true);
                             disp.setVisible(false);
 
-                            initUI(core, !fullscreen);
+                            initUI(core, !fullscreen, display.magnification);
+                            core.setPaused(wasPaused);
 
                             // I'm not sure why this has to be invoked later, but if it's not, stuff breaks
                             SwingUtilities.invokeLater(() -> {
                                 core.lcd.currentRenderer = null;
                                 core.lcd.initializeRenderers();
-                                core.setPaused(false);
                             });
                         });
+                    }
+                });
+
+                menu.add(new JMenu("Magnification")
+                {
+                    {
+                        Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+
+                        for (int mag = 1; mag * 160 < screen.width && mag * 144 < screen.height; mag++)
+                        {
+                            final int magnification = mag;
+                            add(new JCheckBoxMenuItem(mag + "x", mag == display.magnification)
+                            {
+                                {
+                                    addActionListener((e) -> {
+                                        boolean wasPaused = core.isPaused();
+                                        core.setPaused(true);
+                                        disp.setVisible(false);
+
+                                        initUI(core, fullscreen, magnification);
+                                        core.setPaused(wasPaused);
+
+                                        // I'm not sure why this has to be invoked later, but if it's not, stuff breaks
+                                        SwingUtilities.invokeLater(() -> {
+                                            core.lcd.currentRenderer = null;
+                                            core.lcd.initializeRenderers();
+                                        });
+                                    });
+                                }
+                            });
+                        }
                     }
                 });
 
@@ -331,34 +363,5 @@ public class UI
         System.err.println(core.cartridge.gameTitle);
         System.err.println(core.cartridge);
         System.out.flush();
-    }
-
-    private static Panel createHeavyDisplay(Emulator core)
-    {
-        return new Panel()
-        {
-            {
-                int mag = 2;
-                setBackground(Color.BLACK);
-                setMaximumSize(new Dimension(160 * mag, 144 * mag));
-                setMinimumSize(new Dimension(160 * mag, 144 * mag));
-                setSize(new Dimension(160 * mag, 144 * mag));
-                setPreferredSize(new Dimension(160 * mag, 144 * mag));
-                setIgnoreRepaint(true);
-            }
-
-            @Override
-            public void addNotify()
-            {
-                super.addNotify();
-                core.setDisplay(this);
-            }
-
-            @Override
-            public void paint(Graphics g)
-            {
-                throw new RuntimeException();
-            }
-        };
     }
 }
