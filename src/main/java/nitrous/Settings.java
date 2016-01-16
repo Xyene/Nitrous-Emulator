@@ -25,6 +25,7 @@ public class Settings
     private static boolean channel4On;
     private static boolean muted;
     private static int magnification;
+    private static Interpolator interpolator;
 
     public interface SpeedListener
     {
@@ -33,14 +34,6 @@ public class Settings
 
     private static EmulateSpeed speed;
     private static HashSet<SpeedListener> speedListeners = new HashSet<>();
-
-    public interface InterpolatorListener
-    {
-        void updateInterpolator(Interpolator interpolator);
-    }
-
-    private static Interpolator interpolator;
-    private static HashSet<InterpolatorListener> interpolatorListeners = new HashSet<>();
 
     static
     {
@@ -175,16 +168,6 @@ public class Settings
             listener.updateSpeed(speed);
     }
 
-    public static void addInterpolatorListener(InterpolatorListener listener)
-    {
-        interpolatorListeners.add(listener);
-    }
-
-    public static void removeInterpolatorListener(InterpolatorListener listener)
-    {
-        interpolatorListeners.remove(listener);
-    }
-
     public static Interpolator getInterpolator()
     {
         return interpolator;
@@ -193,6 +176,7 @@ public class Settings
     public static void setInterpolator(Interpolator interpolator)
     {
         Settings.interpolator = interpolator;
+        storage.putInt("interpolator", interpolator.ordinal());
     }
 
     public static int getMagnification()

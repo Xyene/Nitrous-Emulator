@@ -275,10 +275,12 @@ public class UI
                             {
                                 {
                                     group.add(this);
-                                    if (interpolator == core.lcd.interpolator)
+
+                                    if (interpolator == Settings.getInterpolator())
                                         group.setSelected(getModel(), true);
+
                                     addActionListener((e) -> {
-                                        core.lcd.interpolator = interpolator;
+                                        Settings.setInterpolator(interpolator);
                                         group.setSelected(getModel(), true);
                                     });
                                 }

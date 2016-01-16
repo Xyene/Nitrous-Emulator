@@ -3,6 +3,7 @@ package nitrous.lcd;
 import nitrous.Emulator;
 import nitrous.PaletteColors;
 import nitrous.R.*;
+import nitrous.Settings;
 import nitrous.mbc.Memory;
 import nitrous.renderer.IRenderManager;
 
@@ -234,7 +235,6 @@ public class LCD
 
     public IRenderManager currentRenderer;
     public List<IRenderManager> renderers;
-    public Interpolator interpolator = Interpolator.NEAREST;
 
     @SuppressWarnings("deprecation")
     public void initializeRenderers()
@@ -373,7 +373,7 @@ public class LCD
 
                 if (graphics != null)
                 {
-                    switch (interpolator)
+                    switch (Settings.getInterpolator())
                     {
                         case NEAREST:
                             graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
