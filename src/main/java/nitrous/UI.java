@@ -340,8 +340,7 @@ public class UI
                                     if (core.clockSpeed == speed.clockSpeed)
                                         group.setSelected(getModel(), true);
                                     addActionListener(e -> {
-                                        core.clockSpeed = speed.clockSpeed;
-                                        core.sound.updateClockSpeed(speed.clockSpeed);
+                                        Settings.setSpeed(speed);
                                         group.setSelected(getModel(), true);
                                     });
                                 }

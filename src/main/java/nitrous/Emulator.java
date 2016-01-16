@@ -25,6 +25,12 @@ public class Emulator
         this.lcd = new LCD(this);
         this.sound = new SoundManager(this);
         sound.updateClockSpeed(clockSpeed);
+
+        Settings.addSpeedListener((speed) -> {
+            clockSpeed = speed.clockSpeed;
+            sound.updateClockSpeed(speed.clockSpeed);
+        });
+
         reset();
     }
 
@@ -393,7 +399,7 @@ public class Emulator
     long divCycle = 0;
     public long timerCycle = 0;
     public static int BASE_CLOCK_SPEED = 4194304;
-    public int clockSpeed = 4194304;
+    public int clockSpeed = Settings.getSpeed().clockSpeed;
     public boolean emulateSpeed = true;
     private boolean doubleSpeed = false;
 
