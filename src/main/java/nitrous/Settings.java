@@ -2,6 +2,7 @@ package nitrous;
 
 import nitrous.lcd.Interpolator;
 
+import java.awt.*;
 import java.util.HashSet;
 import java.util.prefs.Preferences;
 
@@ -22,6 +23,7 @@ public class Settings
     private static boolean channel2On;
     private static boolean channel3On;
     private static boolean channel4On;
+    private static int magnification;
 
     public interface SpeedListener
     {
@@ -48,6 +50,10 @@ public class Settings
 
         speed = getEnum("speed", EmulateSpeed.SINGLE);
         interpolator = getEnum("interpolator", Interpolator.NEAREST);
+
+        Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+        int maxMag = Math.min(screen.width / 160, screen.height / 144);
+        magnification = Math.max(1, Math.min(maxMag, storage.getInt("magnification", 2)));
     }
 
     public static boolean isChannel1On()
@@ -136,5 +142,15 @@ public class Settings
     public static void setInterpolator(Interpolator interpolator)
     {
         Settings.interpolator = interpolator;
+    }
+
+    public static int getMagnification()
+    {
+        return magnification;
+    }
+
+    public static void setMagnification(int magnification)
+    {
+        Settings.magnification = magnification;
     }
 }
