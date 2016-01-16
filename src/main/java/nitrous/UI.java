@@ -63,7 +63,7 @@ public class UI
         Cartridge cartridge = new Cartridge(buf);
         Emulator core = new Emulator(cartridge);
 
-        initUI(core, false, Settings.getMagnification());
+        initUI(core, Settings.isFullScreen(), Settings.getMagnification());
     }
 
     public static File selectROM()
@@ -351,7 +351,7 @@ public class UI
                     }
                 });
 
-                menu.add(new JCheckBoxMenuItem("Fullscreen", fullscreen)
+                menu.add(new JCheckBoxMenuItem("Fullscreen", Settings.isFullScreen())
                 {
                     {
                         addActionListener((e) -> {
@@ -359,7 +359,8 @@ public class UI
                             core.setPaused(true);
                             disp.setVisible(false);
 
-                            initUI(core, !fullscreen, Settings.getMagnification());
+                            Settings.setFullScreen(!Settings.isFullScreen());
+                            initUI(core, Settings.isFullScreen(), Settings.getMagnification());
                             core.setPaused(wasPaused);
 
                             // I'm not sure why this has to be invoked later, but if it's not, stuff breaks
@@ -388,7 +389,7 @@ public class UI
                                         disp.setVisible(false);
 
                                         Settings.setMagnification(magnification);
-                                        initUI(core, fullscreen, magnification);
+                                        initUI(core, Settings.isFullScreen(), magnification);
                                         core.setPaused(wasPaused);
 
                                         // I'm not sure why this has to be invoked later, but if it's not, stuff breaks

@@ -25,6 +25,7 @@ public class Settings
     private static boolean channel4On;
     private static boolean muted;
     private static int magnification;
+    private static boolean fullScreen;
     private static Interpolator interpolator;
 
     public interface SpeedListener
@@ -49,6 +50,7 @@ public class Settings
         Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
         int maxMag = Math.min(screen.width / 160, screen.height / 144);
         magnification = Math.max(1, Math.min(maxMag, storage.getInt("magnification", 2)));
+        fullScreen = storage.getBoolean("fullscreen", false);
     }
 
     public static boolean isChannel1On()
@@ -188,5 +190,16 @@ public class Settings
     {
         Settings.magnification = magnification;
         storage.putInt("magnification", magnification);
+    }
+
+    public static boolean isFullScreen()
+    {
+        return fullScreen;
+    }
+
+    public static void setFullScreen(boolean fullScreen)
+    {
+        Settings.fullScreen = fullScreen;
+        storage.putBoolean("fullscreen", fullScreen);
     }
 }
