@@ -63,7 +63,7 @@ public class UI
         Cartridge cartridge = new Cartridge(buf);
         Emulator core = new Emulator(cartridge);
 
-        initUI(core, false, 2);
+        initUI(core, false, Settings.getMagnification());
     }
 
     public static File selectROM()
@@ -359,7 +359,7 @@ public class UI
                             core.setPaused(true);
                             disp.setVisible(false);
 
-                            initUI(core, !fullscreen, display.magnification);
+                            initUI(core, !fullscreen, Settings.getMagnification());
                             core.setPaused(wasPaused);
 
                             // I'm not sure why this has to be invoked later, but if it's not, stuff breaks
@@ -387,6 +387,7 @@ public class UI
                                         core.setPaused(true);
                                         disp.setVisible(false);
 
+                                        Settings.setMagnification(magnification);
                                         initUI(core, fullscreen, magnification);
                                         core.setPaused(wasPaused);
 

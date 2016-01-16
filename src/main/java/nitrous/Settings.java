@@ -187,5 +187,6 @@ public class Settings
     public static void setMagnification(int magnification)
     {
         Settings.magnification = magnification;
+        storage.putInt("magnification", magnification);
     }
 }
