@@ -23,6 +23,7 @@ public class Settings
     private static boolean channel2On;
     private static boolean channel3On;
     private static boolean channel4On;
+    private static boolean muted;
     private static int magnification;
 
     public interface SpeedListener
@@ -47,6 +48,7 @@ public class Settings
         channel2On = storage.getBoolean("channel2", true);
         channel3On = storage.getBoolean("channel3", true);
         channel4On = storage.getBoolean("channel4", true);
+        muted = storage.getBoolean("muted", false);
 
         speed = getEnum("speed", EmulateSpeed.SINGLE);
         interpolator = getEnum("interpolator", Interpolator.NEAREST);
@@ -136,6 +138,17 @@ public class Settings
             default:
                 throw new IllegalArgumentException();
         }
+    }
+
+    public static boolean isMuted()
+    {
+        return muted;
+    }
+
+    public static void setMuted(boolean muted)
+    {
+        Settings.muted = muted;
+        storage.putBoolean("muted", muted);
     }
 
     public static void addSpeedListener(SpeedListener listener)

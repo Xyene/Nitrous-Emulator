@@ -318,12 +318,12 @@ public class UI
                         });
                     }
                 });
-                menu.add(new JCheckBoxMenuItem("Mute", core.sound.muted)
+                menu.add(new JCheckBoxMenuItem("Mute", Settings.isMuted())
                 {
                     {
                         addActionListener((x) ->
                         {
-                            core.sound.muted = !core.sound.muted;
+                            Settings.setMuted(!Settings.isMuted());
                         });
                     }
                 });

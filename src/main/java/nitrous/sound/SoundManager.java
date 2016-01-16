@@ -245,8 +245,6 @@ public class SoundManager
         }
     }
 
-    public boolean muted = false;
-
     /**
      * Called every time when the CPU clock advances to generate new samples, if available.
      *
@@ -275,18 +273,18 @@ public class SoundManager
             int dataLeft = 0;
             int dataRight = 0;
 
-            if (!muted)
-            {
-                // Render the four channels.
-                int a = channel1.render();
-                if (!Settings.isChannel1On()) a = 0;
-                int b = channel2.render();
-                if (!Settings.isChannel2On()) b = 0;
-                int c = channel3.render();
-                if (!Settings.isChannel3On()) c = 0;
-                int d = channel4.render();
-                if (!Settings.isChannel4On()) d = 0;
+            // Render the four channels.
+            int a = channel1.render();
+            if (!Settings.isChannel1On()) a = 0;
+            int b = channel2.render();
+            if (!Settings.isChannel2On()) b = 0;
+            int c = channel3.render();
+            if (!Settings.isChannel3On()) c = 0;
+            int d = channel4.render();
+            if (!Settings.isChannel4On()) d = 0;
 
+            if (!Settings.isMuted())
+            {
                 // Get the channel mapping flags.
                 int flags = core.mmu.registers[R.R_NR51];
 
