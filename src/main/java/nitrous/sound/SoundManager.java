@@ -3,6 +3,7 @@ package nitrous.sound;
 import com.sun.media.sound.WaveFileWriter;
 import nitrous.Emulator;
 import nitrous.R;
+import nitrous.Settings;
 
 import javax.sound.sampled.*;
 import java.io.*;
@@ -244,43 +245,7 @@ public class SoundManager
         }
     }
 
-    public boolean channel1Enabled = true, channel2Enabled = true, channel3Enabled = true, channel4Enabled = true;
     public boolean muted = false;
-
-    public void setChannelEnabled(int channel, boolean toggle)
-    {
-        switch (channel)
-        {
-            case 1:
-                channel1Enabled = toggle;
-                break;
-            case 2:
-                channel2Enabled = toggle;
-                break;
-            case 3:
-                channel3Enabled = toggle;
-                break;
-            case 4:
-                channel4Enabled = toggle;
-                break;
-        }
-    }
-
-    public boolean isChannelEnabled(int channel)
-    {
-        switch (channel)
-        {
-            case 1:
-                return channel1Enabled;
-            case 2:
-                return channel2Enabled;
-            case 3:
-                return channel3Enabled;
-            case 4:
-                return channel4Enabled;
-        }
-        throw new IllegalArgumentException();
-    }
 
     /**
      * Called every time when the CPU clock advances to generate new samples, if available.
@@ -314,13 +279,13 @@ public class SoundManager
             {
                 // Render the four channels.
                 int a = channel1.render();
-                if (!channel1Enabled) a ^= a;
+                if (!Settings.isChannel1On()) a = 0;
                 int b = channel2.render();
-                if (!channel2Enabled) b ^= b;
+                if (!Settings.isChannel2On()) b = 0;
                 int c = channel3.render();
-                if (!channel3Enabled) c ^= c;
+                if (!Settings.isChannel3On()) c = 0;
                 int d = channel4.render();
-                if (!channel4Enabled) d ^= d;
+                if (!Settings.isChannel4On()) d = 0;
 
                 // Get the channel mapping flags.
                 int flags = core.mmu.registers[R.R_NR51];

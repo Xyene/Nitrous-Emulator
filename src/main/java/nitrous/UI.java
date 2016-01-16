@@ -292,12 +292,12 @@ public class UI
                         for (int i = 1; i < 5; i++)
                         {
                             int channel = i;
-                            add(new JCheckBoxMenuItem("Channel " + i, core.sound.isChannelEnabled(channel))
+                            add(new JCheckBoxMenuItem("Channel " + i, Settings.isChannelOn(channel))
                             {
                                 {
                                     addActionListener((x) ->
                                     {
-                                        core.sound.setChannelEnabled(channel, !core.sound.isChannelEnabled(channel));
+                                        Settings.setChannelOn(channel, !Settings.isChannelOn(channel));
                                     });
                                 }
                             });

@@ -75,7 +75,7 @@ public class Settings
     public static void setChannel2On(boolean channel2On)
     {
         Settings.channel2On = channel2On;
-        storage.putBoolean("channel2", channel1On);
+        storage.putBoolean("channel2", channel2On);
     }
 
     public static boolean isChannel3On()
@@ -86,7 +86,7 @@ public class Settings
     public static void setChannel3On(boolean channel3On)
     {
         Settings.channel3On = channel3On;
-        storage.putBoolean("channel3", channel1On);
+        storage.putBoolean("channel3", channel3On);
     }
 
     public static boolean isChannel4On()
@@ -97,7 +97,45 @@ public class Settings
     public static void setChannel4On(boolean channel4On)
     {
         Settings.channel4On = channel4On;
-        storage.putBoolean("channel4", channel1On);
+        storage.putBoolean("channel4", channel4On);
+    }
+
+    public static boolean isChannelOn(int channel)
+    {
+        switch (channel)
+        {
+            case 1:
+                return channel1On;
+            case 2:
+                return channel2On;
+            case 3:
+                return channel3On;
+            case 4:
+                return channel4On;
+            default:
+                throw new IllegalArgumentException();
+        }
+    }
+
+    public static void setChannelOn(int channel, boolean on)
+    {
+        switch (channel)
+        {
+            case 1:
+                setChannel1On(on);
+                break;
+            case 2:
+                setChannel2On(on);
+                break;
+            case 3:
+                setChannel3On(on);
+                break;
+            case 4:
+                setChannel4On(on);
+                break;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     public static void addSpeedListener(SpeedListener listener)
