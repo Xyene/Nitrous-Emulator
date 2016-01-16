@@ -31,6 +31,14 @@ public class Settings
     private static EmulateSpeed speed;
     private static HashSet<SpeedListener> speedListeners = new HashSet<>();
 
+    public interface InterpolatorListener
+    {
+        void updateInterpolator(Interpolator interpolator);
+    }
+
+    private static Interpolator interpolator;
+    private static HashSet<InterpolatorListener> interpolatorListeners = new HashSet<>();
+
     static
     {
         channel1On = storage.getBoolean("channel1", true);
@@ -39,6 +47,7 @@ public class Settings
         channel4On = storage.getBoolean("channel4", true);
 
         speed = getEnum("speed", EmulateSpeed.SINGLE);
+        interpolator = getEnum("interpolator", Interpolator.NEAREST);
     }
 
     public static boolean isChannel1On()
@@ -107,5 +116,25 @@ public class Settings
 
         for (SpeedListener listener : speedListeners)
             listener.updateSpeed(speed);
+    }
+
+    public static void addInterpolatorListener(InterpolatorListener listener)
+    {
+        interpolatorListeners.add(listener);
+    }
+
+    public static void removeInterpolatorListener(InterpolatorListener listener)
+    {
+        interpolatorListeners.remove(listener);
+    }
+
+    public static Interpolator getInterpolator()
+    {
+        return interpolator;
+    }
+
+    public static void setInterpolator(Interpolator interpolator)
+    {
+        Settings.interpolator = interpolator;
     }
 }
