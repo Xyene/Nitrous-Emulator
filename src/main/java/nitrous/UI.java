@@ -4,12 +4,19 @@ import nitrous.lcd.Interpolator;
 import nitrous.renderer.IRenderManager;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.Semaphore;
 
 public class UI
 {
@@ -17,42 +24,157 @@ public class UI
 
     public static void main(String[] argv) throws IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException
     {
+        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         JPopupMenu.setDefaultLightWeightPopupEnabled(false);
         System.setProperty("sun.java2d.opengl", "false");
 //        System.setProperty("sun.java2d.xrender", "false");
         System.setProperty("sun.java2d.d3d", "true");
 
-//        JFrame x = new JFrame("AAA");
-//        x.add(new JButton("Cliq me") {
-//            {
-//                setPreferredSize(new Dimension(100, 100));
-//            }
-//        });
-//        x.pack();
-//        x.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//        x.setLocationRelativeTo(null);
-//        x.setVisible(true);
 
-//        if(true) return;
+        File rom = null;
+        if (argv.length > 0)
+        {
+            rom = new File(argv[0]);
+            if (!rom.exists())
+            {
+                System.err.println(rom + " does not exist");
+                rom = null;
+            }
+        }
 
-        //    System.setOut(new PrintStream(new BufferedOutputStream(new FileOutputStream("emu.log"))));
+        if (rom == null)
+        {
+            rom = selectROM();
+        }
 
-        File f = new File(argv[0]);
-        FileInputStream in = new FileInputStream(f);
-        byte[] buf = new byte[(int) f.length()];
+        if (rom == null)
+        {
+            System.err.println("No ROM provided, exiting...");
+            return;
+        }
+
+        FileInputStream in = new FileInputStream(rom);
+        byte[] buf = new byte[(int) rom.length()];
         // TODO fix
         in.read(buf);
         in.close();
 
 
         Cartridge cartridge = new Cartridge(buf);
-
-
         Emulator core = new Emulator(cartridge);
 
-        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-
         initUI(core, false, 2);
+    }
+
+    public static File selectROM()
+    {
+        JDialog dialog = new JDialog((Frame) null, "NOx Emulator", true)
+        {
+            {
+                setTitle("NOx Emulator");
+                setModal(true);
+                setSize(new Dimension(160 * 2, 144 * 2));
+                setLayout(new BorderLayout());
+            }
+        };
+
+        class FileReference
+        {
+            File ref;
+        }
+        FileReference target = new FileReference();
+
+        Semaphore selectLock = new Semaphore(1);
+        selectLock.acquireUninterruptibly();
+
+        FileFilter acceptor = new FileFilter()
+        {
+            @Override
+            public boolean accept(File f)
+            {
+                if (f.isDirectory()) return true;
+                String name = f.getName();
+                return name.endsWith(".gb") || name.endsWith(".gbc") || name.endsWith(".rom");
+            }
+
+            @Override
+            public String getDescription()
+            {
+                return "Gameboy ROM (*.gb, *.gbc, *.rom)";
+            }
+        };
+
+        DropTarget dnd = new DropTarget()
+        {
+            public void drop(DropTargetDropEvent e)
+            {
+                try
+                {
+                    e.acceptDrop(DnDConstants.ACTION_COPY);
+                    List<File> droppedFiles = (List<File>)
+                            e.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+                    File f = droppedFiles.get(0);
+                    if (!acceptor.accept(f))
+                    {
+                        JOptionPane.showMessageDialog(null,
+                                "File must be a " + acceptor.getDescription() + "!", "No ROM image provided",
+                                JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    target.ref = f;
+                    dialog.dispose();
+                    selectLock.release();
+                } catch (Exception ex)
+                {
+                    ex.printStackTrace();
+                }
+            }
+        };
+
+        JPanel welcome = new JPanel()
+        {
+            {
+                setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+                setDropTarget(dnd);
+
+                add(Box.createHorizontalGlue());
+                add(new JPanel()
+                {
+                    {
+                        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+                        setDropTarget(dnd);
+
+                        add(Box.createVerticalGlue());
+                        add(new LabelBuilder()
+                                .setFont(new Font("Verdana", Font.PLAIN, 14))
+                                .append("Drag and drop or ").action("select", (e) -> {
+                                    JFileChooser chooser = new JFileChooser("Choose a game...");
+                                    chooser.setVisible(true);
+                                    chooser.setFileFilter(acceptor);
+                                    if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION)
+                                    {
+                                        target.ref = chooser.getSelectedFile();
+                                        dialog.dispose();
+                                        selectLock.release();
+                                    }
+                                }).append(" a game to start").create());
+                        add(Box.createVerticalGlue());
+                    }
+                });
+                add(Box.createHorizontalGlue());
+            }
+        };
+
+        dialog.add(welcome, BorderLayout.CENTER);
+
+        dialog.setResizable(false);
+        dialog.setLocationRelativeTo(null);
+        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        dialog.setVisible(true);
+
+        selectLock.acquireUninterruptibly();
+
+        return target.ref;
     }
 
     private static void initUI(Emulator core, boolean fullscreen, int mag)
