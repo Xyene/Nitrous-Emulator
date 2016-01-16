@@ -2,7 +2,7 @@ package nitrous.lcd;
 
 import nitrous.Emulator;
 import nitrous.PaletteColors;
-import nitrous.R.LCD_STAT;
+import nitrous.R.*;
 import nitrous.mbc.Memory;
 import nitrous.renderer.IRenderManager;
 
@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static nitrous.Emulator.*;
+import static nitrous.Emulator.screenBuffer;
 import static nitrous.R.*;
 
 public class LCD
@@ -247,7 +247,7 @@ public class LCD
                     try
                     {
                         System.err.println(rendererClass);
-                        renderer = rendererClass.getDeclaredConstructor(ComponentPeer.class).newInstance(display.getPeer());
+                        renderer = rendererClass.getDeclaredConstructor(ComponentPeer.class).newInstance(core.display.getPeer());
                     } catch (ReflectiveOperationException e1)
                     {
 //                        e1.printStackTrace();
@@ -287,7 +287,7 @@ public class LCD
             // draw the scanline
             boolean displayEnabled = displayEnabled();
             if (displayEnabled)
-                if (display != null) draw(screenBuffer, LY);
+                if (core.display != null) draw(screenBuffer, LY);
             core.mmu.registers[R_LY] = (byte) (((LY + 1) % 154) & 0xff);
 
             if (LY == 0)
@@ -383,7 +383,7 @@ public class LCD
                             break;
                     }
 
-                    graphics.drawImage(screenBuffer, 0, 0, display.getWidth(), display.getHeight(), null);
+                    graphics.drawImage(screenBuffer, 0, 0, core.display.getWidth(), core.display.getHeight(), null);
                 }
 
                 if (displayEnabled)

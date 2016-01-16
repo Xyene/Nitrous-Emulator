@@ -107,7 +107,7 @@ public class PaletteColors
         PaletteColors dmgPalette = new PaletteColors(dmgColors, dmgColors, dmgColors);
         for (int i = 0; i < byHash.length; i++)
         {
-            if (byHash[i] == null)
+            //if (byHash[i] == null)
                 byHash[i] = dmgPalette;
         }
     }

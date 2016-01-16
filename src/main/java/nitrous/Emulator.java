@@ -4,8 +4,10 @@ import nitrous.lcd.LCD;
 import nitrous.mbc.Memory;
 import nitrous.sound.SoundManager;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.LockSupport;
 
@@ -1812,6 +1814,10 @@ public class Emulator
 //        }
     }
 
+    public static void main(String[] argv) throws ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException, IOException
+    {
+        UI.main(argv);
+    }
 
     public void pushWord(int what)
     {

@@ -13,7 +13,6 @@ import java.io.IOException;
 
 public class UI
 {
-    public static Panel display;
     //public static VRAMViewer debugger;
 
     public static void main(String[] argv) throws IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException
@@ -48,6 +47,25 @@ public class UI
 
         Cartridge cartridge = new Cartridge(buf);
 
+        Panel display = new Panel()
+        {
+            {
+                int mag = 2;
+                setBackground(Color.BLACK);
+                setMaximumSize(new Dimension(160 * mag, 144 * mag));
+                setMinimumSize(new Dimension(160 * mag, 144 * mag));
+                setSize(new Dimension(160 * mag, 144 * mag));
+                setPreferredSize(new Dimension(160 * mag, 144 * mag));
+                setIgnoreRepaint(true);
+            }
+
+            @Override
+            public void paint(Graphics g)
+            {
+                throw new RuntimeException();
+            }
+        };
+
         Emulator core = new Emulator(cartridge, display);
 
         //    debugger = new VRAMViewer(core);
@@ -64,6 +82,167 @@ public class UI
 
             }
         }
+
+        KeyListener toggler = new KeyAdapter()
+        {
+            private void toggle(KeyEvent e, boolean to)
+            {
+                switch (e.getKeyCode())
+                {
+                    case KeyEvent.VK_RIGHT:
+                        core.buttonRight = to;
+                        break;
+                    case KeyEvent.VK_LEFT:
+                        core.buttonLeft = to;
+                        break;
+                    case KeyEvent.VK_UP:
+                        core.buttonUp = to;
+                        break;
+                    case KeyEvent.VK_DOWN:
+                        core.buttonDown = to;
+                        break;
+                    case KeyEvent.VK_A:
+                        core.buttonA = to;
+                        break;
+                    case KeyEvent.VK_B:
+                        core.buttonB = to;
+                        break;
+                    case KeyEvent.VK_X:
+                        core.buttonStart = to;
+                        break;
+                    case KeyEvent.VK_Y:
+                        core.buttonSelect = to;
+                        break;
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e)
+            {
+                toggle(e, false);
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e)
+            {
+                toggle(e, true);
+            }
+        };
+        display.addKeyListener(toggler);
+
+        display.addMouseListener(new MouseAdapter()
+        {
+            @Override
+            public void mouseReleased(MouseEvent e)
+            {
+                JPopupMenu menu = new JPopupMenu();
+                menu.add(new JMenu("Renderer")
+                {
+                    {
+                        ButtonGroup group = new ButtonGroup();
+
+                        for (IRenderManager renderer : core.lcd.renderers)
+                        {
+                            JRadioButtonMenuItem menuItem = renderer.getRadioMenuItem(core.lcd);
+                            group.add(menuItem);
+                            if (renderer == core.lcd.currentRenderer)
+                                group.setSelected(menuItem.getModel(), true);
+                            add(menuItem);
+                        }
+                    }
+                });
+                menu.add(new JMenu("Filter")
+                {
+                    {
+                        ButtonGroup group = new ButtonGroup();
+                        for (final Interpolator interpolator : Interpolator.values())
+                        {
+                            add(new JRadioButtonMenuItem(interpolator.name)
+                            {
+                                {
+                                    group.add(this);
+                                    if (interpolator == core.lcd.interpolator)
+                                        group.setSelected(getModel(), true);
+                                    addActionListener((e) -> {
+                                        core.lcd.interpolator = interpolator;
+                                        group.setSelected(getModel(), true);
+                                    });
+                                }
+                            });
+                        }
+                    }
+                });
+                menu.add(new JMenu("Sound")
+                {
+                    {
+                        for (int i = 1; i < 5; i++)
+                        {
+                            int channel = i;
+                            add(new JCheckBoxMenuItem("Channel " + i, core.sound.isChannelEnabled(channel))
+                            {
+                                {
+                                    addActionListener((x) ->
+                                    {
+                                        core.sound.setChannelEnabled(channel, !core.sound.isChannelEnabled(channel));
+                                    });
+                                }
+                            });
+                        }
+                    }
+                });
+                menu.add(new JSeparator());
+                menu.add(new JCheckBoxMenuItem("Pause", core.isPaused())
+                {
+                    {
+                        addActionListener((x) ->
+                        {
+                            if (core.isPaused())
+                                core.executeLock().release();
+                            else
+                                core.executeLock().acquireUninterruptibly();
+                            core.setPaused(!core.isPaused());
+                        });
+                    }
+                });
+                menu.add(new JCheckBoxMenuItem("Mute", core.sound.muted)
+                {
+                    {
+                        addActionListener((x) ->
+                        {
+                            core.sound.muted = !core.sound.muted;
+                        });
+                    }
+                });
+                menu.add(new JMenu("Speed")
+                {
+                    {
+                        ButtonGroup group = new ButtonGroup();
+                        for (final EmulateSpeed speed : EmulateSpeed.values())
+                        {
+                            add(new JRadioButtonMenuItem(speed.name)
+                            {
+                                {
+                                    group.add(this);
+                                    if (core.clockSpeed == speed.clockSpeed)
+                                        group.setSelected(getModel(), true);
+                                    addActionListener(e -> {
+                                        core.clockSpeed = speed.clockSpeed;
+                                        core.sound.updateClockSpeed(speed.clockSpeed);
+                                        group.setSelected(getModel(), true);
+                                    });
+                                }
+                            });
+                        }
+                    }
+                });
+
+                menu.add(new JSeparator());
+                menu.add(new JMenuItem("Options"));
+
+                if (SwingUtilities.isRightMouseButton(e))
+                    menu.show(e.getComponent(), e.getX(), e.getY());
+            }
+        });
 
         Thread codeExecutionThread = new Thread(core::exec);
 
@@ -86,189 +265,7 @@ public class UI
                             setIgnoreRepaint(true);
 
                             add(Box.createHorizontalGlue());
-                            add(display = new Panel()
-                            {
-                                {
-                                    int mag = 2;
-                                    setBackground(Color.BLACK);
-                                    setMaximumSize(new Dimension(160 * mag, 144 * mag));
-                                    setMinimumSize(new Dimension(160 * mag, 144 * mag));
-                                    setSize(new Dimension(160 * mag, 144 * mag));
-                                    setPreferredSize(new Dimension(160 * mag, 144 * mag));
-//                    setBackground(Color.GREEN);
-                                    KeyListener toggler = new KeyAdapter()
-                                    {
-                                        private void toggle(KeyEvent e, boolean to)
-                                        {
-                                            switch (e.getKeyCode())
-                                            {
-                                                case KeyEvent.VK_RIGHT:
-                                                    core.buttonRight = to;
-                                                    break;
-                                                case KeyEvent.VK_LEFT:
-                                                    core.buttonLeft = to;
-                                                    break;
-                                                case KeyEvent.VK_UP:
-                                                    core.buttonUp = to;
-                                                    break;
-                                                case KeyEvent.VK_DOWN:
-                                                    core.buttonDown = to;
-                                                    break;
-                                                case KeyEvent.VK_A:
-                                                    core.buttonA = to;
-                                                    break;
-                                                case KeyEvent.VK_B:
-                                                    core.buttonB = to;
-                                                    break;
-                                                case KeyEvent.VK_X:
-                                                    core.buttonStart = to;
-                                                    break;
-                                                case KeyEvent.VK_Y:
-                                                    core.buttonSelect = to;
-                                                    break;
-                                            }
-                                        }
-
-                                        @Override
-                                        public void keyReleased(KeyEvent e)
-                                        {
-                                            toggle(e, false);
-                                        }
-
-                                        @Override
-                                        public void keyPressed(KeyEvent e)
-                                        {
-                                            toggle(e, true);
-                                        }
-                                    };
-                                    addMouseListener(new MouseAdapter()
-                                    {
-                                        @Override
-                                        public void mouseReleased(MouseEvent e)
-                                        {
-                                            JPopupMenu menu = new JPopupMenu();
-                                            menu.add(new JMenu("Renderer")
-                                            {
-                                                {
-                                                    ButtonGroup group = new ButtonGroup();
-
-                                                    for (IRenderManager renderer : core.lcd.renderers)
-                                                    {
-                                                        JRadioButtonMenuItem menuItem = renderer.getRadioMenuItem(core.lcd);
-                                                        group.add(menuItem);
-                                                        if (renderer == core.lcd.currentRenderer)
-                                                            group.setSelected(menuItem.getModel(), true);
-                                                        add(menuItem);
-                                                    }
-                                                }
-                                            });
-                                            menu.add(new JMenu("Filter")
-                                            {
-                                                {
-                                                    ButtonGroup group = new ButtonGroup();
-                                                    for (final Interpolator interpolator : Interpolator.values())
-                                                    {
-                                                        add(new JRadioButtonMenuItem(interpolator.name)
-                                                        {
-                                                            {
-                                                                group.add(this);
-                                                                if (interpolator == core.lcd.interpolator)
-                                                                    group.setSelected(getModel(), true);
-                                                                addActionListener((e) -> {
-                                                                    core.lcd.interpolator = interpolator;
-                                                                    group.setSelected(getModel(), true);
-                                                                });
-                                                            }
-                                                        });
-                                                    }
-                                                }
-                                            });
-                                            menu.add(new JMenu("Sound")
-                                            {
-                                                {
-                                                    for (int i = 1; i < 5; i++)
-                                                    {
-                                                        int channel = i;
-                                                        add(new JCheckBoxMenuItem("Channel " + i, core.sound.isChannelEnabled(channel))
-                                                        {
-                                                            {
-                                                                addActionListener((x) ->
-                                                                {
-                                                                    core.sound.setChannelEnabled(channel, !core.sound.isChannelEnabled(channel));
-                                                                });
-                                                            }
-                                                        });
-                                                    }
-                                                }
-                                            });
-                                            menu.add(new JSeparator());
-                                            menu.add(new JCheckBoxMenuItem("Pause", core.isPaused())
-                                            {
-                                                {
-                                                    addActionListener((x) ->
-                                                    {
-                                                        if (core.isPaused())
-                                                            core.executeLock().release();
-                                                        else
-                                                            core.executeLock().acquireUninterruptibly();
-                                                        core.setPaused(!core.isPaused());
-                                                    });
-                                                }
-                                            });
-                                            menu.add(new JCheckBoxMenuItem("Mute", core.sound.muted)
-                                            {
-                                                {
-                                                    addActionListener((x) ->
-                                                    {
-                                                        core.sound.muted = !core.sound.muted;
-                                                    });
-                                                }
-                                            });
-                                            menu.add(new JMenu("Speed")
-                                            {
-                                                {
-                                                    ButtonGroup group = new ButtonGroup();
-                                                    for (final EmulateSpeed speed : EmulateSpeed.values())
-                                                    {
-                                                        add(new JRadioButtonMenuItem(speed.name)
-                                                        {
-                                                            {
-                                                                group.add(this);
-                                                                if (core.clockSpeed == speed.clockSpeed)
-                                                                    group.setSelected(getModel(), true);
-                                                                addActionListener(e -> {
-                                                                    core.clockSpeed = speed.clockSpeed;
-                                                                    core.sound.updateClockSpeed(speed.clockSpeed);
-                                                                    group.setSelected(getModel(), true);
-                                                                });
-                                                            }
-                                                        });
-                                                    }
-                                                }
-                                            });
-
-                                            menu.add(new JSeparator());
-                                            menu.add(new JMenuItem("Options"));
-
-                                            if (SwingUtilities.isRightMouseButton(e))
-                                                menu.show(e.getComponent(), e.getX(), e.getY());
-                                        }
-                                    });
-                                    addKeyListener(toggler);
-                                    disp.addKeyListener(toggler);
-                                    setIgnoreRepaint(true);
-                                }
-
-                                @Override
-                                public void paint(Graphics g)
-                                {
-                                    throw new RuntimeException();
-                                    //System.err.println("a");
-                                    //super.paintComponent(g);
-//                       ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-                                    //   g.drawImage(screenBuffer, 0, 0, getWidth(), getHeight(), null);
-                                }
-                            });
+                            add(display);
                             add(Box.createHorizontalGlue());
                         }
                     });
