@@ -7,17 +7,16 @@ import java.awt.event.KeyEvent;
 
 public class KeybindingSelectionPanel extends JPanel
 {
-    public KeybindingSelectionPanel(int[] keystrokes)
+    public KeybindingSelectionPanel(Keybinding keybinding)
     {
-        String[] ids = {"A", "B", "Right", "Left", "Up", "Down", "Start", "Select"};
-
         setLayout(new GridLayout(0, 2, 10, 0));
 
-        for (int i = 0; i < ids.length; i++)
+        for (int i = 0; i < keybinding.getKeyCount(); i++)
         {
             int button = i;
-            String id = ids[i];
-            int keystroke = keystrokes[i];
+            String id = keybinding.getKeyName(i);
+            int keystroke = keybinding.getKeystroke(i);
+
             add(new JPanel()
             {
                 {
@@ -27,6 +26,7 @@ public class KeybindingSelectionPanel extends JPanel
                             setPreferredSize(new Dimension(40, getPreferredSize().height));
                         }
                     });
+
                     add(new JTextField(10)
                     {
                         {
@@ -46,14 +46,8 @@ public class KeybindingSelectionPanel extends JPanel
                                 {
                                     e.consume();
 
-                                    // disallow double bindings
-                                    int code = e.getKeyCode();
-                                    for (int binding : keystrokes)
-                                        if (binding == code)
-                                            return;
-
-                                    keystrokes[button] = code;
-                                    setText(KeyEvent.getKeyText(code));
+                                    if (keybinding.updateKey(button, e.getKeyCode()))
+                                        setText(KeyEvent.getKeyText(e.getKeyCode()));
                                 }
 
                                 @Override
@@ -75,16 +69,11 @@ public class KeybindingSelectionPanel extends JPanel
         new JFrame("test")
         {
             {
-                int[] keystrokes = {
-                        KeyEvent.VK_A, KeyEvent.VK_B,
-                        KeyEvent.VK_RIGHT, KeyEvent.VK_LEFT, KeyEvent.VK_UP, KeyEvent.VK_DOWN,
-                        KeyEvent.VK_X, KeyEvent.VK_Y
-                };
-                add(new KeybindingSelectionPanel(keystrokes));
+                add(new KeybindingSelectionPanel(Settings.keys));
                 pack();
                 setLocationRelativeTo(null);
                 setResizable(false);
-                setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                setDefaultCloseOperation(EXIT_ON_CLOSE);
                 setVisible(true);
             }
         };

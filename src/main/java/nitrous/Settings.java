@@ -36,6 +36,8 @@ public class Settings
     private static EmulateSpeed speed;
     private static HashSet<SpeedListener> speedListeners = new HashSet<>();
 
+    public static final Keybinding keys = new Keybinding(storage.node("keys"));
+
     static
     {
         channel1On = storage.getBoolean("channel1", true);

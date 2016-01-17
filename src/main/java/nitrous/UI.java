@@ -201,30 +201,30 @@ public class UI
         {
             private void toggle(KeyEvent e, boolean to)
             {
-                switch (e.getKeyCode())
+                switch (Settings.keys.getKey(e.getKeyCode()))
                 {
-                    case KeyEvent.VK_RIGHT:
+                    case Keybinding.KEY_RIGHT:
                         core.buttonRight = to;
                         break;
-                    case KeyEvent.VK_LEFT:
+                    case Keybinding.KEY_LEFT:
                         core.buttonLeft = to;
                         break;
-                    case KeyEvent.VK_UP:
+                    case Keybinding.KEY_UP:
                         core.buttonUp = to;
                         break;
-                    case KeyEvent.VK_DOWN:
+                    case Keybinding.KEY_DOWN:
                         core.buttonDown = to;
                         break;
-                    case KeyEvent.VK_A:
+                    case Keybinding.KEY_A:
                         core.buttonA = to;
                         break;
-                    case KeyEvent.VK_B:
+                    case Keybinding.KEY_B:
                         core.buttonB = to;
                         break;
-                    case KeyEvent.VK_X:
+                    case Keybinding.KEY_START:
                         core.buttonStart = to;
                         break;
-                    case KeyEvent.VK_Y:
+                    case Keybinding.KEY_SELECT:
                         core.buttonSelect = to;
                         break;
                 }
@@ -405,7 +405,21 @@ public class UI
                 });
 
                 menu.add(new JSeparator());
-                menu.add(new JMenuItem("Options"));
+                menu.add(new JMenuItem("Keybindings...") {
+                    {
+                        addActionListener((e) -> {
+                            new JDialog(disp, "Keybindings...") {
+                                {
+                                    add(new KeybindingSelectionPanel(Settings.keys));
+                                    pack();
+                                    setResizable(false);
+                                    setLocationRelativeTo(disp);
+                                    setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+                                }
+                            }.setVisible(true);
+                        });
+                    }
+                });
 
                 if (SwingUtilities.isRightMouseButton(e))
                     menu.show(e.getComponent(), e.getX(), e.getY());
