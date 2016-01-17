@@ -589,8 +589,8 @@ public class UI
                             boolean wasPaused = core.isPaused();
                             core.setPaused(true);
 
-                            // Hide the window as we are creating a new one.
-                            disp.setVisible(false);
+                            // Destroy the window as we are creating a new one.
+                            disp.dispose();
 
                             // Alter full screen setting.
                             Settings.setFullScreen(!Settings.isFullScreen());
@@ -635,8 +635,8 @@ public class UI
                                         boolean wasPaused = core.isPaused();
                                         core.setPaused(true);
 
-                                        // Hide the window as we are creating a new one.
-                                        disp.setVisible(false);
+                                        // Destroy the window as we are creating a new one.
+                                        disp.dispose();
 
                                         // Alter magnification setting.
                                         Settings.setMagnification(magnification);
