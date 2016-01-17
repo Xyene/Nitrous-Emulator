@@ -53,8 +53,8 @@ public class UI
         {
             rom = new File(argv[0]);
 
-            // If it doesn't exits though, we try something else.
-            if (!rom.exists())
+            // If it doesn't exist though, we try something else.
+            if (!rom.isFile())
             {
                 System.err.println(rom + " does not exist");
                 rom = null;
