@@ -137,7 +137,6 @@ public class Emulator {
      */
     public long cyclesExecutedThisSecond;
 
-
     /**
      * Creates a new Emulator.
      *

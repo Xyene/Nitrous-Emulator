@@ -1,5 +1,8 @@
 package nitrous.cpu;
 
+/**
+ * A catch-all class for constants (generally register values) frequently used in emulation.
+ */
 public interface R
 {
     /**

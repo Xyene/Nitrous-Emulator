@@ -5,36 +5,31 @@ import nitrous.lcd.LCD;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.peer.ComponentPeer;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+/**
+ * A renderer that uses Java's rendering support on Linux.
+ *
+ * In order, it attempts to initialize XRender, GLX, and X11
+ */
 public class XRenderManager implements IRenderManager
 {
     protected AbstractRenderManager backing;
 
     public XRenderManager(ComponentPeer peer)
     {
-        try
-        {
-            backing = new XRRenderManager(peer);
-            if (backing.getGraphics() == null) throw new RuntimeException("XRender unavailable");
-        } catch (Exception e)
-        {
-            try
-            {
-                backing = new GLXRenderManager(peer);
-                if (backing.getGraphics() == null) throw new RuntimeException("GLX unavailable");
-            } catch (Exception wtf)
-            {
-                try
-                {
-                    backing = new X11RenderManager(peer);
-                    if (backing.getGraphics() == null) throw new RuntimeException("X11 unavailable (???)");
-                } catch (Exception again)
-                {
-                    throw new RuntimeException("unable to draw with X");
-                }
+        Class[] attempts = {XRRenderManager.class, GLXRenderManager.class, X11RenderManager.class};
+
+        for(Class renderer : attempts) {
+            try {
+                backing = (AbstractRenderManager) renderer.getConstructor(ComponentPeer.class).newInstance(peer);
+                if (backing.getGraphics() == null) continue;
+            } catch (ReflectiveOperationException ignored) {
+                continue;
             }
         }
+        if(backing == null) throw new RuntimeException("unable to draw!");
     }
 
     @Override
