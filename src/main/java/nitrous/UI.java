@@ -240,7 +240,7 @@ public class UI
 
         selectLock.acquireUninterruptibly();
 
-        Settings.rom.usedROM(target.ref.getAbsolutePath());
+        Settings.rom.usedROM(target.ref);
         return target.ref;
     }
 
