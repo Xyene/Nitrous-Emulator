@@ -62,11 +62,19 @@ public class UI {
     }
 
     public static File selectROM() {
+        Semaphore selectLock = new Semaphore(1);
+
         JFrame dialog = new JFrame("NOx Emulator") {
             {
                 setTitle("NOx Emulator");
                 setSize(new Dimension(160 * 2, 144 * 2));
                 setLayout(new BorderLayout());
+                addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosed(WindowEvent e) {
+                        selectLock.release();
+                    }
+                });
             }
         };
 
@@ -75,7 +83,6 @@ public class UI {
         }
         FileReference target = new FileReference();
 
-        Semaphore selectLock = new Semaphore(1);
         selectLock.acquireUninterruptibly();
 
         FileFilter acceptor = new FileFilter() {
