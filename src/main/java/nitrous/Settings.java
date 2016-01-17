@@ -38,6 +38,7 @@ public class Settings
     private static HashSet<SpeedListener> speedListeners = new HashSet<>();
 
     public static final Keybinding keys = new Keybinding(storage.node("keys"));
+    public static final ROM rom = new ROM(storage.node("rom"));
 
     static
     {

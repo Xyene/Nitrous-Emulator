@@ -1,5 +1,8 @@
 package nitrous;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
@@ -18,10 +21,11 @@ public class ROM
         store.putInt(path, store.getInt(path, 0) + 1);
     }
 
-    public static String[] merge(String[] listA, String[] listB, HashMap<String, Integer> frequency)
+    public static File[] merge(File[] listA, File[] listB, HashMap<File, Integer> frequency)
     {
-        String[] result = new String[listA.length + listB.length];
+        File[] result = new File[listA.length + listB.length];
         int indexA = 0, indexB = 0, index = 0;
+
         while (true)
         {
             if (indexA == listA.length)
@@ -34,7 +38,8 @@ public class ROM
                 System.arraycopy(listA, indexA, result, index, listA.length - indexA);
                 break;
             }
-            if (frequency.get(listA[indexA]) < frequency.get(listB[indexB]))
+
+            if (frequency.get(listA[indexA]) > frequency.get(listB[indexB]))
                 result[index++] = listA[indexA++];
             else
                 result[index++] = listB[indexB++];
@@ -42,43 +47,53 @@ public class ROM
         return result;
     }
 
-    public static String[] mergeSort(String[] list, HashMap<String, Integer> frequency)
+    public static File[] mergeSort(File[] list, HashMap<File, Integer> frequency)
     {
-        if (list.length == 1)
+        if (list.length <= 1)
             return list;
+
         int mid = list.length / 2;
-        String[] a = new String[mid];
-        String[] b = new String[list.length-mid];
+        File[] a = new File[mid];
+        File[] b = new File[list.length - mid];
+
         System.arraycopy(list, 0, a, 0, mid);
         System.arraycopy(list, mid, b, 0, b.length);
+
         a = mergeSort(a, frequency);
         b = mergeSort(b, frequency);
 
         return merge(a, b, frequency);
     }
 
-    public String[] mostUsed(int count)
+    public File[] mostUsed(int count)
     {
-        String[] roms;
+        ArrayList<File> roms = new ArrayList<>();
+        HashMap<File, Integer> frequency = new HashMap<>();
 
         try
         {
-            roms = store.keys();
+            for (String rom : store.keys())
+            {
+                File file = new File(rom);
+                if (file.isFile())
+                {
+                    roms.add(file);
+                    frequency.put(file, store.getInt(rom, 0));
+                } else
+                    store.remove(rom);
+            }
         } catch (BackingStoreException e)
         {
-            return new String[0];
+            return new File[0];
         }
 
-        HashMap<String, Integer> frequency = new HashMap<>();
-        for (String rom : roms)
-            frequency.put(rom, store.getInt(rom, 0));
-
-        String[] sorted = mergeSort(roms, frequency);
+        File[] sorted = mergeSort(roms.toArray(new File[roms.size()]), frequency);
+        System.out.println(Arrays.toString(sorted));
         if (sorted.length <= count)
             return sorted;
 
-        roms = new String[count];
-        System.arraycopy(sorted, 0, roms, 0, roms.length);
-        return roms;
+        File[] result = new File[count];
+        System.arraycopy(sorted, 0, result, 0, count);
+        return result;
     }
 }
