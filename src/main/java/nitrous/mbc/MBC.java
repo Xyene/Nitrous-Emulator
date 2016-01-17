@@ -1,6 +1,6 @@
 package nitrous.mbc;
 
-import nitrous.Emulator;
+import nitrous.cpu.Emulator;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -1,6 +1,6 @@
 package nitrous.mbc;
 
-import nitrous.Emulator;
+import nitrous.cpu.Emulator;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**

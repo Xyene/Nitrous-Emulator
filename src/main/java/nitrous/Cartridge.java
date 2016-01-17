@@ -1,5 +1,6 @@
 package nitrous;
 
+import nitrous.cpu.Emulator;
 import nitrous.mbc.*;
 
 import java.nio.charset.StandardCharsets;

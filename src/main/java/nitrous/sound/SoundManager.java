@@ -1,14 +1,12 @@
 package nitrous.sound;
 
 import com.sun.media.sound.WaveFileWriter;
-import nitrous.Emulator;
+import nitrous.cpu.Emulator;
 import nitrous.R;
 import nitrous.Settings;
 
 import javax.sound.sampled.*;
 import java.io.*;
-import java.util.Arrays;
-import java.util.concurrent.Semaphore;
 
 import static nitrous.R.*;
 

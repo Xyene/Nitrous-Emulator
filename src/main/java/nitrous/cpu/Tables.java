@@ -1,4 +1,4 @@
-package nitrous;
+package nitrous.cpu;
 
 /**
  * Contains flag register lookup tables for common operations.

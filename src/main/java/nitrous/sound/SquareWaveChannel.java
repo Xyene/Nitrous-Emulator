@@ -1,6 +1,6 @@
 package nitrous.sound;
 
-import nitrous.Emulator;
+import nitrous.cpu.Emulator;
 
 /**
  * This class implements channel 1 and 2 of the Gameboy's programmable sound chip.

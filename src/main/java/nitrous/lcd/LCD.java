@@ -1,6 +1,6 @@
 package nitrous.lcd;
 
-import nitrous.Emulator;
+import nitrous.cpu.Emulator;
 import nitrous.PaletteColors;
 import nitrous.R.*;
 import nitrous.Settings;
@@ -16,12 +16,16 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static nitrous.Emulator.screenBuffer;
 import static nitrous.R.*;
 
 public class LCD
 {
     protected final Emulator core;
+
+    /**
+     * A buffer to hold the current rendered frame.
+     */
+    public final BufferedImage screenBuffer = new BufferedImage(160, 144, BufferedImage.TYPE_INT_RGB);
 
     /**
      * Background palettes. On CGB, 0-7 are used. On GB, only 0 is used.

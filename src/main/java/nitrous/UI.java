@@ -1,5 +1,6 @@
 package nitrous;
 
+import nitrous.cpu.Emulator;
 import nitrous.lcd.Interpolator;
 import nitrous.renderer.IRenderManager;
 

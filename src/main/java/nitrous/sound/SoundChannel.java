@@ -1,6 +1,6 @@
 package nitrous.sound;
 
-import nitrous.Emulator;
+import nitrous.cpu.Emulator;
 
 import javax.sound.sampled.AudioFormat;
 

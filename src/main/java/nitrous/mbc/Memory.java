@@ -1,6 +1,6 @@
 package nitrous.mbc;
 
-import nitrous.Emulator;
+import nitrous.cpu.Emulator;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -202,8 +202,8 @@ public class Memory
                 vram[vramPageStart + dest + i] = (byte) (getAddress(source + i) & 0xff);
             }
 //            core.cycle += 8;
-//            core.ac += 8;
-//            core.executed += 8;
+//            core.cyclesSinceLastSleep += 8;
+//            core.cyclesExecutedThisSecond += 8;
             ptr += 0x10;
             length -= 0x10;
             System.err.printf("Ticked HDMA from %04X-%04X, %02X remaining\n", source, dest, length);

@@ -1,5 +1,7 @@
 package nitrous;
 
+import nitrous.cpu.Emulator;
+
 import java.awt.*;
 
 public class HeavyDisplayPanel extends Panel
