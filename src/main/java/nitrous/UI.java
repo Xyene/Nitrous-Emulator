@@ -515,8 +515,6 @@ public class UI
             }
         });
 
-        Thread codeExecutionThread = new Thread(core::exec);
-
         SwingUtilities.invokeLater(() -> {
             if (!fullscreen)
                 disp.setContentPane(display);
@@ -583,7 +581,9 @@ public class UI
 
             core.lcd.initializeRenderers();
 
-            codeExecutionThread.start();
+
+            if (core.codeExecutionThread.getState() == Thread.State.NEW)
+                core.codeExecutionThread.start();
         });
 
         System.err.println(core.cartridge.gameTitle);

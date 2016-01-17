@@ -44,6 +44,11 @@ public class Emulator {
     public Panel display;
 
     /**
+     * Code execution thread.
+     */
+    public final Thread codeExecutionThread = new Thread(this::exec);
+
+    /**
      * Whether the game is currently paused.
      */
     private boolean paused = false;
