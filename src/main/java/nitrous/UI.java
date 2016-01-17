@@ -19,12 +19,10 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
-public class UI
-{
+public class UI {
     //public static VRAMViewer debugger;
 
-    public static void main(String[] argv) throws IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException
-    {
+    public static void main(String[] argv) throws IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         JPopupMenu.setDefaultLightWeightPopupEnabled(false);
         System.setProperty("sun.java2d.opengl", "false");
@@ -33,23 +31,19 @@ public class UI
 
 
         File rom = null;
-        if (argv.length > 0)
-        {
+        if (argv.length > 0) {
             rom = new File(argv[0]);
-            if (!rom.exists())
-            {
+            if (!rom.exists()) {
                 System.err.println(rom + " does not exist");
                 rom = null;
             }
         }
 
-        if (rom == null)
-        {
+        if (rom == null) {
             rom = selectROM();
         }
 
-        if (rom == null)
-        {
+        if (rom == null) {
             System.err.println("No ROM provided, exiting...");
             return;
         }
@@ -67,10 +61,8 @@ public class UI
         initUI(core, Settings.isFullScreen(), Settings.getMagnification());
     }
 
-    public static File selectROM()
-    {
-        JDialog dialog = new JDialog((Frame) null, "NOx Emulator", true)
-        {
+    public static File selectROM() {
+        JDialog dialog = new JDialog((Frame) null, "NOx Emulator", true) {
             {
                 setTitle("NOx Emulator");
                 setModal(true);
@@ -79,8 +71,7 @@ public class UI
             }
         };
 
-        class FileReference
-        {
+        class FileReference {
             File ref;
         }
         FileReference target = new FileReference();
@@ -88,35 +79,28 @@ public class UI
         Semaphore selectLock = new Semaphore(1);
         selectLock.acquireUninterruptibly();
 
-        FileFilter acceptor = new FileFilter()
-        {
+        FileFilter acceptor = new FileFilter() {
             @Override
-            public boolean accept(File f)
-            {
+            public boolean accept(File f) {
                 if (f.isDirectory()) return true;
                 String name = f.getName();
                 return name.endsWith(".gb") || name.endsWith(".gbc") || name.endsWith(".rom");
             }
 
             @Override
-            public String getDescription()
-            {
+            public String getDescription() {
                 return "Gameboy ROM (*.gb, *.gbc, *.rom)";
             }
         };
 
-        DropTarget dnd = new DropTarget()
-        {
-            public void drop(DropTargetDropEvent e)
-            {
-                try
-                {
+        DropTarget dnd = new DropTarget() {
+            public void drop(DropTargetDropEvent e) {
+                try {
                     e.acceptDrop(DnDConstants.ACTION_COPY);
                     List<File> droppedFiles = (List<File>)
                             e.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
                     File f = droppedFiles.get(0);
-                    if (!acceptor.accept(f))
-                    {
+                    if (!acceptor.accept(f)) {
                         JOptionPane.showMessageDialog(null,
                                 "File must be a " + acceptor.getDescription() + "!", "No ROM image provided",
                                 JOptionPane.ERROR_MESSAGE);
@@ -125,22 +109,19 @@ public class UI
                     target.ref = f;
                     dialog.dispose();
                     selectLock.release();
-                } catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             }
         };
 
-        JPanel welcome = new JPanel()
-        {
+        JPanel welcome = new JPanel() {
             {
                 setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
                 setDropTarget(dnd);
 
                 add(Box.createHorizontalGlue());
-                add(new JPanel()
-                {
+                add(new JPanel() {
                     {
                         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
                         setDropTarget(dnd);
@@ -152,8 +133,7 @@ public class UI
                                     JFileChooser chooser = new JFileChooser("Choose a game...");
                                     chooser.setVisible(true);
                                     chooser.setFileFilter(acceptor);
-                                    if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION)
-                                    {
+                                    if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                                         target.ref = chooser.getSelectedFile();
                                         dialog.dispose();
                                         selectLock.release();
@@ -178,8 +158,7 @@ public class UI
         return target.ref;
     }
 
-    private static void initUI(Emulator core, boolean fullscreen, int mag)
-    {
+    private static void initUI(Emulator core, boolean fullscreen, int mag) {
         HeavyDisplayPanel display = new HeavyDisplayPanel(core, mag);
         JFrame disp = new JFrame(core.cartridge.gameTitle);
 
@@ -187,23 +166,17 @@ public class UI
 
         File savefile = new File(core.cartridge.gameTitle + ".sav");
 
-        if (core.mmu.hasBattery())
-        {
-            try
-            {
+        if (core.mmu.hasBattery()) {
+            try {
                 core.mmu.load(new FileInputStream(savefile));
-            } catch (Exception ignored)
-            {
+            } catch (Exception ignored) {
 
             }
         }
 
-        KeyListener toggler = new KeyAdapter()
-        {
-            private void toggle(KeyEvent e, boolean to)
-            {
-                switch (Settings.keys.getKey(e.getKeyCode()))
-                {
+        KeyListener toggler = new KeyAdapter() {
+            private void toggle(KeyEvent e, boolean to) {
+                switch (Settings.keys.getKey(e.getKeyCode())) {
                     case Keybinding.KEY_RIGHT:
                         core.buttonRight = to;
                         break;
@@ -232,36 +205,30 @@ public class UI
             }
 
             @Override
-            public void keyReleased(KeyEvent e)
-            {
+            public void keyReleased(KeyEvent e) {
                 toggle(e, false);
             }
 
             @Override
-            public void keyPressed(KeyEvent e)
-            {
+            public void keyPressed(KeyEvent e) {
                 toggle(e, true);
             }
         };
         display.addKeyListener(toggler);
 
-        display.addMouseListener(new MouseAdapter()
-        {
+        display.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseReleased(MouseEvent e)
-            {
+            public void mouseReleased(MouseEvent e) {
 
                 if (!SwingUtilities.isRightMouseButton(e))
                     return;
 
                 JPopupMenu menu = new JPopupMenu();
-                menu.add(new JMenu("Renderer")
-                {
+                menu.add(new JMenu("Renderer") {
                     {
                         ButtonGroup group = new ButtonGroup();
 
-                        for (IRenderManager renderer : core.lcd.renderers)
-                        {
+                        for (IRenderManager renderer : core.lcd.renderers) {
                             JRadioButtonMenuItem menuItem = renderer.getRadioMenuItem(core.lcd);
                             group.add(menuItem);
                             if (renderer == core.lcd.currentRenderer)
@@ -270,14 +237,11 @@ public class UI
                         }
                     }
                 });
-                menu.add(new JMenu("Filter")
-                {
+                menu.add(new JMenu("Filter") {
                     {
                         ButtonGroup group = new ButtonGroup();
-                        for (final Interpolator interpolator : Interpolator.values())
-                        {
-                            add(new JRadioButtonMenuItem(interpolator.name)
-                            {
+                        for (final Interpolator interpolator : Interpolator.values()) {
+                            add(new JRadioButtonMenuItem(interpolator.name) {
                                 {
                                     group.add(this);
 
@@ -293,14 +257,11 @@ public class UI
                         }
                     }
                 });
-                menu.add(new JMenu("Sound")
-                {
+                menu.add(new JMenu("Sound") {
                     {
-                        for (int i = 1; i < 5; i++)
-                        {
+                        for (int i = 1; i < 5; i++) {
                             int channel = i;
-                            add(new JCheckBoxMenuItem("Channel " + i, Settings.isChannelOn(channel))
-                            {
+                            add(new JCheckBoxMenuItem("Channel " + i, Settings.isChannelOn(channel)) {
                                 {
                                     addActionListener((x) ->
                                     {
@@ -312,8 +273,7 @@ public class UI
                     }
                 });
                 menu.add(new JSeparator());
-                menu.add(new JCheckBoxMenuItem("Pause", core.isPaused())
-                {
+                menu.add(new JCheckBoxMenuItem("Pause", core.isPaused()) {
                     {
                         addActionListener((x) ->
                         {
@@ -325,8 +285,7 @@ public class UI
                         });
                     }
                 });
-                menu.add(new JCheckBoxMenuItem("Mute", Settings.isMuted())
-                {
+                menu.add(new JCheckBoxMenuItem("Mute", Settings.isMuted()) {
                     {
                         addActionListener((x) ->
                         {
@@ -334,14 +293,11 @@ public class UI
                         });
                     }
                 });
-                menu.add(new JMenu("Speed")
-                {
+                menu.add(new JMenu("Speed") {
                     {
                         ButtonGroup group = new ButtonGroup();
-                        for (final EmulateSpeed speed : EmulateSpeed.values())
-                        {
-                            add(new JRadioButtonMenuItem(speed.name)
-                            {
+                        for (final EmulateSpeed speed : EmulateSpeed.values()) {
+                            add(new JRadioButtonMenuItem(speed.name) {
                                 {
                                     group.add(this);
                                     if (core.clockSpeed == speed.clockSpeed)
@@ -356,8 +312,22 @@ public class UI
                     }
                 });
 
-                menu.add(new JCheckBoxMenuItem("Fullscreen", Settings.isFullScreen())
-                {
+                menu.add(new JMenu("Volume") {
+                    {
+                        add(new JSlider(0, 100, 50) {
+                            {
+                                setLabelTable(createStandardLabels(50));
+                                setSnapToTicks(false);
+                                setFocusable(false);
+                                setPaintTicks(true);
+                                setPaintLabels(true);
+                                setPaintTrack(true);
+                            }
+                        });
+                    }
+                });
+
+                menu.add(new JCheckBoxMenuItem("Fullscreen", Settings.isFullScreen()) {
                     {
                         addActionListener((e) -> {
                             boolean wasPaused = core.isPaused();
@@ -377,16 +347,13 @@ public class UI
                     }
                 });
 
-                menu.add(new JMenu("Magnification")
-                {
+                menu.add(new JMenu("Magnification") {
                     {
                         Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
 
-                        for (int mag = 1; mag * 160 < screen.width && mag * 144 < screen.height; mag++)
-                        {
+                        for (int mag = 1; mag * 160 < screen.width && mag * 144 < screen.height; mag++) {
                             final int magnification = mag;
-                            add(new JCheckBoxMenuItem(mag + "x", mag == display.magnification)
-                            {
+                            add(new JCheckBoxMenuItem(mag + "x", mag == display.magnification) {
                                 {
                                     addActionListener((e) -> {
                                         boolean wasPaused = core.isPaused();
@@ -436,16 +403,14 @@ public class UI
             if (!fullscreen)
                 disp.setContentPane(display);
             else
-                disp.setContentPane(new Panel()
-                {
+                disp.setContentPane(new Panel() {
                     {
                         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
                         add(Box.createVerticalGlue());
                         setBackground(Color.BLACK);
                         setIgnoreRepaint(true);
 
-                        add(new Panel()
-                        {
+                        add(new Panel() {
                             {
                                 setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
                                 setBackground(Color.BLACK);
@@ -462,8 +427,7 @@ public class UI
                 });
 
 
-            if (fullscreen)
-            {
+            if (fullscreen) {
                 disp.setUndecorated(true);
                 disp.setExtendedState(JFrame.MAXIMIZED_BOTH);
             }
@@ -471,23 +435,18 @@ public class UI
             disp.setResizable(false);
             disp.setLocationRelativeTo(null);
             disp.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            disp.addWindowListener(new WindowAdapter()
-            {
+            disp.addWindowListener(new WindowAdapter() {
                 @Override
-                public void windowClosing(WindowEvent evt)
-                {
+                public void windowClosing(WindowEvent evt) {
                     System.err.println(core.cycle);
-                    try
-                    {
+                    try {
                         FileOutputStream f = new FileOutputStream(savefile);
-                        if (core.mmu.hasBattery())
-                        {
+                        if (core.mmu.hasBattery()) {
                             System.err.println("Saving cart ram");
                             core.mmu.save(f);
                         }
                         f.close();
-                    } catch (IOException e)
-                    {
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
