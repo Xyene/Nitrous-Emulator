@@ -314,7 +314,7 @@ public class UI {
 
                 menu.add(new JMenu("Volume") {
                     {
-                        add(new JSlider(0, 100, 50) {
+                        add(new JSlider(0, 100, Settings.getVolume()) {
                             {
                                 setLabelTable(createStandardLabels(50));
                                 setSnapToTicks(false);
@@ -322,6 +322,19 @@ public class UI {
                                 setPaintTicks(true);
                                 setPaintLabels(true);
                                 setPaintTrack(true);
+
+                                addChangeListener((e) -> {
+                                    Settings.setVolume(getValue());
+                                });
+
+                                addMouseListener(new MouseAdapter()
+                                {
+                                    @Override
+                                    public void mouseReleased(MouseEvent e)
+                                    {
+                                        Settings.saveVolume();
+                                    }
+                                });
                             }
                         });
                     }

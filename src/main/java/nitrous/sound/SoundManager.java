@@ -62,11 +62,6 @@ public class SoundManager
     private double sampleClocks;
 
     /**
-     * Current volume, from 0 to 100.
-     */
-    public int volume = 100;
-
-    /**
      * Samples used in buffer.
      */
     private int usedSamples = 0;
@@ -252,6 +247,9 @@ public class SoundManager
     {
         // Increase amount of time since last sample.
         clockTicks += delta;
+
+        // Cache the current volume setting.
+        int volume = Settings.getVolume();
 
         // As long as the time exceeds the sample time.
         while (clockTicks >= sampleClocks)

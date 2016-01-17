@@ -24,6 +24,7 @@ public class Settings
     private static boolean channel3On;
     private static boolean channel4On;
     private static boolean muted;
+    private static int volume;
     private static int magnification;
     private static boolean fullScreen;
     private static Interpolator interpolator;
@@ -45,6 +46,7 @@ public class Settings
         channel3On = storage.getBoolean("channel3", true);
         channel4On = storage.getBoolean("channel4", true);
         muted = storage.getBoolean("muted", false);
+        volume = storage.getInt("volume", 100);
 
         speed = getEnum("speed", EmulateSpeed.SINGLE);
         interpolator = getEnum("interpolator", Interpolator.NEAREST);
@@ -146,6 +148,21 @@ public class Settings
     {
         Settings.muted = muted;
         storage.putBoolean("muted", muted);
+    }
+
+    public static int getVolume()
+    {
+        return volume;
+    }
+
+    public static void setVolume(int volume)
+    {
+        Settings.volume = volume;
+    }
+
+    public static void saveVolume()
+    {
+        storage.putInt("volume", volume);
     }
 
     public static void addSpeedListener(SpeedListener listener)
