@@ -62,20 +62,4 @@ public class KeybindingSelectionPanel extends JPanel
             });
         }
     }
-
-    public static void main(String[] argv) throws ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException
-    {
-        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        new JFrame("test")
-        {
-            {
-                add(new KeybindingSelectionPanel(Settings.keys));
-                pack();
-                setLocationRelativeTo(null);
-                setResizable(false);
-                setDefaultCloseOperation(EXIT_ON_CLOSE);
-                setVisible(true);
-            }
-        };
-    }
 }
