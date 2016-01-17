@@ -24,12 +24,11 @@ public class XRenderManager implements IRenderManager
         for(Class renderer : attempts) {
             try {
                 backing = (AbstractRenderManager) renderer.getConstructor(ComponentPeer.class).newInstance(peer);
-                if (backing.getGraphics() == null) continue;
+                if (backing.getGraphics() != null) break;
             } catch (ReflectiveOperationException ignored) {
-                continue;
             }
         }
-        if(backing == null) throw new RuntimeException("unable to draw!");
+        if(backing == null || backing.getGraphics() == null) throw new RuntimeException("unable to draw!");
     }
 
     @Override
