@@ -581,7 +581,6 @@ public class LCD {
      * @param basePriority The current priority for the given tile.
      * @param sprite       Whether the tile belongs to a sprite or not.
      */
-
     private void drawTile(IPalette palette, int[] data, int x, int y, int tile, int scanline,
                           boolean flipX, boolean flipY, int bank, int basePriority, boolean sprite) {
         // Store a local copy to save a lot of load opcodes.
