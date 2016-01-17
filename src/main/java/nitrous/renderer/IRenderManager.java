@@ -17,7 +17,8 @@ public interface IRenderManager
     /**
      * The {@link java.lang.Class} objects for each available renderer.
      */
-    Class<? extends IRenderManager>[] RENDERERS = new Class[]{
+    @SuppressWarnings("unchecked")
+    Class<? extends IRenderManager>[] RENDERERS = new Class[] {
             GDIRenderManager.class, // GDI is fastest for drawing just one image
             D3DRenderManager.class, // Followed by D3D (on most cards)
             WGLRenderManager.class, // Some cards may do GL better than D3D, but this is unlikely
