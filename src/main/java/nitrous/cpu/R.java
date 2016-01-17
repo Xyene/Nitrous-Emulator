@@ -1,4 +1,4 @@
-package nitrous;
+package nitrous.cpu;
 
 public interface R
 {

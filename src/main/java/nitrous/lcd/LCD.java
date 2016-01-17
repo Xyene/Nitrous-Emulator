@@ -2,7 +2,7 @@ package nitrous.lcd;
 
 import nitrous.cpu.Emulator;
 import nitrous.PaletteColors;
-import nitrous.R.*;
+import nitrous.cpu.R.*;
 import nitrous.Settings;
 import nitrous.mbc.Memory;
 import nitrous.renderer.IRenderManager;
@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static nitrous.R.*;
+import static nitrous.cpu.R.*;
 
 public class LCD
 {

@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import static nitrous.R.*;
+import static nitrous.cpu.R.*;
 
 /**
  * Represents the memory of a Gameboy.

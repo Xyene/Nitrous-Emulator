@@ -2,13 +2,13 @@ package nitrous.sound;
 
 import com.sun.media.sound.WaveFileWriter;
 import nitrous.cpu.Emulator;
-import nitrous.R;
+import nitrous.cpu.R;
 import nitrous.Settings;
 
 import javax.sound.sampled.*;
 import java.io.*;
 
-import static nitrous.R.*;
+import static nitrous.cpu.R.*;
 
 /**
  * Sound manager. Manages all four sound channels:

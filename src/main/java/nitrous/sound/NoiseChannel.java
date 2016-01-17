@@ -2,7 +2,7 @@ package nitrous.sound;
 
 import nitrous.cpu.Emulator;
 
-import static nitrous.R.*;
+import static nitrous.cpu.R.*;
 
 /**
  * This class implements channel 4 of the Gameboy's programmable sound chip.

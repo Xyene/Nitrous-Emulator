@@ -1,6 +1,6 @@
 package nitrous.lcd;
 
-import static nitrous.R.*;
+import static nitrous.cpu.R.*;
 
 /**
  * Represents a Gameboy color palette. This is a shim for a GBCPalette-like interface.

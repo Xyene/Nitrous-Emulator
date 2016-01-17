@@ -1,7 +1,6 @@
 package nitrous.cpu;
 
 import nitrous.Cartridge;
-import nitrous.R;
 import nitrous.Settings;
 import nitrous.lcd.LCD;
 import nitrous.mbc.Memory;
