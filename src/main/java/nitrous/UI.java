@@ -64,11 +64,23 @@ public class UI
         Cartridge cartridge = new Cartridge(buf);
         Emulator core = new Emulator(cartridge);
 
+        core.savefile = new File(core.cartridge.gameTitle + ".sav");
+
+        if (core.mmu.hasBattery())
+        {
+            try
+            {
+                core.mmu.load(new FileInputStream(core.savefile));
+            } catch (Exception ignored)
+            {
+
+            }
+        }
+
         initUI(core, Settings.isFullScreen(), Settings.getMagnification());
     }
 
-    public static File selectROM()
-    {
+    public static File selectROM() {
         Semaphore selectLock = new Semaphore(1);
 
         JFrame dialog = new JFrame("NOx Emulator") {
@@ -237,19 +249,6 @@ public class UI
         JFrame disp = new JFrame(core.cartridge.gameTitle);
 
         //    debugger = new VRAMViewer(core);
-
-        File savefile = new File(core.cartridge.gameTitle + ".sav");
-
-        if (core.mmu.hasBattery())
-        {
-            try
-            {
-                core.mmu.load(new FileInputStream(savefile));
-            } catch (Exception ignored)
-            {
-
-            }
-        }
 
         KeyListener toggler = new KeyAdapter()
         {
@@ -564,7 +563,7 @@ public class UI
                     System.err.println(core.cycle);
                     try
                     {
-                        FileOutputStream f = new FileOutputStream(savefile);
+                        FileOutputStream f = new FileOutputStream(core.savefile);
                         if (core.mmu.hasBattery())
                         {
                             System.err.println("Saving cart ram");

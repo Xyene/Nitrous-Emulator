@@ -7,6 +7,7 @@ import nitrous.mbc.Memory;
 import nitrous.sound.SoundManager;
 
 import java.awt.*;
+import java.io.File;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.LockSupport;
 
@@ -25,6 +26,11 @@ public class Emulator {
      * Cartridge wrapper around ROM bytes.
      */
     public final Cartridge cartridge;
+
+    /**
+     * Cartridge save file.
+     */
+    public File savefile;
 
     /**
      * LCD; may be null if running headlessly.
