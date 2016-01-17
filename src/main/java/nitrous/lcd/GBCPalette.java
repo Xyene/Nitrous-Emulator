@@ -24,7 +24,7 @@ public class GBCPalette implements IPalette
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     public int getColor(int number)
     {

@@ -44,7 +44,7 @@ public class DMGPalette implements IPalette
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     public int getColor(int number)
     {

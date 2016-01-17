@@ -66,7 +66,7 @@ public class MBC1 extends MBC
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public void setAddress(int addr, int _data)

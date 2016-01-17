@@ -44,7 +44,7 @@ public class HeavyDisplayPanel extends Panel {
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public void addNotify() {

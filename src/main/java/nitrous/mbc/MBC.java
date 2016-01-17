@@ -41,7 +41,7 @@ public abstract class MBC extends Memory
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public void load(InputStream in) throws IOException
@@ -57,7 +57,7 @@ public abstract class MBC extends Memory
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public short getAddress(int addr)
