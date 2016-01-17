@@ -17,21 +17,18 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
 public class UI
 {
-    //public static VRAMViewer debugger;
-
     public static void main(String[] argv) throws IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException
     {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         JPopupMenu.setDefaultLightWeightPopupEnabled(false);
         System.setProperty("sun.java2d.opengl", "false");
-//        System.setProperty("sun.java2d.xrender", "false");
         System.setProperty("sun.java2d.d3d", "true");
-
 
         File rom = null;
         if (argv.length > 0)
@@ -55,14 +52,7 @@ public class UI
             return;
         }
 
-        FileInputStream in = new FileInputStream(rom);
-        byte[] buf = new byte[(int) rom.length()];
-        // TODO fix
-        in.read(buf);
-        in.close();
-
-
-        Cartridge cartridge = new Cartridge(buf);
+        Cartridge cartridge = new Cartridge(Files.readAllBytes(rom.toPath()));
         Emulator core = new Emulator(cartridge);
 
         core.savefile = new File(core.cartridge.gameTitle + ".sav");
