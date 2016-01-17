@@ -4,33 +4,62 @@ import nitrous.cpu.Emulator;
 
 import java.awt.*;
 
-public class HeavyDisplayPanel extends Panel
-{
+/**
+ * Heavyweight panel to display a game's LCD on.
+ */
+public class HeavyDisplayPanel extends Panel {
+    /**
+     * The Emulator bound to this display.
+     */
     private final Emulator core;
+
+    /**
+     * The magnification level of this display.
+     */
     public final int magnification;
 
-    public HeavyDisplayPanel(Emulator core, int mag)
-    {
+    /**
+     * Creates a new HeavyDisplayPanel.
+     *
+     * @param core The Emulator to render.
+     * @param mag  The magnification level to use.
+     */
+    public HeavyDisplayPanel(Emulator core, int mag) {
         this.core = core;
         this.magnification = mag;
+
+        // Other parts of the code draw black for disabled areas
         setBackground(Color.BLACK);
-        setMaximumSize(new Dimension(160 * mag, 144 * mag));
-        setMinimumSize(new Dimension(160 * mag, 144 * mag));
-        setSize(new Dimension(160 * mag, 144 * mag));
-        setPreferredSize(new Dimension(160 * mag, 144 * mag));
+
+        // Strict sizing based off magnification
+        Dimension sz = new Dimension(160 * mag, 144 * mag);
+        setMaximumSize(sz);
+        setMinimumSize(sz);
+        setSize(sz);
+        setPreferredSize(sz);
+
+        // Painting is done by an IRenderManager directly on the component peer
         setIgnoreRepaint(true);
     }
 
+    /**
+     * @{inheritDoc}
+     */
     @Override
-    public void addNotify()
-    {
+    public void addNotify() {
         super.addNotify();
+
+        // Notify the Emulator to paint on this surface
         core.setDisplay(this);
     }
 
+    /**
+     * Disables painting of this component by throwing a RuntimeException: use an IRenderManager to draw instead.
+     *
+     * @param g An ignored graphics object.
+     */
     @Override
-    public void paint(Graphics g)
-    {
+    public void paint(Graphics g) {
         throw new RuntimeException();
     }
 }
