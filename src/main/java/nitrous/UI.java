@@ -62,10 +62,9 @@ public class UI {
     }
 
     public static File selectROM() {
-        JDialog dialog = new JDialog((Frame) null, "NOx Emulator", true) {
+        JFrame dialog = new JFrame("NOx Emulator") {
             {
                 setTitle("NOx Emulator");
-                setModal(true);
                 setSize(new Dimension(160 * 2, 144 * 2));
                 setLayout(new BorderLayout());
             }
