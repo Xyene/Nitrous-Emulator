@@ -1,6 +1,7 @@
 package nitrous;
 
 import nitrous.cpu.Emulator;
+import nitrous.cpu.R;
 import nitrous.lcd.Interpolator;
 import nitrous.renderer.IRenderManager;
 
@@ -86,7 +87,7 @@ public class UI
         JFrame dialog = new JFrame("NOx Emulator") {
             {
                 setTitle("NOx Emulator");
-                setSize(new Dimension(160 * 2, 144 * 2));
+                setSize(new Dimension(R.W * 2, R.H * 2));
                 setLayout(new BorderLayout());
                 addWindowListener(new WindowAdapter() {
                     @Override
@@ -464,7 +465,7 @@ public class UI
                     {
                         Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
 
-                        for (int mag = 1; mag * 160 < screen.width && mag * 144 < screen.height; mag++)
+                        for (int mag = 1; mag * R.W < screen.width && mag * R.H < screen.height; mag++)
                         {
                             final int magnification = mag;
                             add(new JCheckBoxMenuItem(mag + "x", mag == display.magnification)

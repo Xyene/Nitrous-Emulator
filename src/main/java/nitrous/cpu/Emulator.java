@@ -12,6 +12,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.LockSupport;
 
 public class Emulator {
+
     /**
      * Memory chip/unit.
      */

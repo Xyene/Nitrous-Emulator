@@ -1,6 +1,7 @@
 package nitrous;
 
 import nitrous.cpu.Emulator;
+import nitrous.cpu.R;
 
 import java.awt.*;
 
@@ -32,7 +33,7 @@ public class HeavyDisplayPanel extends Panel {
         setBackground(Color.BLACK);
 
         // Strict sizing based off magnification
-        Dimension sz = new Dimension(160 * mag, 144 * mag);
+        Dimension sz = new Dimension(R.W * mag, R.H * mag);
         setMaximumSize(sz);
         setMinimumSize(sz);
         setSize(sz);
