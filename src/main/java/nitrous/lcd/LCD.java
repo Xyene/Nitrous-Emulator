@@ -1,7 +1,6 @@
 package nitrous.lcd;
 
 import nitrous.cpu.Emulator;
-import nitrous.PaletteColors;
 import nitrous.cpu.R.*;
 import nitrous.Settings;
 import nitrous.mbc.Memory;

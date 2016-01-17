@@ -1,13 +1,20 @@
-package nitrous;
+package nitrous.lcd;
 
 import java.awt.*;
 
+/**
+ * Palette colour data for non-colour Gameboy ROMs.
+ */
 public class PaletteColors
 {
+    /**
+     * Mapping of colours by 8-bit game hash.
+     */
     public static final PaletteColors[] byHash = new PaletteColors[0x100];
 
     static
     {
+        // Initialize colour table.
         byHash[0xFF] = new PaletteColors(new int[]{0xFFFFFF, 0xFF9C00, 0xFF0000, 0x000000}, new int[]{0xFFFFFF, 0xFF9C00, 0xFF0000, 0x000000}, new int[]{0xFFFFFF, 0xFF9C00, 0xFF0000, 0x000000});
         byHash[0x71] = new PaletteColors(new int[]{0xFFFFFF, 0xFF9C00, 0xFF0000, 0x000000}, new int[]{0xFFFFFF, 0xFF9C00, 0xFF0000, 0x000000}, new int[]{0xFFFFFF, 0xFF9C00, 0xFF0000, 0x000000});
         byHash[0xDB] = new PaletteColors(new int[]{0xFFFFFF, 0xFFFF00, 0xFF0000, 0x000000}, new int[]{0xFFFFFF, 0xFFFF00, 0xFF0000, 0x000000}, new int[]{0xFFFFFF, 0xFFFF00, 0xFF0000, 0x000000});
@@ -103,8 +110,11 @@ public class PaletteColors
         byHash[0xD3] = new PaletteColors(new int[]{0xFFFFFF, 0xADAD84, 0x42737B, 0x000000}, new int[]{0xFFFFFF, 0xFFAD63, 0x843100, 0x000000}, new int[]{0xFFFFFF, 0x63A5FF, 0x0000FF, 0x000000});
         byHash[0xF4] = new PaletteColors(new int[]{0xFFFFFF, 0x7BFF31, 0x0063C5, 0x000000}, new int[]{0xFFFFFF, 0xFF8484, 0x943A3A, 0x000000}, new int[]{0xFFFFFF, 0x63A5FF, 0x0000FF, 0x000000});
 
+        // Default colours.
         int[] dmgColors = new int[]{Color.WHITE.getRGB(), Color.LIGHT_GRAY.getRGB(), Color.DARK_GRAY.getRGB(), Color.BLACK.getRGB()};
         PaletteColors dmgPalette = new PaletteColors(dmgColors, dmgColors, dmgColors);
+
+        // Set all colours to default, because we don't know the hash algorithm.
         for (int i = 0; i < byHash.length; i++)
         {
             //if (byHash[i] == null)
@@ -112,10 +122,18 @@ public class PaletteColors
         }
     }
 
+    // The three different palettes.
     public final int[] bg;
     public final int[] obj0;
     public final int[] obj1;
 
+    /**
+     * Construct a palette.
+     *
+     * @param bg background palette
+     * @param obj0 object palette 1
+     * @param obj1 object palette 2
+     */
     public PaletteColors(int[] bg, int[] obj0, int[] obj1)
     {
         this.bg = bg;
