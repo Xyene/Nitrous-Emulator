@@ -249,6 +249,10 @@ public class UI
             @Override
             public void mouseReleased(MouseEvent e)
             {
+
+                if (!SwingUtilities.isRightMouseButton(e))
+                    return;
+
                 JPopupMenu menu = new JPopupMenu();
                 menu.add(new JMenu("Renderer")
                 {
@@ -421,8 +425,7 @@ public class UI
                     }
                 });
 
-                if (SwingUtilities.isRightMouseButton(e))
-                    menu.show(e.getComponent(), e.getX(), e.getY());
+                menu.show(e.getComponent(), e.getX(), e.getY());
             }
         });
 
