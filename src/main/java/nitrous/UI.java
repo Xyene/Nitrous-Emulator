@@ -579,11 +579,9 @@ public class UI
             });
 
             disp.setVisible(true);
-//            disp.setIgnoreRepaint(true);
-
+            display.requestFocus();
 
             core.lcd.initializeRenderers();
-            //          core.lcd.currentRenderer.getGraphics().getDeviceConfiguration().getDevice().setFullScreenWindow(disp);
 
             codeExecutionThread.start();
         });
