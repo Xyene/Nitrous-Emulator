@@ -65,6 +65,8 @@ public interface R
     int TIMER_OVERFLOW_HANDLER_ADDRESS = 0x50;
     int SERIAL_TRANSFER_HANDLER_ADDRESS = 0x58;
     int HILO_HANDLER_ADDRESS = 0x60;
+    int W = 160;
+    int H = 144;
 
     interface LCDC
     {
