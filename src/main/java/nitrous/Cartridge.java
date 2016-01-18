@@ -10,9 +10,9 @@ import java.nio.charset.StandardCharsets;
  */
 public class Cartridge
 {
-    public final String gameTitle;
-    public final boolean isColorGB, isSuperGB;
-
+    /**
+     * Mapping of cartridge type id to readable name.
+     */
     // might be wrong!
     public static final String[] CARTRIDGE_TYPES = {
     /* 0x00 */  "ROM ONLY",
@@ -47,13 +47,57 @@ public class Cartridge
     /* 0x1d */  "ROM+MBC5+RUMBLE+SRAM",
     /* 0x1e */  "ROM+MBC5+RUMBLE+SRAM+BATT",
     };
+
+    /**
+     * The title of the game.
+     */
+    public final String gameTitle;
+
+    /**
+     * Whether the cartridge supports Gameboy Color features.
+     */
+    public final boolean isColorGB;
+
+    /**
+     * Whether the cartridge supports Super Gameboy features.
+     */
+    public final boolean isSuperGB;
+
+    /**
+     * The cartridge type ({@see CARTRIDGE_TYPES}).
+     */
     public final byte cartridgeType;
+
+    /**
+     * The number of ROM banks in this cartridge.
+     */
     public final int romBanks;
+
+    /**
+     * The number of RAM banks in this cartridge.
+     */
     public final int ramBanks;
+
+    /**
+     * Whether this is a Japanese cartridge.
+     */
     public final boolean isJapanese;
+
+    /**
+     * Raw ROM data.
+     */
     public final byte[] rom;
+
+    /**
+     * Cartridge checksum.
+     */
     public int checksum;
 
+    /**
+     * Creates a new Cartridge.
+     *
+     * @param rom The raw ROM data to read from.
+     */
     public Cartridge(byte[] rom)
     {
         this.rom = rom;
@@ -162,10 +206,15 @@ public class Cartridge
          * This secret value is actually just the lowest 8 bits of the sum of the game title.
          */
         for (int i = 0; i < 16; ++i)
-            checksum += rom[0x134+i];
+            checksum += rom[0x134 + i];
         checksum &= 0xFF;
     }
 
+    /**
+     * Checks whether this cartridge has a battery.
+     *
+     * @return Whether the cartridge contains a battery.
+     */
     public boolean hasBattery()
     {
         // MMM01 not included here, but we don't support it anyway
@@ -185,11 +234,19 @@ public class Cartridge
         }
     }
 
+    /**
+     * Creates a memory controlled for the given Emulator.
+     *
+     * @param core The Emulator to bind the controller to.
+     * @return A Memory instance.
+     */
     public Memory createController(Emulator core)
     {
+        // Look up which MBC should be used given the cartridge type
         switch (cartridgeType)
         {
             case 0x00:
+                // Just ROM
                 return new Memory(core);
             case 0x01:
             case 0x02:
@@ -210,6 +267,9 @@ public class Cartridge
         throw new UnsupportedOperationException("unsupported controller " + CARTRIDGE_TYPES[cartridgeType]);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString()
     {
