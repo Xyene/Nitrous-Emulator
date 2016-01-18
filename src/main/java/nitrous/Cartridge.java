@@ -64,7 +64,7 @@ public class Cartridge
     public final boolean isSuperGB;
 
     /**
-     * The cartridge type ({@see CARTRIDGE_TYPES}).
+     * The cartridge type ({@link #CARTRIDGE_TYPES}).
      */
     public final byte cartridgeType;
 
