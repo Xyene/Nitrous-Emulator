@@ -350,7 +350,7 @@ public class Application
                 })
                 {{
                     setBorder(BorderFactory.createCompoundBorder(
-                            new TitledBorder("Recent games")
+                            new TitledBorder("Frequent games")
                             {
                                 {
                                     setTitleFont(verdana);
@@ -566,9 +566,10 @@ public class Application
 
                 // Add the pause menu checkbox item.
                 // #cheat allows the game to be paused
-                menu.add(new JCheckBoxMenuItem("Pause", core.isPaused())
+                menu.add(new JCheckBoxMenuItem("<html><u>P</u>ause</html>", core.isPaused())
                 {
                     {
+                        setMnemonic('P');
                         // On click, toggle the pause state by controlling the execution lock.
                         // #action alter pause state on menu click
                         addActionListener((x) ->
@@ -579,16 +580,6 @@ public class Application
                                 core.executeLock().acquireUninterruptibly();
                             core.setPaused(!core.isPaused());
                         });
-                    }
-                });
-
-                // Add a checkbox for the mute setting.
-                menu.add(new JCheckBoxMenuItem("Mute", Settings.isMuted())
-                {
-                    {
-                        // On click, toggle the setting.
-                        // #action alter mute state on menu click
-                        addActionListener((x) -> Settings.setMuted(!Settings.isMuted()));
                     }
                 });
 
@@ -624,6 +615,17 @@ public class Application
                                 }
                             });
                         }
+                    }
+                });
+
+                // Add a checkbox for the mute setting.
+                menu.add(new JCheckBoxMenuItem("<html><u>M</u>ute</html>", Settings.isMuted())
+                {
+                    {
+                        setMnemonic('M');
+                        // On click, toggle the setting.
+                        // #action alter mute state on menu click
+                        addActionListener((x) -> Settings.setMuted(!Settings.isMuted()));
                     }
                 });
 
@@ -666,9 +668,10 @@ public class Application
                 });
 
                 // Add fullscreen checkbox.
-                menu.add(new JCheckBoxMenuItem("Fullscreen", Settings.isFullScreen())
+                menu.add(new JCheckBoxMenuItem("<html><u>F</u>ullscreen</html>", Settings.isFullScreen())
                 {
                     {
+                        setMnemonic('F');
                         // On click, switch fullscreen state.
                         // #action alter fullscreen state on menu click
                         addActionListener((e) ->
@@ -748,6 +751,19 @@ public class Application
                                 }
                             });
                         }//end for
+                    }
+                });
+
+                menu.add(new JMenuItem("<html><u>R</u>eset...</html>")
+                {
+                    {
+                        setMnemonic('R');
+                        addActionListener((e) -> {
+                            if (JOptionPane.showConfirmDialog(disp,
+                                    "Are you sure you want to reset the game?",
+                                    "Reset?", JOptionPane.YES_NO_OPTION) == JOptionPane.OK_OPTION)
+                                core.reset();
+                        });
                     }
                 });
 
