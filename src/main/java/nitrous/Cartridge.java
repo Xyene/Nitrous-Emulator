@@ -91,7 +91,7 @@ public class Cartridge
     /**
      * Cartridge checksum.
      */
-    public int checksum;
+    public final int checksum;
 
     /**
      * Creates a new Cartridge.
@@ -205,9 +205,10 @@ public class Cartridge
          * Calculate the special value used by the CGB boot ROM to colorize some monochrome games.
          * This secret value is actually just the lowest 8 bits of the sum of the game title.
          */
+        int chk = 0;
         for (int i = 0; i < 16; ++i)
-            checksum += rom[0x134 + i];
-        checksum &= 0xFF;
+            chk += rom[0x134 + i];
+        this.checksum = chk & 0xFF;
     }//end Cartridge(rom)
 
     /**
