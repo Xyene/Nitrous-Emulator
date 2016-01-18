@@ -400,10 +400,10 @@ public class Emulator
     }
 
     /**
-     * Fetches the short value contained in a register pair.
+     * Fetches the byte value contained in a register.
      *
-     * @param r the register pair id as encoded by opcode
-     * @return the value of the register pair
+     * @param r the register id as encoded by opcode
+     * @return the value of the register
      */
     public int getRegister(int r)
     {
@@ -431,10 +431,10 @@ public class Emulator
     }
 
     /**
-     * Alters the short value contained in a register pair.
+     * Alters the byte value contained in a register.
      *
-     * @param r the register pair id as encoded by opcode
-     * @param val the short value
+     * @param r the register id as encoded by opcode
+     * @param val the byte value
      */
     public void setRegister(int r, int val)
     {
