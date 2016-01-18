@@ -1,7 +1,5 @@
 package nitrous;
 
-import nitrous.cpu.Emulator;
-
 import static nitrous.cpu.Emulator.BASE_CLOCK_SPEED;
 
 /**
