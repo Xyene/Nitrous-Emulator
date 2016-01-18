@@ -22,7 +22,6 @@ import static nitrous.cpu.R.*;
  */
 public class LCD
 {
-
     /**
      * An array of blank values matching in size with the dimensions of screenBuffer, used to very quickly
      * clear the contents of the previous frame via System.arraycopy.
@@ -177,7 +176,6 @@ public class LCD
      */
     private void updatePaletteByte(byte[] from, IPalette to, int i, int j)
     {
-
         /**
          * This register allows to read/write data to the CGBs Background Palette Memory, addressed through Register FF68.
          * Each color is defined by two bytes (Bit 0-7 in first byte).
@@ -295,7 +293,6 @@ public class LCD
             int lcdStat = core.mmu.registers[R_LCD_STAT];
             if (displayEnabled && !isVBlank)
             {
-
                 /**
                  * INT 48 - LCDC Status Interrupt
                  *
@@ -452,12 +449,8 @@ public class LCD
             drawSprites(data, scanline);
 
         // If the window appears in this scanline, draw it
-        if (windowEnabled() &&
-                scanline >= getWindowPosY() &&
-                getWindowPosX() < W && getWindowPosY() >= 0)
-        {
+        if (windowEnabled() && scanline >= getWindowPosY() && getWindowPosX() < W && getWindowPosY() >= 0)
             drawWindow(data, scanline);
-        }
     }
 
     /**
@@ -622,7 +615,6 @@ public class LCD
      * @param basePriority The current priority for the given tile.
      * @param sprite       Whether the tile belongs to a sprite or not.
      */
-
     private void drawTile(IPalette palette, int[] data, int x, int y, int tile, int scanline,
                           boolean flipX, boolean flipY, int bank, int basePriority, boolean sprite)
     {
