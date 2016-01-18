@@ -11,12 +11,13 @@ import java.awt.event.KeyEvent;
 public class KeybindingSelectionPanel extends JPanel
 {
     /**
-     * Create the Panel.
+     * Creates a new KeybindingSelectionPanel.
      *
      * @param keybinding the underlying keybinding storage
      */
     public KeybindingSelectionPanel(Keybinding keybinding)
     {
+        // 2x4 matrix of buttons
         setLayout(new GridLayout(0, 2, 10, 0));
 
         // Loop over all keys.
@@ -34,15 +35,16 @@ public class KeybindingSelectionPanel extends JPanel
             add(new JPanel()
             {
                 {
-                    // THe button name label.
+                    // The button name label.
                     add(new JLabel(id)
                     {
                         {
+                            // Should have a bit of fixed padding between label and textbox.
                             setPreferredSize(new Dimension(40, getPreferredSize().height));
                         }
                     });
 
-                    // The binding text field.
+                    // The binding text field, big enough for 10 characters.
                     add(new JTextField(10)
                     {
                         {
@@ -50,15 +52,22 @@ public class KeybindingSelectionPanel extends JPanel
                             setForeground(getDisabledTextColor());
                             setText(KeyEvent.getKeyText(keystroke));
 
-                            // Event handler to update biding.
+                            // Event handler to update binding: it consumes absolutely all events, and updates
+                            // the text field itself.
                             addKeyListener(new KeyAdapter()
                             {
+                                /**
+                                 * {@inheritDoc}
+                                 */
                                 @Override
                                 public void keyTyped(KeyEvent e)
                                 {
                                     e.consume();
                                 }
 
+                                /**
+                                 * {@inheritDoc}
+                                 */
                                 @Override
                                 public void keyPressed(KeyEvent e)
                                 {
@@ -71,6 +80,9 @@ public class KeybindingSelectionPanel extends JPanel
                                         setText(KeyEvent.getKeyText(e.getKeyCode()));
                                 }
 
+                                /**
+                                 * {@inheritDoc}
+                                 */
                                 @Override
                                 public void keyReleased(KeyEvent e)
                                 {
