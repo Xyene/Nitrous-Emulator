@@ -56,7 +56,7 @@ public class Emulator
     /**
      * Execution lock used to implement pausing.
      */
-    private Semaphore executeLock = new Semaphore(1);
+    private final Semaphore executeLock = new Semaphore(1);
 
     /**
      * Whether the CPU should trigger interrupt handlers.
@@ -460,8 +460,8 @@ public class Emulator
     /**
      * Checks whether a particular interrupt is enabled.
      *
-     * @param interrupt
-     * @return
+     * @param interrupt The interrupt bit.
+     * @return Whether it is currently triggered or not.
      */
     public boolean isInterruptTriggered(int interrupt)
     {
@@ -703,12 +703,6 @@ public class Emulator
 
         int op = nextUByte();
 
-
-        if (false)
-            System.out.printf("%08d pc=%04X, c=%02X, SP=%08X, A=%d, B=%d, C=%d, D=%d, E=%d, HL=%04X, Z=%b, C=%b, H=%b\n",
-                    instr, pc - 1, op & 0xff, SP, A, B, C, D, E,
-                    getRegisterPair(RegisterPair.HL), (F & F_Z) != 0, (F & F_C) != 0, (F & F_H) != 0);
-
         switch (op)
         {
             case 0x00:
@@ -771,7 +765,7 @@ public class Emulator
             case 0x32:
                 return LD_HLD_A();
             case 0x10:
-                return STOP(op);
+                return STOP();
             case 0xf9:
             {
                 setRegisterPair(RegisterPair.SP, getRegisterPair(RegisterPair.HL));
@@ -1214,7 +1208,7 @@ public class Emulator
         return 0;
     }
 
-    private int STOP(int op)
+    private int STOP()
     {
         return NOP();
     }

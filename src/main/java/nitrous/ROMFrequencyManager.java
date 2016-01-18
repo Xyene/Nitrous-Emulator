@@ -9,7 +9,7 @@ import java.util.prefs.Preferences;
 /**
  * Most frequently used ROMs manager.
  */
-public class ROM
+public class ROMFrequencyManager
 {
     /**
      * Backing store: with {@link Preferences}.
@@ -21,7 +21,7 @@ public class ROM
      *
      * @param store the {@link Preferences} to store the data.
      */
-    public ROM(Preferences store)
+    public ROMFrequencyManager(Preferences store)
     {
         this.store = store;
     }

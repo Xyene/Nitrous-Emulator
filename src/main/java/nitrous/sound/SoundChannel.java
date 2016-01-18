@@ -17,7 +17,7 @@ public abstract class SoundChannel
     /**
      * Base constructor, stores the {@link Emulator} instance.
      *
-     * @param core
+     * @param core The Emulator to use.
      */
     public SoundChannel(Emulator core)
     {

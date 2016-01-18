@@ -29,7 +29,7 @@ public class SoundManager
     /**
      * Sound buffer.
      */
-    private byte[] buffer;
+    private final byte[] buffer;
 
     /**
      * {@link SourceDataLine} for output.
@@ -39,22 +39,22 @@ public class SoundManager
     /**
      * {@link SquareWaveChannel} instance for channel 1.
      */
-    public SquareWaveChannel channel1;
+    public final SquareWaveChannel channel1;
 
     /**
      * {@link SquareWaveChannel} instance for channel 2.
      */
-    public SquareWaveChannel channel2;
+    public final SquareWaveChannel channel2;
 
     /**
      * {@link RawWaveChannel} instance for channel 3.
      */
-    public RawWaveChannel channel3;
+    public final RawWaveChannel channel3;
 
     /**
      * {@link NoiseChannel} instance for channel 4.
      */
-    public NoiseChannel channel4;
+    public final NoiseChannel channel4;
 
     /**
      * Amount of CPU cycles per sample of audio.

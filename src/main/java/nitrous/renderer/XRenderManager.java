@@ -19,13 +19,14 @@ public class XRenderManager implements IRenderManager
 
     public XRenderManager(ComponentPeer peer)
     {
-        Class[] attempts = {XRRenderManager.class, GLXRenderManager.class, X11RenderManager.class};
+        @SuppressWarnings("unchecked")
+        Class<? extends AbstractRenderManager>[] attempts = new Class[]{XRRenderManager.class, GLXRenderManager.class, X11RenderManager.class};
 
-        for (Class renderer : attempts)
+        for (Class<? extends AbstractRenderManager> renderer : attempts)
         {
             try
             {
-                backing = (AbstractRenderManager) renderer.getConstructor(ComponentPeer.class).newInstance(peer);
+                backing = renderer.getConstructor(ComponentPeer.class).newInstance(peer);
                 if (backing.getGraphics() != null) break;
             } catch (ReflectiveOperationException ignored)
             {

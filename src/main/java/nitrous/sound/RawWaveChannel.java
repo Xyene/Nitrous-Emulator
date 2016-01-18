@@ -100,12 +100,12 @@ public class RawWaveChannel extends SoundChannel
     /**
      * Array of samples which are being played.
      */
-    private int[] samples = new int[32];
+    private final int[] samples = new int[32];
 
     /**
      * Array of samples that will replace {@link #samples} on the next update, if there is one.
      */
-    private int[] updated = new int[32];
+    private final int[] updated = new int[32];
 
     /**
      * Flag to signal a sample update request.

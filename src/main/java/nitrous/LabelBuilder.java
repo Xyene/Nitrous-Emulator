@@ -23,7 +23,7 @@ public class LabelBuilder
     /**
      * Container for all label components.
      */
-    private ArrayList<Component> bits = new ArrayList<Component>();
+    private final ArrayList<Component> bits = new ArrayList<>();
 
     /**
      * Default foreground color.
@@ -115,10 +115,8 @@ public class LabelBuilder
                         {
                             if (clicked)
                             {
-                                SwingUtilities.invokeLater(() -> {
-                                            act.actionPerformed(new ActionEvent(this,
-                                                    ActionEvent.ACTION_PERFORMED, "label_action"));
-                                        }
+                                SwingUtilities.invokeLater(() -> act.actionPerformed(new ActionEvent(this,
+                                        ActionEvent.ACTION_PERFORMED, "label_action"))
                                 );
                             }
                             mouseExited(e);
@@ -127,6 +125,7 @@ public class LabelBuilder
                     }
 
                     @Override
+                    @SuppressWarnings("unchecked")
                     public void mouseEntered(MouseEvent e)
                     {
                         if (!active)
@@ -162,10 +161,7 @@ public class LabelBuilder
     public JPanel create()
     {
         JPanel panel = new JPanel(new GridBagLayout());
-        for (Component comp : bits)
-        {
-            panel.add(comp);
-        }
+        bits.forEach(panel::add);
         return panel;
     }
 }

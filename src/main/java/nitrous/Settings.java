@@ -15,7 +15,7 @@ public class Settings
     /**
      * Create the settings storage.
      */
-    private static Preferences storage = Preferences.userNodeForPackage(Settings.class);
+    private static final Preferences storage = Preferences.userNodeForPackage(Settings.class);
 
     /**
      * Utility function to get enum values form settings storage with fallback.
@@ -88,7 +88,7 @@ public class Settings
     /**
      * Registered {@link SpeedListener} instances.
      */
-    private static HashSet<SpeedListener> speedListeners = new HashSet<>();
+    private static final HashSet<SpeedListener> speedListeners = new HashSet<>();
 
     /**
      * The keybinding storage, managed by a {@link Keybinding} instance.
@@ -96,9 +96,9 @@ public class Settings
     public static final Keybinding keys = new Keybinding(storage.node("keys"));
 
     /**
-     * The most frequently used ROMs, managed by a {@link ROM} instance.
+     * The most frequently used ROMs, managed by a {@link ROMFrequencyManager} instance.
      */
-    public static final ROM rom = new ROM(storage.node("rom"));
+    public static final ROMFrequencyManager rom = new ROMFrequencyManager(storage.node("rom"));
 
     static
     {

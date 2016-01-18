@@ -168,6 +168,7 @@ public class UI
          */
         class ROMDropTarget extends DropTarget
         {
+            @SuppressWarnings("unchecked")
             public void drop(DropTargetDropEvent e)
             {
                 try
@@ -198,7 +199,6 @@ public class UI
                 }
             }
         }
-        ;
 
         // Create the welcome panel.
         JPanel welcome = new JPanel()
@@ -484,9 +484,7 @@ public class UI
                                 {
                                     // Alter settings on click.
                                     addActionListener((x) ->
-                                    {
-                                        Settings.setChannelOn(channel, !Settings.isChannelOn(channel));
-                                    });
+                                            Settings.setChannelOn(channel, !Settings.isChannelOn(channel)));
                                 }
                             });
                         }
@@ -518,9 +516,7 @@ public class UI
                     {
                         // On click, toggle the setting.
                         addActionListener((x) ->
-                        {
-                            Settings.setMuted(!Settings.isMuted());
-                        });
+                                Settings.setMuted(!Settings.isMuted()));
                     }
                 });
 
@@ -573,9 +569,7 @@ public class UI
                                 setPaintTrack(true);
 
                                 // Update volume on slider change.
-                                addChangeListener((e) -> {
-                                    Settings.setVolume(getValue());
-                                });
+                                addChangeListener((e) -> Settings.setVolume(getValue()));
 
                                 // Only save the volume once the slider is released.
                                 addMouseListener(new MouseAdapter()
@@ -679,21 +673,19 @@ public class UI
                 {
                     {
                         // On click, create and show the dialog.
-                        addActionListener((e) -> {
-                            new JDialog(disp, "Keybindings...")
+                        addActionListener((e) -> new JDialog(disp, "Keybindings...")
+                        {
                             {
-                                {
-                                    // Add the panel.
-                                    add(new KeybindingSelectionPanel(Settings.keys));
+                                // Add the panel.
+                                add(new KeybindingSelectionPanel(Settings.keys));
 
-                                    // Pack and show the dialog, disposing it on close.
-                                    pack();
-                                    setResizable(false);
-                                    setLocationRelativeTo(disp);
-                                    setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-                                }
-                            }.setVisible(true);
-                        });
+                                // Pack and show the dialog, disposing it on close.
+                                pack();
+                                setResizable(false);
+                                setLocationRelativeTo(disp);
+                                setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+                            }
+                        }.setVisible(true));
                     }
                 });
 

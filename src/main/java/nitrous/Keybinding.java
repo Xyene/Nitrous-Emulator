@@ -42,17 +42,17 @@ public class Keybinding
     /**
      * The current keybinding settings, as an array indexed by constants in {@link Keybinding}.
      */
-    private int[] keystrokes = new int[8];
+    private final int[] keystrokes = new int[8];
 
     /**
      * The names of each button, in the same order as {@link #keystrokes}.
      */
-    private String[] keyNames = {"A", "B", "Right", "Left", "Up", "Down", "Start", "Select"};
+    private final String[] keyNames = {"A", "B", "Right", "Left", "Up", "Down", "Start", "Select"};
 
     /**
      * The mapping of key codes to the button id.
      */
-    private HashMap<Integer, Integer> keyMap = new HashMap<>();
+    private final HashMap<Integer, Integer> keyMap = new HashMap<>();
 
     /**
      * Creates a keybinding manager.

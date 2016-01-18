@@ -523,53 +523,48 @@ public class Memory
      */
     public short getAddress(int addr)
     {
-        short ret = _mapMemory(addr);
-//        System.out.printf("memread %04X=%02X\n", addr, ret & 0xFF);
-        return ret;
-    }
-
-    public short _mapMemory(int addr)
-    {
-        addr &= 0xFFFF;
-        int block = addr & 0xF000;
+        //        System.out.printf("memread %04X=%02X\n", addr, ret & 0xFF);
+        int addr1 = addr;
+        addr1 &= 0xFFFF;
+        int block = addr1 & 0xF000;
         switch (block)
         {
             case 0x0000:
             case 0x1000:
             case 0x2000:
             case 0x3000:
-                return core.cartridge.rom[addr];
+                return core.cartridge.rom[addr1];
             case 0x4000:
             case 0x5000:
             case 0x6000:
             case 0x7000:
-                return core.cartridge.rom[romPageStart + addr - 0x4000];
+                return core.cartridge.rom[romPageStart + addr1 - 0x4000];
             case 0x8000:
             case 0x9000:
-                return vram[vramPageStart + addr - 0x8000];
+                return vram[vramPageStart + addr1 - 0x8000];
             case 0xA000:
             case 0xB000:
                 return 0;
             case 0xC000:
-                return wram[addr - 0xc000];
+                return wram[addr1 - 0xc000];
             case 0xD000:
-                return wram[wramPageStart + addr - 0xd000];
+                return wram[wramPageStart + addr1 - 0xd000];
             case 0xE000:
             case 0xF000:
                 //  FEA0-FEFF is not usable
-                if (0xFEA0 <= addr && addr <= 0xFEFF) return 0xFF;
-                if (addr < 0xFE00)
+                if (0xFEA0 <= addr1 && addr1 <= 0xFEFF) return 0xFF;
+                if (addr1 < 0xFE00)
                 {
                     // E000-FE00 echoes the main ram
                     // But wait, E000-FE00 contains just 7.5kb and hence
                     // does not echo the entire 8kb internal ram
-                    return getAddress(addr - 0xE000);
-                } else if (addr < 0xFF00)
+                    return getAddress(addr1 - 0xE000);
+                } else if (addr1 < 0xFF00)
                 {
-                    return oam[addr - 0xFE00];
+                    return oam[addr1 - 0xFE00];
                 } else
                 {
-                    return getIO(addr - 0xFF00);
+                    return getIO(addr1 - 0xFF00);
                 }
         }
         return 0xFF;
@@ -583,15 +578,10 @@ public class Memory
      */
     public short getIO(int addr)
     {
-        short ret = _readReg(addr);
         //     System.out.printf("IO READ %04X=%02X\n", addr&0xFFFF, (byte)ret);
-        return ret;
-    }
-
-    public short _readReg(int addr)
-    {
-        addr &= 0xFFFF;
-        switch (addr)
+        int addr1 = addr;
+        addr1 &= 0xFFFF;
+        switch (addr1)
         {
             case 0x4d:
                 if (core.isDoubleSpeed()) return 0x80;
@@ -630,6 +620,6 @@ public class Memory
                 return reg;
             }
         }
-        return registers[addr];
+        return registers[addr1];
     }
 }
