@@ -10,11 +10,12 @@ import java.awt.*;
 import java.io.File;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.LockSupport;
+import static nitrous.cpu.R.*;
 
 /**
  * Core emulator class.
  *
- * Manages all resources and emulate CPU.
+ * Manages all resources and emulates the Gameboy CPU.
  */
 public class Emulator
 {
@@ -68,17 +69,17 @@ public class Emulator
      */
     public boolean interruptsEnabled;
 
-    public boolean buttonRight, buttonLeft, buttonStart, buttonSelect, buttonUp, buttonDown, buttonA, buttonB;
-
     /**
-     * The DMG has 4 flag registers, zero, subtract, half-carry and carry.
-     * Half-carry is only ever used for the DAA instruction. Half-carry is usually carry over lower nibble, and carry
-     * is over bit 7.
+     * Pressed states for Gameboy buttons.
      */
-    public final short F_Z = 0x80;
-    public final short F_N = 0x40;
-    public final short F_H = 0x20;
-    public final short F_C = 0x10;
+    public boolean buttonRight;
+    public boolean buttonLeft;
+    public boolean buttonStart;
+    public boolean buttonSelect;
+    public boolean buttonUp;
+    public boolean buttonDown;
+    public boolean buttonA;
+    public boolean buttonB;
 
     /**
      * Program counter.
@@ -324,6 +325,7 @@ public class Emulator
                 break;
             case SP:
                 A = hi;
+
                 // Other bits don't actually exist
                 F = lo & (F_C | F_H | F_N | F_Z);
                 break;
@@ -574,6 +576,7 @@ public class Emulator
     {
         if (doubleSpeed)
             delta /= 2;
+
         // The DIV register increments at 16KHz, and resets to 0 after
         divCycle += delta;
 
@@ -761,10 +764,8 @@ public class Emulator
      * http://www.z80.info/zip/z80cpu_um.pdf
      * <p/>
      * The general idea is that _exec executes a single instruction, and returns the number of extra cycles
-     * (not counting memory access) that the instruction took.
+     * (not counting memory access, see above) that the instruction took.
      *******************************************************************************************************/
-
-    long instr;
 
     private int _exec()
     {
@@ -774,8 +775,6 @@ public class Emulator
                 return 4;
             cpuHalted = false;
         }
-
-        instr++;
 
         int op = nextUByte();
 
