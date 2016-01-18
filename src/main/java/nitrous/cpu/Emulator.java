@@ -10,11 +10,12 @@ import java.awt.*;
 import java.io.File;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.LockSupport;
+
 import static nitrous.cpu.R.*;
 
 /**
  * Core emulator class.
- *
+ * <p/>
  * Manages all resources and emulates the Gameboy CPU.
  */
 public class Emulator
@@ -72,14 +73,7 @@ public class Emulator
     /**
      * Pressed states for Gameboy buttons.
      */
-    public boolean buttonRight;
-    public boolean buttonLeft;
-    public boolean buttonStart;
-    public boolean buttonSelect;
-    public boolean buttonUp;
-    public boolean buttonDown;
-    public boolean buttonA;
-    public boolean buttonB;
+    public boolean buttonRight, buttonLeft, buttonStart, buttonSelect, buttonUp, buttonDown, buttonA, buttonB;
 
     /**
      * Program counter.
@@ -258,8 +252,8 @@ public class Emulator
      * Alters the short value contained in a register pair.
      *
      * @param object the register pair id
-     * @param hi the high byte of the short value
-     * @param lo the low byte of the short value
+     * @param hi     the high byte of the short value
+     * @param lo     the low byte of the short value
      */
     public void setRegisterPair(RegisterPair object, short hi, short lo)
     {
@@ -289,7 +283,7 @@ public class Emulator
      * Alters the short value contained in a register pair.
      *
      * @param object the register pair id
-     * @param val the short value
+     * @param val    the short value
      */
     public void setRegisterPair(RegisterPair object, int val)
     {
@@ -302,8 +296,8 @@ public class Emulator
      * Like setRegisterPair, except 0x3 maps to AF.
      *
      * @param object the register pair id
-     * @param hi the high byte of the short value
-     * @param lo the low byte of the short value
+     * @param hi     the high byte of the short value
+     * @param lo     the low byte of the short value
      */
     public void setRegisterPair2(RegisterPair object, int hi, int lo)
     {
@@ -435,7 +429,7 @@ public class Emulator
     /**
      * Alters the byte value contained in a register.
      *
-     * @param r the register id as encoded by opcode
+     * @param r   the register id as encoded by opcode
      * @param val the byte value
      */
     public void setRegister(int r, int val)
@@ -655,7 +649,7 @@ public class Emulator
 
     /**
      * The execution thread.
-     *
+     * <p/>
      * This method executes the CPU instructions and performs other tasks such as triggering interrupts.
      * It is also responsible for controlling emulation speed.
      */
