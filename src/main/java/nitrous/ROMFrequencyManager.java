@@ -52,12 +52,12 @@ public class ROMFrequencyManager
         {
             // This can't really happen.
             throw new RuntimeException(e);
-        }
+        }//end try
 
         // Use BigInteger to convert binary data into hexadecimal.
         BigInteger bi = new BigInteger(1, digest);
         return String.format("%0" + (digest.length << 1) + "X", bi);
-    }
+    }//end md5String
 
     /**
      * Increase the usage frequency of a ROM.
@@ -176,7 +176,7 @@ public class ROMFrequencyManager
                 {
                     store.remove(hash);
                     continue;
-                }
+                }//end if
 
                 // Create file object based on path.
                 File file = new File(rom);
