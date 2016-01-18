@@ -8,7 +8,6 @@ import nitrous.cpu.R;
 import nitrous.lcd.Interpolator;
 import nitrous.renderer.IRenderManager;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileFilter;
@@ -28,7 +27,7 @@ import java.util.concurrent.Semaphore;
 
 /**
  * Main emulator UI.
- *
+ * <p/>
  * #main
  *
  * @author Tudor
@@ -36,23 +35,14 @@ import java.util.concurrent.Semaphore;
  */
 public class Application
 {
-    private static Image TITLE_ICON;
-
-    static
-    {
-        try
-        {
-            TITLE_ICON = ImageIO.read(ClassLoader.getSystemResourceAsStream("icon.png"));
-        } catch (IOException e)
-        {
-            // #error print stacktrace for debugging
-            e.printStackTrace();
-        }
-    }
+    /**
+     * The Image used for as a title icon for all windows.
+     */
+    private static final Image TITLE_ICON = new ImageIcon(ClassLoader.getSystemResource("icon.png")).getImage();
 
     /**
      * The main entry point.
-     *
+     * <p/>
      * #static method
      *
      * @param argv command line arguments
@@ -357,9 +347,11 @@ public class Application
                             }//end mouseClicked
                         });
                     }
-                }) {{
+                })
+                {{
                     setBorder(BorderFactory.createCompoundBorder(
-                            new TitledBorder("Recent games") {
+                            new TitledBorder("Recent games")
+                            {
                                 {
                                     setTitleFont(verdana);
                                     setBorder(BorderFactory.createEmptyBorder());
