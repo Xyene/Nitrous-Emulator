@@ -158,15 +158,12 @@ public class Cartridge
         this.isJapanese = rom[0x014A] == 0;
 
         /**
-         * 014D - Header Checksum
-         * Contains an 8 bit checksum across the cartridge header bytes 0134-014C. The checksum is calculated as follows:
-         *
-         * x=0:FOR i=0134h TO 014Ch:x=x-MEM[i]-1:NEXT
-         *
-         * We use this to simulate the CGB boot rom to colorize some monochrome games.
+         * Calculate the special value used by the CGB boot ROM to colorize some monochrome games.
+         * This secret value is actually just the lowest 8 bits of the sum of the game title.
          */
-
-//        this.checksum = 0x14;// rom[0x014d] & 0xff;
+        for (int i = 0; i < 16; ++i)
+            checksum += rom[0x134+i];
+        checksum &= 0xFF;
     }
 
     public boolean hasBattery()

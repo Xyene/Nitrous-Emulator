@@ -114,12 +114,10 @@ public class PaletteColors
         int[] dmgColors = new int[]{Color.WHITE.getRGB(), Color.LIGHT_GRAY.getRGB(), Color.DARK_GRAY.getRGB(), Color.BLACK.getRGB()};
         PaletteColors dmgPalette = new PaletteColors(dmgColors, dmgColors, dmgColors);
 
-        // Set all colours to default, because we don't know the hash algorithm.
+        // Set all unknown colours to default.
         for (int i = 0; i < byHash.length; i++)
-        {
-            //if (byHash[i] == null)
+            if (byHash[i] == null)
                 byHash[i] = dmgPalette;
-        }
     }
 
     // The three different palettes.
