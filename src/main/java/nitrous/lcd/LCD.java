@@ -24,7 +24,7 @@ public class LCD
 {
     /**
      * An array of blank values matching in size with the dimensions of screenBuffer, used to very quickly
-     * clear the contents of the previous frame via System.arraycopy.
+     * clear the contents of the previous frame via {@link System#arraycopy}.
      */
     private static final int[] BLANK = new int[W * H];
 
@@ -343,7 +343,6 @@ public class LCD
                 // If we actually have a display, we should draw
                 if (graphics != null)
                 {
-
                     // Set the user's preferred interpolation method
                     switch (Settings.getInterpolator())
                     {

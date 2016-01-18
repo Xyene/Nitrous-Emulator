@@ -131,7 +131,7 @@ public class Application
                     public void windowClosed(WindowEvent e)
                     {
                         selectLock.release();
-                    }
+                    }//end windowClosed
                 });
             }
         };
@@ -163,7 +163,7 @@ public class Application
                 if (f.isDirectory()) return true;
                 String name = f.getName();
                 return name.endsWith(".gb") || name.endsWith(".gbc") || name.endsWith(".rom");
-            }
+            }//end accept
 
             /**
              * {@inheritDoc}
@@ -172,7 +172,7 @@ public class Application
             public String getDescription()
             {
                 return "Gameboy ROM (*.gb, *.gbc, *.rom)";
-            }
+            }//end getDescription
         };
 
         /**
