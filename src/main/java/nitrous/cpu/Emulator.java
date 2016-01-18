@@ -11,6 +11,11 @@ import java.io.File;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.LockSupport;
 
+/**
+ * Core emulator class.
+ *
+ * Manages all resources and emulate CPU.
+ */
 public class Emulator
 {
     /**
@@ -163,21 +168,41 @@ public class Emulator
         reset();
     }
 
+    /**
+     * Change the display.
+     *
+     * @param display the new display
+     */
     public void setDisplay(Panel display)
     {
         this.display = display;
     }
 
+    /**
+     * Checks if the emulation is paused.
+     *
+     * @return {@literal true} if paused.
+     */
     public boolean isPaused()
     {
         return paused;
     }
 
+    /**
+     * Alters the pause state.
+     *
+     * @param x the new pause state
+     */
     public void setPaused(boolean x)
     {
         paused = x;
     }
 
+    /**
+     * Gets the execution lock, which if acquired, pauses execution.
+     *
+     * @return the exection lock
+     */
     public Semaphore executeLock()
     {
         return executeLock;
@@ -228,6 +253,13 @@ public class Emulator
         throw new UnsupportedOperationException("" + object);
     }
 
+    /**
+     * Alters the short value contained in a register pair.
+     *
+     * @param object the register pair id
+     * @param hi the high byte of the short value
+     * @param lo the low byte of the short value
+     */
     public void setRegisterPair(RegisterPair object, short hi, short lo)
     {
         hi &= 0xff;
@@ -252,6 +284,12 @@ public class Emulator
         }
     }
 
+    /**
+     * Alters the short value contained in a register pair.
+     *
+     * @param object the register pair id
+     * @param val the short value
+     */
     public void setRegisterPair(RegisterPair object, int val)
     {
         short hi = (short) ((val >> 8) & 0xFF);
@@ -259,6 +297,13 @@ public class Emulator
         setRegisterPair(object, hi, lo);
     }
 
+    /**
+     * Like setRegisterPair, except 0x3 maps to AF.
+     *
+     * @param object the register pair id
+     * @param hi the high byte of the short value
+     * @param lo the low byte of the short value
+     */
     public void setRegisterPair2(RegisterPair object, int hi, int lo)
     {
         hi &= 0xff;
@@ -285,6 +330,9 @@ public class Emulator
         }
     }
 
+    /**
+     * Emulates the Gameboy system startup.
+     */
     public void reset()
     {
         // On startup, a CGB has 11h in A, a normal GB has 01h
@@ -351,6 +399,12 @@ public class Emulator
         return false;
     }
 
+    /**
+     * Fetches the short value contained in a register pair.
+     *
+     * @param r the register pair id as encoded by opcode
+     * @return the value of the register pair
+     */
     public int getRegister(int r)
     {
         switch (r)
@@ -376,6 +430,12 @@ public class Emulator
         return 0;
     }
 
+    /**
+     * Alters the short value contained in a register pair.
+     *
+     * @param r the register pair id as encoded by opcode
+     * @param val the short value
+     */
     public void setRegister(int r, int val)
     {
         val &= 0xff;
@@ -468,16 +528,31 @@ public class Emulator
         return (mmu.registers[R.R_TRIGGERED_INTERRUPTS] & mmu.registers[R.R_ENABLED_INTERRUPTS] & interrupt) != 0;
     }
 
+    /**
+     * Triggers a particular interrupt.
+     *
+     * @param interrupt The interrupt bit.
+     */
     public void setInterruptTriggered(int interrupt)
     {
         mmu.registers[R.R_TRIGGERED_INTERRUPTS] |= interrupt;
     }
 
+    /**
+     * Checks if the emulator is running in double speed mode.
+     *
+     * @return {@literal true} if the emulator runs in double speed mode
+     */
     public boolean isDoubleSpeed()
     {
         return doubleSpeed;
     }
 
+    /**
+     * Puts the emulator in and out of double speed mode.
+     *
+     * @param doubleSpeed the new double speed state
+     */
     public void setDoubleSpeed(boolean doubleSpeed)
     {
         if (this.doubleSpeed == doubleSpeed)
@@ -490,6 +565,11 @@ public class Emulator
             clockSpeed = BASE_CLOCK_SPEED;
     }
 
+    /**
+     * Trigger timer interrupts, LCD updates, and sound updates as needed.
+     *
+     * @param delta the amount of CPU cycles elapsed since the last call to this method
+     */
     public void updateInterrupts(long delta)
     {
         if (doubleSpeed)
@@ -545,24 +625,22 @@ public class Emulator
                 int tima = (mmu.registers[R.R_TIMA] & 0xff) + 1;
                 if (tima > 0xff)
                 {
-                    // Reset to the wanted value, and trigger the interrupt
                     tima = mmu.registers[R.R_TMA] & 0xff;
-                    //     if (isInterruptEnabled(R.TIMER_OVERFLOW_BIT))
                     setInterruptTriggered(R.TIMER_OVERFLOW_BIT);
-//                        System.out.println("triggered TIMA");
                 }
                 mmu.registers[R.R_TIMA] = (byte) tima;
             }
         }
 
         sound.tick(delta);
-        // Update the display
         lcd.tick(delta);
-//        if((mmu.registers[R.R_LY]&0xff) == 144) {
-//            debugger.vram.paintImmediately(debugger.vram.getBounds());
-//        }
     }
 
+    /**
+     * Increase the clock cycles and trigger interrupts as needed.
+     *
+     * @param delta the amount of clock cycles executed
+     */
     public void tick(long delta)
     {
         cycle += delta;
@@ -572,6 +650,12 @@ public class Emulator
         updateInterrupts(delta);
     }
 
+    /**
+     * The execution thread.
+     *
+     * This method executes the CPU instructions and performs other tasks such as triggering interrupts.
+     * It is also responsible for controlling emulation speed.
+     */
     public void exec()
     {
         long last = System.nanoTime();
@@ -594,28 +678,20 @@ public class Emulator
                 last = System.nanoTime();
                 cyclesExecutedThisSecond = 0;
             }
-            // The idea here is that we cap the amount of cycles we execute per second to 4194304
-            // it doesn't actually do this since some timing is off
-            int t = 100000;///6000;//4194304;
+
+            int t = 100000;
             if (cyclesSinceLastSleep >= t)
             {
-                // System.err.println(cycle + "..." + oldCycle);
-                // 1 cycle takes 1/4194304 seconds
-                // d cycles take d / 4194304 seconds, or (d / 4194304) * 1000 milliseconds
-                // 1000000000 - (System.nanoTime() - last)
                 executeLock.release();
                 try
                 {
-                    //   LockSupport.parkNanos(1000000000 - (System.nanoTime() - _last));
                     if (emulateSpeed)
                     {
-                        //sound.render(t);
                         LockSupport.parkNanos(1_000_000_000L * t / clockSpeed + _last - System.nanoTime());
                     } else
                     {
                         clockSpeed = (int) (1_000_000_000L * t / (System.nanoTime() - _last));
                         sound.updateClockSpeed(clockSpeed);
-                        //sound.render(t);
                     }
                     _last = System.nanoTime();
                 } catch (Exception e)
