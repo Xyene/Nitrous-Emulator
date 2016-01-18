@@ -5,7 +5,8 @@ import java.awt.*;
 /**
  * Palette colour data for non-colour Gameboy ROMs.
  * <p/>
- * {@see https://tcrf.net/Game_Boy_Color_Bootstrap_ROM}
+ *
+ * @see <a href="https://tcrf.net/Game_Boy_Color_Bootstrap_ROM">https://tcrf.net/Game_Boy_Color_Bootstrap_ROM</a>
  */
 public class PaletteColors
 {
