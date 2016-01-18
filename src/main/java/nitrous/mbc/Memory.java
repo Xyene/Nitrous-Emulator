@@ -1,6 +1,7 @@
 package nitrous.mbc;
 
 import nitrous.cpu.Emulator;
+import nitrous.cpu.R;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,27 +59,27 @@ public class Memory
 
     /**
      * Video RAM, mapped from $8000-$9FFF.
-     * <p>
+     * <p/>
      * On the GBC, this bank is switchable 0-1 by writing to $FF4F.
      */
     public final byte[] vram;
     /**
      * Work RAM, mapped from $C000-$CFFF and $D000-$DFFF.
-     * <p>
+     * <p/>
      * On the GBC, this bank is switchable 1-7 by writing to $FF07.
      */
     public final byte[] wram;
 
     /**
      * The current page of Video RAM, always multiples of Memory.VRAM_PAGESIZE.
-     * <p>
+     * <p/>
      * On non-GBC, this is always 0.
      */
     public int vramPageStart = 0;
 
     /**
      * The current page of Work RAM, always multiples of Memory.WRAM_PAGESIZE.
-     * <p>
+     * <p/>
      * On non-GBC, this is always Memory.VRAM_PAGESIZE.
      */
     public int wramPageStart = WRAM_PAGESIZE;
@@ -139,7 +140,7 @@ public class Memory
 
     /**
      * Represents a H-Blank DMA transfer session.
-     * <p>
+     * <p/>
      * HDMA transfers 16 bytes from source to dest every H-Blank interval,
      * and can be used for a lot of video effects.
      */
@@ -306,6 +307,15 @@ public class Memory
 //            if(data == 0) return;//new IOException().printStackTrace();
 //            core.lcd.scrollx = data;
 //        }
+
+        if (addr == R.R_SCX)
+        {
+            System.out.println("Set SCX to 0x" + Integer.toHexString(data & 0xff));
+        } else if (addr == 0x96)
+        {
+            System.out.println("Set FF96 to 0x" + Integer.toHexString(data & 0xff));
+        }
+
         switch (addr)
         {
             case 0x4d:

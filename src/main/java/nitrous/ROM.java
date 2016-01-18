@@ -43,8 +43,8 @@ public class ROM
     /**
      * Merges two sorted lists of File objects into one based on frequency.
      *
-     * @param listA the first list
-     * @param listB the second list
+     * @param listA     the first list
+     * @param listB     the second list
      * @param frequency the frequency map by which the lists shall be sorted
      * @return a newly created list, containing everything in listA and listB, sorted
      */
@@ -84,7 +84,7 @@ public class ROM
     /**
      * A mergesort implementation that would sort a list of {@link File} objects by frequency.
      *
-     * @param list the list to sort
+     * @param list      the list to sort
      * @param frequency the frequency map
      * @return a new list that contains elements of list, in order of frequency
      */

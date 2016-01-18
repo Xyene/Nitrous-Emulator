@@ -16,9 +16,11 @@ public abstract class SoundChannel
 
     /**
      * Base constructor, stores the {@link Emulator} instance.
+     *
      * @param core
      */
-    public SoundChannel(Emulator core) {
+    public SoundChannel(Emulator core)
+    {
         this.core = core;
     }
 
@@ -37,14 +39,16 @@ public abstract class SoundChannel
     /**
      * Called to update the sound: set flag.
      */
-    public void update() {
+    public void update()
+    {
         updateRequest = true;
     }
 
     /**
      * Called to restart the sound: set flag.
      */
-    public void restart() {
+    public void restart()
+    {
         restartRequest = true;
     }
 
@@ -53,7 +57,8 @@ public abstract class SoundChannel
      *
      * @return whether there was any changes, i.e. an update or restart.
      */
-    protected boolean handleRequests() {
+    protected boolean handleRequests()
+    {
         // We did something if there was a request of either kind.
         boolean didSomething = updateRequest || restartRequest;
 
@@ -100,7 +105,8 @@ public abstract class SoundChannel
      * @param gbFreq Gameboy frequency value
      * @return CPU cycles
      */
-    public static int gbFreqToCycles(int gbFreq) {
+    public static int gbFreqToCycles(int gbFreq)
+    {
         return 32 * (2048 - gbFreq);
     }
 }

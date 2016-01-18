@@ -3,7 +3,8 @@ package nitrous.cpu;
 /**
  * Defines a register pair; that is, a 16-bit value made up of two 8-bit values.
  */
-public enum RegisterPair {
+public enum RegisterPair
+{
     BC, DE, HL, SP;
 
     /**

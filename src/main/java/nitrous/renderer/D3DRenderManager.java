@@ -7,7 +7,7 @@ import java.lang.reflect.Method;
 
 /**
  * A renderer that uses Java's Direct3D support.
- *
+ * <p/>
  * Requires system property {@literal sun.java2d.d3d} to be set to {@literal true}.
  */
 public class D3DRenderManager extends AbstractRenderManager

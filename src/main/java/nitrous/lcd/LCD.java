@@ -20,7 +20,8 @@ import static nitrous.cpu.R.*;
 /**
  * Emulates the LCD component of a Gameboy.
  */
-public class LCD {
+public class LCD
+{
 
     /**
      * An array of blank values matching in size with the dimensions of screenBuffer, used to very quickly
@@ -104,7 +105,8 @@ public class LCD {
      *
      * @param core The Emulator to operate on.
      */
-    public LCD(Emulator core) {
+    public LCD(Emulator core)
+    {
         this.core = core;
         initializePalettes();
     }
@@ -112,8 +114,10 @@ public class LCD {
     /**
      * Initializes all palette RAM to the default on Gameboy boot.
      */
-    private void initializePalettes() {
-        if (core.cartridge.isColorGB) {
+    private void initializePalettes()
+    {
+        if (core.cartridge.isColorGB)
+        {
             // On CGB all background RAM is initialized with 1Fh
             Arrays.fill(gbcBackgroundPaletteMemory, (byte) 0x1f);
 
@@ -124,7 +128,8 @@ public class LCD {
             // And "load" them from RAM
             loadPalettesFromMemory(gbcSpritePaletteMemory, spritePalettes);
             loadPalettesFromMemory(gbcBackgroundPaletteMemory, bgPalettes);
-        } else {
+        } else
+        {
             /**
              * FF69 - BCPD/BGPD - CGB Mode Only - Background Palette Data
              * This register allows to read/write data to the CGBs Background Palette Memory, addressed through Register FF68.
@@ -151,9 +156,11 @@ public class LCD {
      * @param from Palette RAM to load from.
      * @param to   Reference to an array of IPalettes to populate.
      */
-    private void loadPalettesFromMemory(byte[] from, IPalette[] to) {
+    private void loadPalettesFromMemory(byte[] from, IPalette[] to)
+    {
         // 8 palettes
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < 8; i++)
+        {
             // 4 bytes per palette
             for (int j = 0; j < 4; ++j)
                 updatePaletteByte(from, to[i], i, j);
@@ -168,7 +175,8 @@ public class LCD {
      * @param i    The palette index being updated.
      * @param j    The byte index of the palette being updated.
      */
-    private void updatePaletteByte(byte[] from, IPalette to, int i, int j) {
+    private void updatePaletteByte(byte[] from, IPalette to, int i, int j)
+    {
 
         /**
          * This register allows to read/write data to the CGBs Background Palette Memory, addressed through Register FF68.
@@ -199,7 +207,8 @@ public class LCD {
      * @param reg  The register written to.
      * @param data The data written.
      */
-    public void setBackgroundPalette(int reg, int data) {
+    public void setBackgroundPalette(int reg, int data)
+    {
         gbcBackgroundPaletteMemory[reg] = (byte) data;
         int palette = reg >> 3;
         updatePaletteByte(gbcBackgroundPaletteMemory, bgPalettes[palette], palette, (reg >> 1) & 0x3);
@@ -211,7 +220,8 @@ public class LCD {
      * @param reg  The register written to.
      * @param data The data written.
      */
-    public void setSpritePalette(int reg, int data) {
+    public void setSpritePalette(int reg, int data)
+    {
         gbcSpritePaletteMemory[reg] = (byte) data;
         int palette = reg >> 3;
         updatePaletteByte(gbcSpritePaletteMemory, spritePalettes[palette], palette, (reg >> 1) & 0x3);
@@ -222,13 +232,15 @@ public class LCD {
      *
      * @param cycles The number of CPU cycles elapsed since the last call to tick.
      */
-    public void tick(long cycles) {
+    public void tick(long cycles)
+    {
         // Accumulate to an internal counter
         lcdCycles += cycles;
 
         // 4.194304MHz clock, 154 scanlines per frame, 59.7 frames/second
         // = ~456 cycles / line
-        if (lcdCycles >= 456) {
+        if (lcdCycles >= 456)
+        {
             lcdCycles -= 456;
 
             /**
@@ -247,13 +259,16 @@ public class LCD {
             // Increment LY, and wrap at 154 lines
             core.mmu.registers[R_LY] = (byte) (((LY + 1) % 154) & 0xff);
 
-            if (LY == 0) {
-                if (lastSecondTime == -1) {
+            if (LY == 0)
+            {
+                if (lastSecondTime == -1)
+                {
                     lastSecondTime = System.nanoTime();
                     lastCoreCycle = core.cycle;
                 }
                 currentVBlankCount++;
-                if (currentVBlankCount == 60) {
+                if (currentVBlankCount == 60)
+                {
                     System.out.println("Took " + ((System.nanoTime() - lastSecondTime) / 1_000_000_000.0) +
                             " seconds for 60 frames - " + (core.cycle - lastCoreCycle) / 60 + " clks/frames");
                     lastCoreCycle = core.cycle;
@@ -264,7 +279,8 @@ public class LCD {
 
             boolean isVBlank = 144 <= LY;
 
-            if (!isVBlank && core.mmu.hdma != null) {
+            if (!isVBlank && core.mmu.hdma != null)
+            {
                 System.err.println(LY);
                 core.mmu.hdma.tick();
             }
@@ -277,7 +293,8 @@ public class LCD {
             core.mmu.registers[R_LCD_STAT] |= mode;
 
             int lcdStat = core.mmu.registers[R_LCD_STAT];
-            if (displayEnabled && !isVBlank) {
+            if (displayEnabled && !isVBlank)
+            {
 
                 /**
                  * INT 48 - LCDC Status Interrupt
@@ -290,18 +307,22 @@ public class LCD {
                  *
                  * @{see http://bgb.bircd.org/pandocs.htm#lcdstatusregister}
                  */
-                if ((lcdStat & LCD_STAT.COINCIDENCE_INTERRUPT_ENABLED_BIT) != 0) {
+                if ((lcdStat & LCD_STAT.COINCIDENCE_INTERRUPT_ENABLED_BIT) != 0)
+                {
                     int lyc = (core.mmu.registers[R_LYC] & 0xff);
                     // Fire when LYC == LY
-                    if (lyc == LY) {
+                    if (lyc == LY)
+                    {
                         core.setInterruptTriggered(LCDC_BIT);
                         core.mmu.registers[R_LCD_STAT] |= LCD_STAT.COINCIDENCE_BIT;
-                    } else {
+                    } else
+                    {
                         core.mmu.registers[R_LCD_STAT] &= ~LCD_STAT.COINCIDENCE_BIT;
                     }
                 }
 
-                if ((lcdStat & LCD_STAT.HBLANK_MODE_BIT) != 0) {
+                if ((lcdStat & LCD_STAT.HBLANK_MODE_BIT) != 0)
+                {
                     core.setInterruptTriggered(LCDC_BIT);
                 }
             }
@@ -317,15 +338,18 @@ public class LCD {
              * @{see http://bgb.bircd.org/pandocs.htm#lcdinterrupts}
              */
             // use 143 here as we've just finished processing line 143 and will start 144
-            if (LY == 143) {
+            if (LY == 143)
+            {
                 // Our renderer may have been invalidated, or we may be running headlessly
                 Graphics2D graphics = currentRenderer != null ? currentRenderer.getGraphics() : null;
 
                 // If we actually have a display, we should draw
-                if (graphics != null) {
+                if (graphics != null)
+                {
 
                     // Set the user's preferred interpolation method
-                    switch (Settings.getInterpolator()) {
+                    switch (Settings.getInterpolator())
+                    {
                         case NEAREST:
                             graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
                             break;
@@ -342,12 +366,14 @@ public class LCD {
                 }
 
                 // Trigger interrupts if the display is enabled
-                if (displayEnabled) {
+                if (displayEnabled)
+                {
                     // Trigger VBlank
                     core.setInterruptTriggered(VBLANK_BIT);
 
                     // Trigger LCDC if enabled
-                    if ((lcdStat & LCD_STAT.VBLANK_MODE_BIT) != 0) {
+                    if ((lcdStat & LCD_STAT.VBLANK_MODE_BIT) != 0)
+                    {
                         core.setInterruptTriggered(LCDC_BIT);
                     }
                 }
@@ -359,23 +385,31 @@ public class LCD {
      * Initializes renderers to draw on the current Emulator display.
      */
     @SuppressWarnings("deprecation")
-    public void initializeRenderers() {
-        renderers = Collections.unmodifiableList(new ArrayList<IRenderManager>() {{
-            for (Class<? extends IRenderManager> rendererClass : IRenderManager.RENDERERS) {
+    public void initializeRenderers()
+    {
+        renderers = Collections.unmodifiableList(new ArrayList<IRenderManager>()
+        {{
+            for (Class<? extends IRenderManager> rendererClass : IRenderManager.RENDERERS)
+            {
                 IRenderManager renderer;
-                try {
+                try
+                {
                     System.err.println(rendererClass);
                     renderer = rendererClass.getDeclaredConstructor(ComponentPeer.class).newInstance(core.display.getPeer());
-                } catch (ReflectiveOperationException ignored) {
+                } catch (ReflectiveOperationException ignored)
+                {
                     continue;
                 }
-                if (renderer.getGraphics() != null) {
+                if (renderer.getGraphics() != null)
+                {
                     add(renderer);
-                    if (currentRenderer == null) {
+                    if (currentRenderer == null)
+                    {
                         System.out.println("Using " + renderer);
                         currentRenderer = renderer;
                     }
-                } else {
+                } else
+                {
                     System.err.println(renderer + " failed to produce a Graphics2D");
                 }
             }
@@ -387,7 +421,8 @@ public class LCD {
      *
      * @param scanline The scanline to draw.
      */
-    public void draw(int scanline) {
+    public void draw(int scanline)
+    {
         // Don't even bother if the display is not enabled
         if (!displayEnabled()) return;
 
@@ -419,7 +454,8 @@ public class LCD {
         // If the window appears in this scanline, draw it
         if (windowEnabled() &&
                 scanline >= getWindowPosY() &&
-                getWindowPosX() < W && getWindowPosY() >= 0) {
+                getWindowPosX() < W && getWindowPosY() >= 0)
+        {
             drawWindow(data, scanline);
         }
     }
@@ -430,7 +466,8 @@ public class LCD {
      * @param data     The raster to write to.
      * @param scanline The current scanline.
      */
-    private void drawBackgroundTiles(int[] data, int scanline) {
+    private void drawBackgroundTiles(int[] data, int scanline)
+    {
         // Local reference to save time
         byte[] vram = core.mmu.vram;
 
@@ -461,7 +498,8 @@ public class LCD {
          */
 
         // 20 8x8 tiles fit in a 160px-wide screen
-        for (int x = 0; x < 21; x++) {
+        for (int x = 0; x < 21; x++)
+        {
             int addressBase = offset + ((y + scrollY / 8) % 32 * 32) + ((x + scrollX / 8) % 32);
             // add 256 to jump into second tile pattern table
             int tile = tileDataOffset == 0 ? vram[addressBase] & 0xff : vram[addressBase] + 256;
@@ -487,7 +525,8 @@ public class LCD {
              *
              * @{see http://bgb.bircd.org/pandocs.htm#vrambackgroundmaps}
              */
-            if (core.cartridge.isColorGB) {
+            if (core.cartridge.isColorGB)
+            {
                 int attribs = vram[Memory.VRAM_PAGESIZE + addressBase];
 
                 if ((attribs & 0x8) != 0) gbcVramBank = 1;
@@ -515,7 +554,8 @@ public class LCD {
      * @param data     The raster to write to.
      * @param scanline The current scanline.
      */
-    private void drawWindow(int[] data, int scanline) {
+    private void drawWindow(int[] data, int scanline)
+    {
         // Local reference to save time
         byte[] vram = core.mmu.vram;
 
@@ -528,7 +568,8 @@ public class LCD {
         int tileMapOffset = getWindowTileMapOffset();
 
         int y = (scanline - posY) / 8;
-        for (int x = getWindowPosX() / 8; x < 21; x++) {
+        for (int x = getWindowPosX() / 8; x < 21; x++)
+        {
             // 32 tiles a row
             int addressBase = tileMapOffset + (x + y * 32);
 
@@ -545,7 +586,8 @@ public class LCD {
              *
              * @{see http://bgb.bircd.org/pandocs.htm#vrambackgroundmaps}
              */
-            if (core.cartridge.isColorGB) {
+            if (core.cartridge.isColorGB)
+            {
                 int attribs = vram[Memory.VRAM_PAGESIZE + addressBase];
                 if ((attribs & 0x8) != 0) gbcVramBank = 1;
                 flipX = (attribs & 0x20) != 0;
@@ -580,15 +622,18 @@ public class LCD {
      * @param basePriority The current priority for the given tile.
      * @param sprite       Whether the tile belongs to a sprite or not.
      */
+
     private void drawTile(IPalette palette, int[] data, int x, int y, int tile, int scanline,
-                          boolean flipX, boolean flipY, int bank, int basePriority, boolean sprite) {
+                          boolean flipX, boolean flipY, int bank, int basePriority, boolean sprite)
+    {
         // Store a local copy to save a lot of load opcodes.
         byte[] vram = core.mmu.vram;
         int line = scanline - y;
         int addressBase = Memory.VRAM_PAGESIZE * bank + tile * 16;
 
         // 8 pixel width
-        for (int px = 0; px < 8; px++) {
+        for (int px = 0; px < 8; px++)
+        {
             // Destination pixels
             int dx = x + px;
 
@@ -643,7 +688,8 @@ public class LCD {
      * @param data     The raster to write to.
      * @param scanline The current scanline.
      */
-    private void drawSprites(int[] data, int scanline) {
+    private void drawSprites(int[] data, int scanline)
+    {
         // Hold local references to save a lot of load opcodes
         byte[] oam = core.mmu.oam;
         boolean tall = isUsingTallSprites();
@@ -652,7 +698,8 @@ public class LCD {
         // Actual GameBoy hardware can only handle drawing 10 sprites per line
         // our code doesn't actually have this limitation, but we artificially introduce it by keeping
         // track of how many sprites are drawn per line
-        for (int i = 0; i < oam.length && spritesDrawnPerLine[scanline] < 10; i += 4) {
+        for (int i = 0; i < oam.length && spritesDrawnPerLine[scanline] < 10; i += 4)
+        {
             /**
              * Sprite attributes reside in the Sprite Attribute Table (OAM - Object Attribute Memory) at $FE00-FE9F.
              * Each of the 40 entries consists of four bytes with the following meanings:
@@ -712,20 +759,24 @@ public class LCD {
             IPalette pal = spritePalettes[obp];
 
             // Handle drawing double sprites
-            if (tall) {
+            if (tall)
+            {
                 // If we're using tall sprites we actually have to flip the order that we draw the top/bottom tiles
                 int hi = flipY ? (tile | 0x01) : (tile & 0xFE);
                 int lo = flipY ? (tile & 0xFE) : (tile | 0x01);
-                if (y - 16 <= scanline && scanline < y - 8) {
+                if (y - 16 <= scanline && scanline < y - 8)
+                {
                     drawTile(pal, data, x - 8, y - 16, hi, scanline, flipX, flipY, vrambank, priority, true);
                     spritesDrawnPerLine[scanline]++;
                 }
-                if (y - 8 <= scanline && scanline < y) {
+                if (y - 8 <= scanline && scanline < y)
+                {
                     drawTile(pal, data, x - 8, y - 8, lo, scanline, flipX, flipY, vrambank, priority, true);
                     spritesDrawnPerLine[scanline]++;
                 }
 
-            } else {
+            } else
+            {
                 drawTile(pal, data, x - 8, y - 16, tile, scanline, flipX, flipY, vrambank, priority, true);
                 spritesDrawnPerLine[scanline]++;
             }
@@ -737,7 +788,8 @@ public class LCD {
      *
      * @return The enabled state.
      */
-    public boolean displayEnabled() {
+    public boolean displayEnabled()
+    {
         return (core.mmu.registers[R_LCDC] & LCDC.CONTROL_OPERATION_BIT) != 0;
     }
 
@@ -746,7 +798,8 @@ public class LCD {
      *
      * @return The enabled state.
      */
-    public boolean backgroundEnabled() {
+    public boolean backgroundEnabled()
+    {
         return (core.mmu.registers[R_LCDC] & LCDC.BGWINDOW_DISPLAY_BIT) != 0;
     }
 
@@ -755,7 +808,8 @@ public class LCD {
      *
      * @return The offset.
      */
-    public int getWindowTileMapOffset() {
+    public int getWindowTileMapOffset()
+    {
         if ((core.mmu.registers[R_LCDC] & LCDC.WINDOW_TILE_MAP_DISPLAY_SELECT_BIT) != 0)
             return 0x1c00;
         return 0x1800;
@@ -766,7 +820,8 @@ public class LCD {
      *
      * @return The offset.
      */
-    public int getBackgroundTileMapOffset() {
+    public int getBackgroundTileMapOffset()
+    {
         if ((core.mmu.registers[R_LCDC] & LCDC.BG_TILE_MAP_DISPLAY_SELECT_BIT) != 0)
             return 0x1c00;
         return 0x1800;
@@ -777,7 +832,8 @@ public class LCD {
      *
      * @return The enabled state.
      */
-    public boolean isUsingTallSprites() {
+    public boolean isUsingTallSprites()
+    {
         return (core.mmu.registers[R_LCDC] & LCDC.SPRITE_SIZE_BIT) != 0;
     }
 
@@ -786,7 +842,8 @@ public class LCD {
      *
      * @return The enabled state.
      */
-    public boolean spritesEnabled() {
+    public boolean spritesEnabled()
+    {
         return (core.mmu.registers[R_LCDC] & LCDC.SPRITE_DISPLAY_BIT) != 0;
     }
 
@@ -795,7 +852,8 @@ public class LCD {
      *
      * @return The enabled state.
      */
-    public boolean windowEnabled() {
+    public boolean windowEnabled()
+    {
         return (core.mmu.registers[R_LCDC] & LCDC.WINDOW_DISPLAY_BIT) != 0;
     }
 
@@ -806,7 +864,8 @@ public class LCD {
      * <p/>
      * The Tile Data Table address for the background can be selected via LCDC register.
      */
-    public int getTileDataOffset() {
+    public int getTileDataOffset()
+    {
         if ((core.mmu.registers[R_LCDC] & LCDC.BGWINDOW_TILE_DATA_SELECT_BIT) != 0)
             return 0;
         return 0x0800;
@@ -817,7 +876,8 @@ public class LCD {
      *
      * @return The signed offset.
      */
-    public int getScrollX() {
+    public int getScrollX()
+    {
         return (core.mmu.registers[R_SCX] & 0xFF);
     }
 
@@ -826,7 +886,8 @@ public class LCD {
      *
      * @return The signed offset.
      */
-    public int getScrollY() {
+    public int getScrollY()
+    {
         return (core.mmu.registers[R_SCY] & 0xff);
     }
 
@@ -835,7 +896,8 @@ public class LCD {
      *
      * @return The unsigned offset.
      */
-    public int getWindowPosX() {
+    public int getWindowPosX()
+    {
         return (core.mmu.registers[R_WX] & 0xFF) - 7;
     }
 
@@ -844,7 +906,8 @@ public class LCD {
      *
      * @return The unsigned offset.
      */
-    public int getWindowPosY() {
+    public int getWindowPosY()
+    {
         return (core.mmu.registers[R_WY] & 0xFF);
     }
 }

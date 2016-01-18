@@ -18,9 +18,11 @@ public class FallbackRenderManager implements IRenderManager
 
     /**
      * Constructs a fallback renderer for the {@link java.awt.Panel} whose peer is given.
+     *
      * @param peer the peer of the {@link java.awt.Panel} for which the renderer is constructed.
      */
-    public FallbackRenderManager(ComponentPeer peer) {
+    public FallbackRenderManager(ComponentPeer peer)
+    {
         this.peer = peer;
     }
 

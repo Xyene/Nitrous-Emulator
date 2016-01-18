@@ -12,11 +12,11 @@ import static nitrous.cpu.R.*;
 
 /**
  * Sound manager. Manages all four sound channels:
- *
+ * <p/>
  * <ul>
- *     <li>{@link SquareWaveChannel} - channel 1 and 2</li>
- *     <li>{@link RawWaveChannel} - channel 3</li>
- *     <li>{@link NoiseChannel} - channel 4</li>
+ * <li>{@link SquareWaveChannel} - channel 1 and 2</li>
+ * <li>{@link RawWaveChannel} - channel 3</li>
+ * <li>{@link NoiseChannel} - channel 4</li>
  * </ul>
  */
 public class SoundManager
@@ -73,7 +73,7 @@ public class SoundManager
 
     /**
      * {@link OutputStream} for sound output to file.
-     *
+     * <p/>
      * {@literal null} means no output.
      */
     private static OutputStream out = null;

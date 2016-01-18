@@ -2,7 +2,7 @@ package nitrous.cpu;
 
 /**
  * Contains flag register lookup tables for common operations.
- * <p>
+ * <p/>
  * The tables can be used to avoid recomputing predictable flag combinations every instruction,
  * saving a not-insignificant amount of time in the long run.
  */

@@ -95,21 +95,23 @@ public class UI
             }
         }
 
-        // Initialize the UI with stored full screen and magnification settings.
+        // Initialize the UI with stored fullscreen and magnification settings.
         initUI(core, Settings.isFullScreen(), Settings.getMagnification());
     }
 
     /**
-     * ROM selection UI.
+     * Shows the ROM selection UI.
      *
-     * @return the selected ROM
+     * @return the selected ROM, if any.
      */
-    public static File selectROM() {
+    public static File selectROM()
+    {
         // We use this Semaphore to wait until the user selects a ROM.
         Semaphore selectLock = new Semaphore(1);
 
         // Create the frame.
-        JFrame dialog = new JFrame("NOx Emulator") {
+        JFrame dialog = new JFrame("NOx Emulator")
+        {
             {
                 // Layout of the Frame.
                 setTitle("NOx Emulator");
@@ -117,9 +119,11 @@ public class UI
                 setLayout(new BorderLayout());
 
                 // Stop the waiting if the window is closed.
-                addWindowListener(new WindowAdapter() {
+                addWindowListener(new WindowAdapter()
+                {
                     @Override
-                    public void windowClosed(WindowEvent e) {
+                    public void windowClosed(WindowEvent e)
+                    {
                         selectLock.release();
                     }
                 });
@@ -173,10 +177,10 @@ public class UI
                     // Get the dropped file.
                     List<File> droppedFiles = (List<File>)
                             e.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
-                    File f = droppedFiles.get(0);
+                    File rom = droppedFiles.get(0);
 
                     // Notify the user if the file is not accepted.
-                    if (!acceptor.accept(f))
+                    if (!acceptor.accept(rom))
                     {
                         JOptionPane.showMessageDialog(null,
                                 "File must be a " + acceptor.getDescription() + "!", "No ROM image provided",
@@ -185,7 +189,7 @@ public class UI
                     }
 
                     // If it's good, set the file, close the window, and release the wait.
-                    target.ref = f;
+                    target.ref = rom;
                     dialog.dispose();
                     selectLock.release();
                 } catch (Exception ex)
@@ -193,7 +197,8 @@ public class UI
                     ex.printStackTrace();
                 }
             }
-        };
+        }
+        ;
 
         // Create the welcome panel.
         JPanel welcome = new JPanel()
@@ -235,7 +240,8 @@ public class UI
                 });
 
                 // Add the recent ROMs label.
-                add(new JLabel("Recent ROMs (double-click to run):") {
+                add(new JLabel("Recent ROMs (double-click to run):")
+                {
                     {
                         // Layout and set drop target.
                         setAlignmentX(CENTER_ALIGNMENT);
@@ -248,15 +254,18 @@ public class UI
                  * Helper class to wrap a {@link File} object such that only the filename,
                  * no extension, is displayed when converted to string.
                  */
-                class FileNameDisplay {
+                class FileNameDisplay
+                {
                     File file;
 
-                    FileNameDisplay(File file) {
+                    FileNameDisplay(File file)
+                    {
                         this.file = file;
                     }
 
                     @Override
-                    public String toString() {
+                    public String toString()
+                    {
                         // Get the file name and remove the extension.
                         return file.getName().replaceFirst("[.][^.]+$", "");
                     }
@@ -281,9 +290,12 @@ public class UI
                         setModel(romModel);
 
                         // Mouse listener for double click.
-                        addMouseListener(new MouseAdapter() {
-                            public void mouseClicked(MouseEvent evt) {
-                                if (evt.getClickCount() == 2) {
+                        addMouseListener(new MouseAdapter()
+                        {
+                            public void mouseClicked(MouseEvent evt)
+                            {
+                                if (evt.getClickCount() == 2)
+                                {
                                     // When a ROM is double clicked, set the file, close the window,
                                     // and release the wait.
                                     target.ref = romModel.elementAt(locationToIndex(evt.getPoint())).file;
@@ -319,9 +331,9 @@ public class UI
     /**
      * Create the emulator UI.
      *
-     * @param core the {@link Emulator}
-     * @param fullscreen whether to run full screen
-     * @param mag the magnification to run on
+     * @param core       the {@link Emulator}
+     * @param fullscreen whether to run fullscreen
+     * @param mag        the magnification to run on
      */
     private static void initUI(Emulator core, boolean fullscreen, int mag)
     {
@@ -512,7 +524,7 @@ public class UI
                     }
                 });
 
-                // Add a submeny for emulation speed settings.
+                // Add a submenu for emulation speed settings.
                 menu.add(new JMenu("Speed")
                 {
                     {
@@ -579,20 +591,20 @@ public class UI
                     }
                 });
 
-                // Add full screen checkbox.
+                // Add fullscreen checkbox.
                 menu.add(new JCheckBoxMenuItem("Fullscreen", Settings.isFullScreen())
                 {
                     {
-                        // On click, switch full screen state.
+                        // On click, switch fullscreen state.
                         addActionListener((e) -> {
-                            // Pause the game while switching full screen.
+                            // Pause the game while switching fullscreen.
                             boolean wasPaused = core.isPaused();
                             core.setPaused(true);
 
                             // Destroy the window as we are creating a new one.
                             disp.dispose();
 
-                            // Alter full screen setting.
+                            // Alter fullscreen setting.
                             Settings.setFullScreen(!Settings.isFullScreen());
 
                             // Recreate the frame with new settings.
@@ -621,8 +633,7 @@ public class UI
                         // Loop over all valid magnification sizes, i.e. the ones that don't go off screen.
                         for (int mag = 1; mag * R.W < screen.width && mag * R.H < screen.height; mag++)
                         {
-                            // Again, use another variable so that subclasses don't capture the changing
-                            // loop variable.
+                            // Again, use another variable so that subclasses don't capture the changing loop variable.
                             final int magnification = mag;
 
                             // Create a checkbox element and selecting it if it is the current state.
@@ -692,8 +703,9 @@ public class UI
         });
 
         // Continuing setting up the frame.
-        SwingUtilities.invokeLater(() -> {
-            // If not full screen, we just use our panel.
+        SwingUtilities.invokeLater(() ->
+        {
+            // If not fullscreen, we just use our panel.
             if (!fullscreen)
             {
                 disp.setContentPane(display);
@@ -728,7 +740,7 @@ public class UI
                 });
             }
 
-            // Undecorate and maximize if full screen.
+            // Undecorate and maximize if fullscreen.
             if (fullscreen)
             {
                 disp.setUndecorated(true);

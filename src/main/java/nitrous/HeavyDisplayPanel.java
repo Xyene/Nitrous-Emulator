@@ -8,7 +8,8 @@ import java.awt.*;
 /**
  * Heavyweight panel to display a game's LCD on.
  */
-public class HeavyDisplayPanel extends Panel {
+public class HeavyDisplayPanel extends Panel
+{
     /**
      * The Emulator bound to this display.
      */
@@ -25,7 +26,8 @@ public class HeavyDisplayPanel extends Panel {
      * @param core The Emulator to render.
      * @param mag  The magnification level to use.
      */
-    public HeavyDisplayPanel(Emulator core, int mag) {
+    public HeavyDisplayPanel(Emulator core, int mag)
+    {
         this.core = core;
         this.magnification = mag;
 
@@ -47,7 +49,8 @@ public class HeavyDisplayPanel extends Panel {
      * {@inheritDoc}
      */
     @Override
-    public void addNotify() {
+    public void addNotify()
+    {
         super.addNotify();
 
         // Notify the Emulator to paint on this surface
@@ -60,7 +63,8 @@ public class HeavyDisplayPanel extends Panel {
      * @param g An ignored graphics object.
      */
     @Override
-    public void paint(Graphics g) {
+    public void paint(Graphics g)
+    {
         throw new RuntimeException();
     }
 }

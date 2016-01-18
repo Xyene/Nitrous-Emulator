@@ -21,8 +21,8 @@ public class Settings
      * Utility function to get enum values form settings storage with fallback.
      *
      * @param name the key name that stores the enum
-     * @param def the fallback enum value
-     * @param <T> the enum type
+     * @param def  the fallback enum value
+     * @param <T>  the enum type
      * @return the stored enum value, or {@literal def} if unavailable
      */
     private static <T extends Enum<T>> T getEnum(String name, T def)
@@ -233,8 +233,9 @@ public class Settings
 
     /**
      * Alter the enabled state of a channel.
+     *
      * @param channel the channel to alter
-     * @param on the new state of the said channel
+     * @param on      the new state of the said channel
      */
     public static void setChannelOn(int channel, boolean on)
     {

@@ -6,52 +6,52 @@ import static nitrous.cpu.R.*;
 
 /**
  * This class implements channel 4 of the Gameboy's programmable sound chip.
- *
+ * <p/>
  * This channel outputs white noise. This is done by randomly switching the amplitude between
  * high and low at a given frequency. Depending on the frequency the noise will appear 'harder'
  * or 'softer'.
- *
+ * <p/>
  * It is also possible to influence the function of the random generator, so the that the output becomes
  * more regular, resulting in a limited ability to output Tone instead of Noise.
- *
+ * <p/>
  * <strong>FF20 - NR41 - Channel 4 Sound Length (R/W)</strong>
- *
+ * <p/>
  * <ul>
- *     <li>Bit 5-0 - Sound length data (t1: 0-63)</li>
+ * <li>Bit 5-0 - Sound length data (t1: 0-63)</li>
  * </ul>
- *
+ * <p/>
  * Sound Length = (64-t1)*(1/256) seconds
  * The Length value is used only if Bit 6 in NR44 is set.
- *
+ * <p/>
  * <strong>FF21 - NR42 - Channel 4 Volume Envelope (R/W)</strong>
- *
+ * <p/>
  * <ul>
- *     <li>Bit 7-4 - Initial Volume of envelope (0-0Fh) (0=No Sound)</li>
- *     <li>Bit 3   - Envelope Direction (0=Decrease, 1=Increase)</li>
- *     <li>Bit 2-0 - Number of envelope sweep (n: 0-7). If zero, stop envelope operation.</li>
+ * <li>Bit 7-4 - Initial Volume of envelope (0-0Fh) (0=No Sound)</li>
+ * <li>Bit 3   - Envelope Direction (0=Decrease, 1=Increase)</li>
+ * <li>Bit 2-0 - Number of envelope sweep (n: 0-7). If zero, stop envelope operation.</li>
  * </ul>
- *
+ * <p/>
  * Length of 1 step = n*(1/64) seconds
- *
+ * <p/>
  * <strong>FF22 - NR43 - Channel 4 Polynomial Counter (R/W)</strong>
  * The amplitude is randomly switched between high and low at the given frequency.
  * A higher frequency will make the noise to appear 'softer'.
- *
+ * <p/>
  * When Bit 3 is set, the output will become more regular,
  * and some frequencies will sound more like Tone than Noise.
- *
+ * <p/>
  * <ul>
- *     <li>Bit 7-4 - Shift Clock Frequency (s)</li>
- *     <li>Bit 3   - Counter Step/Width (0=15 bits, 1=7 bits)</li>
- *     <li>Bit 2-0 - Dividing Ratio of Frequencies (r)</li>
+ * <li>Bit 7-4 - Shift Clock Frequency (s)</li>
+ * <li>Bit 3   - Counter Step/Width (0=15 bits, 1=7 bits)</li>
+ * <li>Bit 2-0 - Dividing Ratio of Frequencies (r)</li>
  * </ul>
- *
+ * <p/>
  * Frequency = 524288 Hz / r / 2^(s+1) ;For r=0 assume r=0.5 instead
-
+ * <p/>
  * <strong>FF23 - NR44 - Channel 4 Counter/consecutive; Inital (R/W)</strong>
  * <ul>
- *     <li>Bit 7   - Initial (1=Restart Sound)     (Write Only)</li>
- *     <li>Bit 6   - Counter/consecutive selection (Read/Write, 1=Stop output when length in NR41 expires)</li>
+ * <li>Bit 7   - Initial (1=Restart Sound)     (Write Only)</li>
+ * <li>Bit 6   - Counter/consecutive selection (Read/Write, 1=Stop output when length in NR41 expires)</li>
  * </ul>
  *
  * @see <a href="http://bgb.bircd.org/pandocs.htm#soundchannel4noise">Sound Channel 4 - Noise - Pandocs</a>
@@ -60,7 +60,7 @@ public class NoiseChannel extends SoundChannel
 {
     /**
      * Time between potential toggles in the wave form.
-     *
+     * <p/>
      * Measured in clock cycles.
      */
     public int period = -1;
@@ -102,14 +102,14 @@ public class NoiseChannel extends SoundChannel
 
     /**
      * Current volume field.
-     *
+     * <p/>
      * -1 means update, hence recalculate from {@link #envelopeInitial}
      */
     int currentVolume = -1;
 
     /**
      * The current state of the waveform.
-     *
+     * <p/>
      * {@literal true} means a positive amplitude, and {@literal false} means a negative one.
      */
     boolean high = false;
@@ -121,7 +121,7 @@ public class NoiseChannel extends SoundChannel
 
     /**
      * Field that shows whether we are still playing the sound.
-     *
+     * <p/>
      * i.e. whether {@link #length} is respected and exceeded.
      */
     public boolean isPlaying;
@@ -138,7 +138,7 @@ public class NoiseChannel extends SoundChannel
 
     /**
      * Handle sound update.
-     *
+     * <p/>
      * This method rereads everything from memory.
      */
     @Override

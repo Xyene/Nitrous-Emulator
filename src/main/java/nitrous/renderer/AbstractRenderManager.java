@@ -45,8 +45,8 @@ public abstract class AbstractRenderManager implements IRenderManager
     /**
      * Sets up the most common renderers.
      *
-     * @param peer the native peer of our {@link java.awt.Panel} upon which we operate
-     * @param peerClass the full class name of the peer class we support
+     * @param peer         the native peer of our {@link java.awt.Panel} upon which we operate
+     * @param peerClass    the full class name of the peer class we support
      * @param surfaceClass the full class name of the surface used by this render
      */
     public AbstractRenderManager(ComponentPeer peer, String peerClass, String surfaceClass)
@@ -87,9 +87,10 @@ public abstract class AbstractRenderManager implements IRenderManager
 
     /**
      * Attempt to create a surface and convert it to a {@link java.awt.Graphics2D} object.
-     *
+     * <p/>
      * In doing so, this method temporarily switches to the new {@link java.awt.GraphicsConfiguration}.
      * This method does not cache the newly created {@link java.awt.Graphics2D} object.
+     *
      * @return a {@link java.awt.Graphics2D} object.
      */
     protected Graphics2D createGraphics()

@@ -9,7 +9,8 @@ import static nitrous.cpu.Emulator.BASE_CLOCK_SPEED;
  * <p/>
  * All speeds are based off of a 4.194304MHz clock.
  */
-public enum EmulateSpeed {
+public enum EmulateSpeed
+{
     QUARTER("0.25x", BASE_CLOCK_SPEED / 4),
     HALF("0.5x", BASE_CLOCK_SPEED / 2),
     SINGLE("1x", BASE_CLOCK_SPEED),
@@ -37,7 +38,8 @@ public enum EmulateSpeed {
      * @param name       The identifier to show to the user in the GUI.
      * @param clockSpeed The clock speed.
      */
-    EmulateSpeed(String name, int clockSpeed) {
+    EmulateSpeed(String name, int clockSpeed)
+    {
         this.name = name;
         this.clockSpeed = clockSpeed;
     }

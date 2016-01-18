@@ -10,7 +10,7 @@ import java.lang.reflect.Method;
 
 /**
  * A renderer that uses Java's rendering support on Linux.
- *
+ * <p/>
  * In order, it attempts to initialize XRender, GLX, and X11
  */
 public class XRenderManager implements IRenderManager
@@ -21,14 +21,17 @@ public class XRenderManager implements IRenderManager
     {
         Class[] attempts = {XRRenderManager.class, GLXRenderManager.class, X11RenderManager.class};
 
-        for(Class renderer : attempts) {
-            try {
+        for (Class renderer : attempts)
+        {
+            try
+            {
                 backing = (AbstractRenderManager) renderer.getConstructor(ComponentPeer.class).newInstance(peer);
                 if (backing.getGraphics() != null) break;
-            } catch (ReflectiveOperationException ignored) {
+            } catch (ReflectiveOperationException ignored)
+            {
             }
         }
-        if(backing == null || backing.getGraphics() == null) throw new RuntimeException("unable to draw!");
+        if (backing == null || backing.getGraphics() == null) throw new RuntimeException("unable to draw!");
     }
 
     @Override
@@ -135,7 +138,7 @@ public class XRenderManager implements IRenderManager
 
             try
             {
-    //            System.out.println("!!!!!!!!!!!" + old);
+                //            System.out.println("!!!!!!!!!!!" + old);
                 Class<?> GLXGraphicsConfig = Class.forName("sun.java2d.opengl.GLXGraphicsConfig");
                 Class<?> X11GraphicsConfig = Class.forName("sun.awt.X11GraphicsConfig");
                 Class<?> X11GraphicsEnvironment = Class.forName("sun.awt.X11GraphicsEnvironment");
@@ -144,7 +147,7 @@ public class XRenderManager implements IRenderManager
                 Method isGLXAvailable = X11GraphicsEnvironment.getMethod("isGLXAvailable");
                 if (!(boolean) isGLXAvailable.invoke(null))
                 {
-    //                System.err.println("GLX unavailable!");
+                    //                System.err.println("GLX unavailable!");
                     throw new RuntimeException("GLX unavailable");
                 }
 
@@ -153,14 +156,14 @@ public class XRenderManager implements IRenderManager
                 Method getVisual = X11GraphicsConfig.getMethod("getVisual");
 
                 int visual = (int) getVisual.invoke(old);
-    //            System.out.println(visual + " <<< visual");
+                //            System.out.println(visual + " <<< visual");
 
                 Method getConfig = GLXGraphicsConfig.getMethod("getConfig", X11GraphicsDevice, int.class);
                 //            System.out.println(">>>>> " + gc);
                 return (GraphicsConfiguration) getConfig.invoke(null, old.getDevice(), visual);
             } catch (Exception e)
             {
-    //            e.printStackTrace();
+                //            e.printStackTrace();
                 return null;
             }
         }

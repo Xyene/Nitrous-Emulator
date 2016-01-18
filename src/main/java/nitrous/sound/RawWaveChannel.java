@@ -6,57 +6,57 @@ import static nitrous.cpu.R.*;
 
 /**
  * This class implements channel 3 of the Gameboy's programmable sound chip.
- *
+ * <p/>
  * This channel can be used to output digital sound, the length of the sample buffer
  * (Wave RAM) is limited to 32 digits. This sound channel can be also used to output
  * normal tones when initializing the Wave RAM by a square wave. This channel doesn't
  * have a volume envelope register.
-
+ * <p/>
  * <strong>FF1A - NR30 - Channel 3 Sound on/off (R/W)</strong>
- *
+ * <p/>
  * <ul>
- *     <li>Bit 7 - Sound Channel 3 Off  (0=Stop, 1=Playback)  (Read/Write)</li>
+ * <li>Bit 7 - Sound Channel 3 Off  (0=Stop, 1=Playback)  (Read/Write)</li>
  * </ul>
- *
+ * <p/>
  * <strong>FF1B - NR31 - Channel 3 Sound Length</strong>
- *
+ * <p/>
  * <ul>
- *     <li>Bit 7-0 - Sound length (t1: 0 - 255)</li>
+ * <li>Bit 7-0 - Sound length (t1: 0 - 255)</li>
  * </ul>
- *
+ * <p/>
  * Sound Length = (256-t1)*(1/256) seconds
  * This value is used only if Bit 6 in NR34 is set.
- *
+ * <p/>
  * <strong>FF1C - NR32 - Channel 3 Select output level (R/W)</strong>
- *
+ * <p/>
  * <ul>
- *     <li>Bit 6-5 - Select output level (Read/Write)</li>
+ * <li>Bit 6-5 - Select output level (Read/Write)</li>
  * </ul>
- *
+ * <p/>
  * Possible Output levels are:
- *
+ * <p/>
  * 0: Mute (No sound)
  * 1: 100% Volume (Produce Wave Pattern RAM Data as it is)
  * 2:  50% Volume (Produce Wave Pattern RAM data shifted once to the right)
  * 3:  25% Volume (Produce Wave Pattern RAM data shifted twice to the right)
- *
- *
+ * <p/>
+ * <p/>
  * <strong>FF1D - NR33 - Channel 3 Frequency's lower data (W)</strong>
  * Lower 8 bits of an 11 bit frequency (x).
- *
+ * <p/>
  * <strong>FF1E - NR34 - Channel 3 Frequency's higher data (R/W)</strong>
- *
+ * <p/>
  * <ul>
- *     <li>Bit 7   - Initial (1=Restart Sound)     (Write Only)</li>
- *     <li>Bit 6   - Counter/consecutive selection (Read/Write, 1=Stop output when length in NR31 expires)</li>
- *     <li>Bit 2-0 - Frequency's higher 3 bits (x) (Write Only)</li>
+ * <li>Bit 7   - Initial (1=Restart Sound)     (Write Only)</li>
+ * <li>Bit 6   - Counter/consecutive selection (Read/Write, 1=Stop output when length in NR31 expires)</li>
+ * <li>Bit 2-0 - Frequency's higher 3 bits (x) (Write Only)</li>
  * </ul>
- *
+ * <p/>
  * Frequency = 4194304/(64*(2048-x)) Hz = 65536/(2048-x) Hz
- *
+ * <p/>
  * <strong>FF30-FF3F - Wave Pattern RAM</strong>
  * Contents - Waveform storage for arbitrary sound data
- *
+ * <p/>
  * This storage area holds 32 4-bit samples that are played back upper 4 bits first.
  *
  * @see <a href="http://bgb.bircd.org/pandocs.htm#soundchannel3waveoutput">Sound Channel 3 - Wave Output - Pandocs</a>
@@ -80,14 +80,14 @@ public class RawWaveChannel extends SoundChannel
 
     /**
      * Amount of time one sample is played for.
-     *
+     * <p/>
      * Measured in clock cycles.
      */
     private int period;
 
     /**
      * The amount of bits to shift the sound, for Gameboy's crude parody of volume control.
-     *
+     * <p/>
      * 3 = mute, which counts as playing.
      */
     private int shift;
@@ -119,7 +119,7 @@ public class RawWaveChannel extends SoundChannel
 
     /**
      * Field that shows whether we are still playing the sound.
-     *
+     * <p/>
      * i.e. whether {@link #length} is respected and exceeded, and the channel is enabled.
      */
     public boolean isPlaying;
@@ -136,10 +136,11 @@ public class RawWaveChannel extends SoundChannel
 
     /**
      * Handle sound update.
-     *
+     * <p/>
      * This method rereads everything from memory.
      */
-    public void handleUpdateRequest() {
+    public void handleUpdateRequest()
+    {
         byte[] registers = core.mmu.registers;
 
         // Check whether the channel is enabled.
@@ -162,7 +163,8 @@ public class RawWaveChannel extends SoundChannel
         int newPeriod = gbFreqToCycles(gbFreq) / 16;
 
         // If the period changed, restart the sound.
-        if (period != newPeriod) {
+        if (period != newPeriod)
+        {
             period = newPeriod;
             clockStart = core.cycle;
         }
@@ -193,7 +195,7 @@ public class RawWaveChannel extends SoundChannel
      * Update sample request, by byte. Each byte contains two samples.
      *
      * @param byteId the byte of the sample to update
-     * @param value the new value of the byte
+     * @param value  the new value of the byte
      */
     public void updateSample(int byteId, byte value)
     {

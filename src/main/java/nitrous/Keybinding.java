@@ -112,7 +112,7 @@ public class Keybinding
     /**
      * Update the keybinding of a button.
      *
-     * @param button the button id of the button whose binding is to be changed
+     * @param button  the button id of the button whose binding is to be changed
      * @param keyCode the key code of the key to be bound to the button
      * @return {@literal true} if the key was able to be bound to this button
      */

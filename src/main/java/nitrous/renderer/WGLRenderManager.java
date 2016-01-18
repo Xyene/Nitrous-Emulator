@@ -6,7 +6,7 @@ import java.lang.reflect.Method;
 
 /**
  * A renderer that uses Java's Windows OpenGL support.
- *
+ * <p/>
  * Works with system property {@literal sun.java2d.opengl} set to {@literal false}.
  */
 public class WGLRenderManager extends AbstractRenderManager
