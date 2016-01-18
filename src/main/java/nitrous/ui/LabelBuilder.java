@@ -1,4 +1,4 @@
-package nitrous;
+package nitrous.ui;
 
 import javax.swing.*;
 import java.awt.*;
@@ -7,11 +7,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.font.TextAttribute;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 /**

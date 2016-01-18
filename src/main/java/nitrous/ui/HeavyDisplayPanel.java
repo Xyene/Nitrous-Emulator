@@ -1,4 +1,4 @@
-package nitrous;
+package nitrous.ui;
 
 import nitrous.cpu.Emulator;
 import nitrous.cpu.R;

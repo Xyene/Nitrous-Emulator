@@ -2,6 +2,7 @@ package nitrous;
 
 import nitrous.cpu.R;
 import nitrous.lcd.Interpolator;
+import nitrous.ui.Keybinding;
 
 import java.awt.*;
 import java.util.HashSet;

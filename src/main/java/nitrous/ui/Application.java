@@ -1,5 +1,8 @@
-package nitrous;
+package nitrous.ui;
 
+import nitrous.Cartridge;
+import nitrous.EmulateSpeed;
+import nitrous.Settings;
 import nitrous.cpu.Emulator;
 import nitrous.cpu.R;
 import nitrous.lcd.Interpolator;
@@ -24,7 +27,7 @@ import java.util.concurrent.Semaphore;
 /**
  * Main emulator UI.
  */
-public class UI
+public class Application
 {
     /**
      * The main entry point.

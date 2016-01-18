@@ -1,4 +1,4 @@
-package nitrous;
+package nitrous.ui;
 
 import javax.swing.*;
 import java.awt.*;
