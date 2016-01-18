@@ -1,7 +1,7 @@
 package nitrous.lcd;
 
 /**
- * A generic palette. Implementing classes include DMGPalette and GBCPalette.
+ * A generic palette. Implementing classes include {@link DMGPalette} and {@link GBCPalette}.
  */
 public interface IPalette
 {
