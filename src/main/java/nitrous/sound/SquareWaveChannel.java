@@ -197,7 +197,7 @@ public class SquareWaveChannel extends SoundChannel
         // Store extra parameters.
         this.ioStart = ioStart;
         this.sweep = sweep;
-    }
+    }//end SquareWaveChannel(core, ioStart, sweep)
 
     /**
      * Handle sound update.
@@ -222,7 +222,7 @@ public class SquareWaveChannel extends SoundChannel
             sweepCycles = newTime;
             sweepIncrease = (registers[ioStart - 1] & 0x8) != 0;
             sweepShift = registers[ioStart - 1] & 0x7;
-        }
+        }//end sweep
 
         // Update wave duty and sound length.
         duty = (registers[ioStart] >> 6) & 0x3;
@@ -236,7 +236,7 @@ public class SquareWaveChannel extends SoundChannel
         {
             envelopeInitial = newInitial;
             currentVolume = -1;
-        }
+        }//end if
 
         // Update envelope increase flag and sweep time.
         envelopeIncrease = (registers[ioStart + 1] & 0x8) != 0;
@@ -256,7 +256,7 @@ public class SquareWaveChannel extends SoundChannel
         // Update period, and whether length is respected.
         period = newPeriod;
         useLength = (registers[ioStart + 3] & 0x40) != 0;
-    }
+    }//end handleUpdateRequest
 
 
     /**
@@ -266,7 +266,7 @@ public class SquareWaveChannel extends SoundChannel
     protected void handleRestartRequest()
     {
         clockStart = core.cycle;
-    }
+    }//end handleRestartRequest
 
     /**
      * {@inheritDoc}
@@ -291,7 +291,7 @@ public class SquareWaveChannel extends SoundChannel
         {
             isPlaying = false;
             return 0;
-        }
+        }//end if
 
         // So we are playing.
         isPlaying = true;
@@ -312,7 +312,7 @@ public class SquareWaveChannel extends SoundChannel
             // Otherwise, calculate the amount of sweeping done and predict what the envelope would be at,
             // then capping it to fit between 0 and 15 inclusive.
             currentVolume = amplitude = Math.min(15, Math.max(0, envelopeInitial + delta / envelopeSweep * (envelopeIncrease ? 1 : -1))) * 2;
-        }
+        }//end if
 
         // If we are channel 1, and frequency sweeping is enabled, and it's time for another sweep:
         if (sweep && sweepCycles > 0 && core.cycle - lastSweep >= sweepCycles)
@@ -338,7 +338,7 @@ public class SquareWaveChannel extends SoundChannel
 
             // Update last sweep time.
             lastSweep = core.cycle;
-        }
+        }//end if
 
         /**
          * Duty   Waveform    Ratio  Cycle
@@ -361,7 +361,7 @@ public class SquareWaveChannel extends SoundChannel
                 return (byte) (cycle == 0 || cycle > 4 ? amplitude : -amplitude);
             case 3:
                 return (byte) (cycle != 0 && cycle != 7 ? amplitude : -amplitude);
-        }
+        }//end switch
         return -1;
-    }
-}
+    }//end render
+}//end class SquareWaveChannel

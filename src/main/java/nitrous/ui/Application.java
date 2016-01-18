@@ -61,21 +61,21 @@ public class Application
             {
                 System.err.println(rom + " does not exist");
                 rom = null;
-            }
-        }
+            }//end if
+        }//end if
 
         // Try invoking the ROM selection window.
         if (rom == null)
         {
             rom = selectROM();
-        }
+        }//end if
 
         // If we still can't get a ROM, give up.
         if (rom == null)
         {
             System.err.println("No ROM provided, exiting...");
             return;
-        }
+        }//end if
 
         // Load the ROM.
         Cartridge cartridge = new Cartridge(Files.readAllBytes(rom.toPath()));
@@ -95,12 +95,12 @@ public class Application
             } catch (Exception ignored)
             {
                 // There is nothing you can do if the file fails to load.
-            }
-        }
+            }//end try
+        }//end if
 
         // Initialize the UI with stored fullscreen and magnification settings.
         initUI(core, Settings.isFullScreen(), Settings.getMagnification());
-    }
+    }//end main
 
     /**
      * Shows the ROM selection UI.
@@ -124,6 +124,9 @@ public class Application
                 // Stop the waiting if the window is closed.
                 addWindowListener(new WindowAdapter()
                 {
+                    /**
+                     * {@inheritDoc}
+                     */
                     @Override
                     public void windowClosed(WindowEvent e)
                     {
@@ -142,7 +145,7 @@ public class Application
         class FileReference
         {
             File ref;
-        }
+        }//end class FileReference
         FileReference target = new FileReference();
 
         // Acquire the semaphore such that the next acquire blocks until release.
@@ -151,6 +154,9 @@ public class Application
         // Create a file filter so that only ROM files can be loaded.
         FileFilter acceptor = new FileFilter()
         {
+            /**
+             * {@inheritDoc}
+             */
             @Override
             public boolean accept(File f)
             {
@@ -159,6 +165,9 @@ public class Application
                 return name.endsWith(".gb") || name.endsWith(".gbc") || name.endsWith(".rom");
             }
 
+            /**
+             * {@inheritDoc}
+             */
             @Override
             public String getDescription()
             {
@@ -171,6 +180,9 @@ public class Application
          */
         class ROMDropTarget extends DropTarget
         {
+            /**
+             * {@inheritDoc}
+             */
             @SuppressWarnings("unchecked")
             public void drop(DropTargetDropEvent e)
             {
@@ -190,7 +202,7 @@ public class Application
                                 "File must be a " + acceptor.getDescription() + "!", "No ROM image provided",
                                 JOptionPane.ERROR_MESSAGE);
                         return;
-                    }
+                    }//end if
 
                     // If it's good, set the file, close the window, and release the wait.
                     target.ref = rom;
@@ -199,9 +211,9 @@ public class Application
                 } catch (Exception ex)
                 {
                     ex.printStackTrace();
-                }
-            }
-        }
+                }//end try
+            }//end drop
+        }//end class ROMDropTarget
 
         // Create the welcome panel.
         JPanel welcome = new JPanel()
@@ -236,7 +248,7 @@ public class Application
                                         target.ref = chooser.getSelectedFile();
                                         dialog.dispose();
                                         selectLock.release();
-                                    }
+                                    }//end if
                                 }).append(" a game to start").create());
                         add(Box.createHorizontalGlue());
                     }
@@ -259,20 +271,30 @@ public class Application
                  */
                 class FileNameDisplay
                 {
+                    /**
+                     * The file reference to display.
+                     */
                     File file;
 
+                    /**
+                     * Creates a new FileNameDisplay.
+                     * @param file The file to display.
+                     */
                     FileNameDisplay(File file)
                     {
                         this.file = file;
-                    }
+                    }//end FileNameDisplay(file)
 
+                    /**
+                     * {@inheritDoc}
+                     */
                     @Override
                     public String toString()
                     {
                         // Get the file name and remove the extension.
                         return file.getName().replaceFirst("[.][^.]+$", "");
-                    }
-                }
+                    }//end toString
+                }//end class FileNameDisplay
 
                 // Create a list display control.
                 add(new JScrollPane(new JList<FileNameDisplay>()
@@ -295,6 +317,10 @@ public class Application
                         // Mouse listener for double click.
                         addMouseListener(new MouseAdapter()
                         {
+                            /**
+                             * {@inheritDoc}
+                             */
+                            @Override
                             public void mouseClicked(MouseEvent evt)
                             {
                                 if (evt.getClickCount() == 2)
@@ -304,8 +330,8 @@ public class Application
                                     target.ref = romModel.elementAt(locationToIndex(evt.getPoint())).file;
                                     dialog.dispose();
                                     selectLock.release();
-                                }
-                            }
+                                }//end if
+                            }//end mouseClicked
                         });
                     }
                 }));
@@ -329,7 +355,7 @@ public class Application
 
         // Return the selected ROM.
         return target.ref;
-    }
+    }//end selectROM
 
     /**
      * Create the emulator UI.
@@ -382,27 +408,36 @@ public class Application
                     case Keybinding.KEY_SELECT:
                         core.buttonSelect = to;
                         break;
-                }
-            }
+                }//end switch
+            }//end toggle
 
+            /**
+             * {@inheritDoc}
+             */
             @Override
             public void keyReleased(KeyEvent e)
             {
                 // Handle releasing.
                 toggle(e, false);
-            }
+            }//end keyReleased
 
+            /**
+             * {@inheritDoc}
+             */
             @Override
             public void keyPressed(KeyEvent e)
             {
                 // Handle pressing.
                 toggle(e, true);
-            }
+            }//end keyPressed
         });
 
         // Add mouse listener.
         display.addMouseListener(new MouseAdapter()
         {
+            /**
+             * {@inheritDoc}
+             */
             @Override
             public void mouseReleased(MouseEvent e)
             {
@@ -434,7 +469,7 @@ public class Application
                                 group.setSelected(menuItem.getModel(), true);
 
                             add(menuItem);
-                        }
+                        }//end for
                     }
                 });
 
@@ -466,7 +501,7 @@ public class Application
                                     });
                                 }
                             });
-                        }
+                        }//end for
                     }
                 });
 
@@ -490,7 +525,7 @@ public class Application
                                             Settings.setChannelOn(channel, !Settings.isChannelOn(channel)));
                                 }
                             });
-                        }
+                        }//end for
                     }
                 });
 
@@ -518,8 +553,7 @@ public class Application
                 {
                     {
                         // On click, toggle the setting.
-                        addActionListener((x) ->
-                                Settings.setMuted(!Settings.isMuted()));
+                        addActionListener((x) -> Settings.setMuted(!Settings.isMuted()));
                     }
                 });
 
@@ -545,7 +579,8 @@ public class Application
                                         group.setSelected(getModel(), true);
 
                                     // On click, update the speed.
-                                    addActionListener(e -> {
+                                    addActionListener(e ->
+                                    {
                                         Settings.setSpeed(speed);
                                         group.setSelected(getModel(), true);
                                     });
@@ -577,11 +612,14 @@ public class Application
                                 // Only save the volume once the slider is released.
                                 addMouseListener(new MouseAdapter()
                                 {
+                                    /**
+                                     * {@inheritDoc}
+                                     */
                                     @Override
                                     public void mouseReleased(MouseEvent e)
                                     {
                                         Settings.saveVolume();
-                                    }
+                                    }//end mouseReleased
                                 });
                             }
                         });
@@ -593,7 +631,8 @@ public class Application
                 {
                     {
                         // On click, switch fullscreen state.
-                        addActionListener((e) -> {
+                        addActionListener((e) ->
+                        {
                             // Pause the game while switching fullscreen.
                             boolean wasPaused = core.isPaused();
                             core.setPaused(true);
@@ -611,7 +650,8 @@ public class Application
                             core.setPaused(wasPaused);
 
                             // I'm not sure why this has to be invoked later, but if it's not, stuff breaks
-                            SwingUtilities.invokeLater(() -> {
+                            SwingUtilities.invokeLater(() ->
+                            {
                                 // Reinitialize the renderers.
                                 core.lcd.currentRenderer = null;
                                 core.lcd.initializeRenderers();
@@ -638,7 +678,8 @@ public class Application
                             {
                                 {
                                     // On click, switch to new setting.
-                                    addActionListener((e) -> {
+                                    addActionListener((e) ->
+                                    {
                                         // Pause the game while switching magnification.
                                         boolean wasPaused = core.isPaused();
                                         core.setPaused(true);
@@ -656,7 +697,8 @@ public class Application
                                         core.setPaused(wasPaused);
 
                                         // I'm not sure why this has to be invoked later, but if it's not, stuff breaks
-                                        SwingUtilities.invokeLater(() -> {
+                                        SwingUtilities.invokeLater(() ->
+                                        {
                                             // Reinitialize the renderers.
                                             core.lcd.currentRenderer = null;
                                             core.lcd.initializeRenderers();
@@ -664,7 +706,7 @@ public class Application
                                     });
                                 }
                             });
-                        }
+                        }//end for
                     }
                 });
 
@@ -694,7 +736,7 @@ public class Application
 
                 // Show the menu at the mouse position.
                 menu.show(e.getComponent(), e.getX(), e.getY());
-            }
+            }//end mouseReleased
         });
 
         // Continuing setting up the frame.
@@ -733,14 +775,14 @@ public class Application
                         add(Box.createVerticalGlue());
                     }
                 });
-            }
+            }//end if
 
             // Undecorate and maximize if fullscreen.
             if (fullscreen)
             {
                 disp.setUndecorated(true);
                 disp.setExtendedState(JFrame.MAXIMIZED_BOTH);
-            }
+            }//end if
 
             // Pack the frame, set location, and declare exit on close.
             disp.pack();
@@ -751,6 +793,9 @@ public class Application
             // Add window listener for window close.
             disp.addWindowListener(new WindowAdapter()
             {
+                /**
+                 * {@inheritDoc}
+                 */
                 @Override
                 public void windowClosing(WindowEvent evt)
                 {
@@ -764,12 +809,12 @@ public class Application
                         {
                             System.err.println("Saving cart ram");
                             core.mmu.save(f);
-                        }
+                        }//end if
                     } catch (IOException e)
                     {
                         e.printStackTrace();
-                    }
-                }
+                    }//end try
+                }//end windowClosing
             });
 
             // Show the frame.
@@ -790,5 +835,5 @@ public class Application
         System.err.println(core.cartridge.gameTitle);
         System.err.println(core.cartridge);
         System.out.flush();
-    }
-}
+    }//end initUI
+}//end class Application

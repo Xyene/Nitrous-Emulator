@@ -20,7 +20,7 @@ public class D3DRenderManager extends AbstractRenderManager
     public D3DRenderManager(ComponentPeer peer)
     {
         super(peer, "sun.awt.windows.WComponentPeer", "sun.java2d.d3d.D3DSurfaceData");
-    }
+    }//end D3DRenderManager(peer)
 
     /**
      * {@inheritDoc}
@@ -48,9 +48,7 @@ public class D3DRenderManager extends AbstractRenderManager
             if (((int) ContextCapabilities.getMethod("getCaps").invoke(d3dCaps) & CAPS_OK) == 0)
             {
                 throw new RuntimeException("Could not enable Direct3D pipeline on " + "screen " + screen);
-            }
-
-//            System.err.println("!!Direct3D pipeline enabled on screen " + screen);
+            }//end if
 
             // Find constructors for Direct3D graphics device and configuration
             Constructor<?> newD3DGraphicsDevice =
@@ -69,8 +67,8 @@ public class D3DRenderManager extends AbstractRenderManager
         {
             // Otherwise, we fall back to the default and hope for the best.
             return super.getGraphicsConfig();
-        }
-    }
+        }//end try
+    }//end getGraphicsConfig
 
     /**
      * {@inheritDoc}
@@ -79,5 +77,5 @@ public class D3DRenderManager extends AbstractRenderManager
     protected String getName()
     {
         return "DirectDraw";
-    }
-}
+    }//end getName
+}//end class D3DRenderManager

@@ -38,7 +38,7 @@ public class ROMFrequencyManager
 
         // Increase the usage frequency.
         store.putInt(path, store.getInt(path, 0) + 1);
-    }
+    }//end usedROM
 
     /**
      * Merges two sorted lists of File objects into one based on frequency.
@@ -64,22 +64,22 @@ public class ROMFrequencyManager
             {
                 System.arraycopy(listB, indexB, result, index, listB.length - indexB);
                 break;
-            }
+            }//end if
             if (indexB == listB.length)
             {
                 System.arraycopy(listA, indexA, result, index, listA.length - indexA);
                 break;
-            }
+            }//end if
 
             // Otherwise, put the element with greater frequency to the output list.
             if (frequency.get(listA[indexA]) > frequency.get(listB[indexB]))
                 result[index++] = listA[indexA++];
             else
                 result[index++] = listB[indexB++];
-        }
+        }//end while
 
         return result;
-    }
+    }//end merge
 
     /**
      * A mergesort implementation that would sort a list of {@link File} objects by frequency.
@@ -109,7 +109,7 @@ public class ROMFrequencyManager
 
         // Merge the two partitions.
         return merge(a, b, frequency);
-    }
+    }//end mergeSort
 
     /**
      * Find the {@literal count} most used ROMs.
@@ -141,13 +141,13 @@ public class ROMFrequencyManager
                 {
                     // Remove information about deleted ROMs.
                     store.remove(rom);
-                }
-            }
+                }//end if
+            }//end for
         } catch (BackingStoreException e)
         {
             // If failed to query ROMs, return an empty list.
             return new File[0];
-        }
+        }//end try
 
         // Sort the ROMs by frequency.
         File[] sorted = mergeSort(roms.toArray(new File[roms.size()]), frequency);
@@ -160,5 +160,5 @@ public class ROMFrequencyManager
         File[] result = new File[count];
         System.arraycopy(sorted, 0, result, 0, count);
         return result;
-    }
-}
+    }//end mostUsed
+}//end class ROMFrequencyManager

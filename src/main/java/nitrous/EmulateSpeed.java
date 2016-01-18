@@ -40,5 +40,5 @@ public enum EmulateSpeed
     {
         this.name = name;
         this.clockSpeed = clockSpeed;
-    }
-}
+    }//end EmulateSpeed(name, clockSpeed)
+}//end enum EmulateSpeed

@@ -43,7 +43,7 @@ public class HeavyDisplayPanel extends Panel
 
         // Painting is done by an IRenderManager directly on the component peer
         setIgnoreRepaint(true);
-    }
+    }//end HeavyDisplayPanel(core, mag)
 
     /**
      * {@inheritDoc}
@@ -55,7 +55,7 @@ public class HeavyDisplayPanel extends Panel
 
         // Notify the Emulator to paint on this surface
         core.setDisplay(this);
-    }
+    }//end addNotify
 
     /**
      * Disables painting of this component by throwing a RuntimeException: use an IRenderManager to draw instead.
@@ -66,5 +66,5 @@ public class HeavyDisplayPanel extends Panel
     public void paint(Graphics g)
     {
         throw new RuntimeException();
-    }
+    }//end paint
 }

@@ -22,7 +22,7 @@ public abstract class SoundChannel
     public SoundChannel(Emulator core)
     {
         this.core = core;
-    }
+    }//end SoundChannel(core)
 
     /**
      * Field to indicate there is an update request.
@@ -42,7 +42,7 @@ public abstract class SoundChannel
     public void update()
     {
         updateRequest = true;
-    }
+    }//end update
 
     /**
      * Called to restart the sound: set flag.
@@ -50,7 +50,7 @@ public abstract class SoundChannel
     public void restart()
     {
         restartRequest = true;
-    }
+    }//end restart
 
     /**
      * Method to handle requests.
@@ -75,7 +75,7 @@ public abstract class SoundChannel
 
         // Return whether there was any requests, before we set the variables to false.
         return didSomething;
-    }
+    }//end handleRequests
 
     /**
      * Method called to handle a restart request.
@@ -108,5 +108,5 @@ public abstract class SoundChannel
     public static int gbFreqToCycles(int gbFreq)
     {
         return 32 * (2048 - gbFreq);
-    }
+    }//end gbFreqToCycles
 }

@@ -30,22 +30,22 @@ public class XRenderManager implements IRenderManager
                 if (backing.getGraphics() != null) break;
             } catch (ReflectiveOperationException ignored)
             {
-            }
-        }
+            }//end try
+        }//end for
         if (backing == null || backing.getGraphics() == null) throw new RuntimeException("unable to draw!");
-    }
+    }//end XRenderManager(peer)
 
     @Override
     public Graphics2D getGraphics()
     {
         return backing.getGraphics();
-    }
+    }//end getGraphics
 
     @Override
     public void update()
     {
         backing.update();
-    }
+    }//end update
 
     @Override
     public JRadioButtonMenuItem getRadioMenuItem(LCD lcd)
@@ -60,7 +60,7 @@ public class XRenderManager implements IRenderManager
                 });
             }
         };
-    }
+    }//end getRadioMenuItem
 
     /**
      * On most modern systems we'll get away with just this - XRender.
@@ -70,14 +70,14 @@ public class XRenderManager implements IRenderManager
         public XRRenderManager(ComponentPeer peer)
         {
             super(peer, "sun.awt.X11ComponentPeer", "sun.java2d.xr.XRSurfaceData");
-        }
+        }//end XRRenderManager(peer)
 
         @Override
         protected String getName()
         {
             return "X Render";
-        }
-    }
+        }//end getName
+    }//end class XRRenderManager
 
     /**
      * On an ancient system or if the JVM is started with -Dsun.java2d.xrender=false, X Render will fail to initialize
@@ -88,7 +88,7 @@ public class XRenderManager implements IRenderManager
         public X11RenderManager(ComponentPeer peer)
         {
             super(peer, "sun.awt.X11ComponentPeer", "sun.java2d.x11.X11SurfaceData");
-        }
+        }//end X11RenderManager(peer)
 
         @Override
         protected GraphicsConfiguration getGraphicsConfig()
@@ -115,22 +115,22 @@ public class XRenderManager implements IRenderManager
             {
                 e.printStackTrace();
                 return null;
-            }
-        }
+            }//end try
+        }//end getGraphicsConfig
 
         @Override
         protected String getName()
         {
             return "X11";
-        }
-    }
+        }//end getName
+    }//end class X11RenderManager
 
     public static class GLXRenderManager extends AbstractRenderManager
     {
         public GLXRenderManager(ComponentPeer peer)
         {
             super(peer, "sun.awt.X11ComponentPeer", "sun.java2d.opengl.GLXSurfaceData");
-        }
+        }//end GLXRenderManager(peer)
 
         @Override
         protected GraphicsConfiguration getGraphicsConfig()
@@ -139,7 +139,6 @@ public class XRenderManager implements IRenderManager
 
             try
             {
-                //            System.out.println("!!!!!!!!!!!" + old);
                 Class<?> GLXGraphicsConfig = Class.forName("sun.java2d.opengl.GLXGraphicsConfig");
                 Class<?> X11GraphicsConfig = Class.forName("sun.awt.X11GraphicsConfig");
                 Class<?> X11GraphicsEnvironment = Class.forName("sun.awt.X11GraphicsEnvironment");
@@ -148,31 +147,27 @@ public class XRenderManager implements IRenderManager
                 Method isGLXAvailable = X11GraphicsEnvironment.getMethod("isGLXAvailable");
                 if (!(boolean) isGLXAvailable.invoke(null))
                 {
-                    //                System.err.println("GLX unavailable!");
                     throw new RuntimeException("GLX unavailable");
-                }
+                }//end if
 
                 System.out.println(old.getDevice());
 
                 Method getVisual = X11GraphicsConfig.getMethod("getVisual");
 
                 int visual = (int) getVisual.invoke(old);
-                //            System.out.println(visual + " <<< visual");
 
                 Method getConfig = GLXGraphicsConfig.getMethod("getConfig", X11GraphicsDevice, int.class);
-                //            System.out.println(">>>>> " + gc);
                 return (GraphicsConfiguration) getConfig.invoke(null, old.getDevice(), visual);
-            } catch (Exception e)
+            } catch (Exception ignored)
             {
-                //            e.printStackTrace();
                 return null;
-            }
-        }
+            }//end try
+        }//end getGraphicsConfig
 
         @Override
         protected String getName()
         {
             return "GLX";
-        }
-    }
-}
+        }//end getName
+    }//end class GLXRenderManager
+}//end class XRenderManager

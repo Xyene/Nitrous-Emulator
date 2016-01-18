@@ -47,4 +47,4 @@ public interface IRenderManager
      * @return a {@link javax.swing.JRadioButtonMenuItem} to switch to this renderer.
      */
     JRadioButtonMenuItem getRadioMenuItem(LCD lcd);
-}
+}//end interface IRenderManager

@@ -21,7 +21,7 @@ public class GBCPalette implements IPalette
         if (colors.length != 4)
             throw new IllegalArgumentException("colors must be of length 4");
         this.colors = colors;
-    }
+    }//end GBCPalette(colors)
 
     /**
      * {@inheritDoc}
@@ -29,5 +29,5 @@ public class GBCPalette implements IPalette
     public int getColor(int number)
     {
         return colors[number];
-    }
-}
+    }//end getColor
+}//end class GBCPalette

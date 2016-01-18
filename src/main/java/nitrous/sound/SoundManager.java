@@ -122,8 +122,8 @@ public class SoundManager
         {
             e.printStackTrace();
             sdl = null;
-        }
-    }
+        }//end try
+    }//end SoundManager(core)
 
     /**
      * Gets the amount of CPU cycles per sample of audio.
@@ -133,8 +133,7 @@ public class SoundManager
     public double getSampleClocks()
     {
         return sampleClocks;
-    }
-
+    }//end getSampleClocks
 
     /**
      * Sets the amount of CPU cycles per sample of audio.
@@ -144,7 +143,7 @@ public class SoundManager
     public void updateClockSpeed(int clockSpeed)
     {
         sampleClocks = clockSpeed / SoundChannel.AUDIO_FORMAT.getSampleRate();
-    }
+    }//end updateClockSpeed
 
     /**
      * Updates the length stored in the sound output file.
@@ -168,7 +167,7 @@ public class SoundManager
                 (byte) ((written >> 16) & 0xff),
                 (byte) ((written >> 24) & 0xff)
         });
-    }
+    }//end updateSoundFileLength
 
     static
     {
@@ -183,7 +182,7 @@ public class SoundManager
             } catch (IOException e)
             {
                 e.printStackTrace();
-            }
+            }//end try
 
             // Create a File object to represent the output file.
             File wav = new File(System.getProperty("nox.soundFile"));
@@ -191,6 +190,9 @@ public class SoundManager
             // Define and start the wave writer thread.
             wavWriter = new Thread("WAV-Writer-Thread")
             {
+                /**
+                 * {@inheritDoc}
+                 */
                 @Override
                 public void run()
                 {
@@ -205,11 +207,11 @@ public class SoundManager
                         int length = Integer.MAX_VALUE / SoundChannel.AUDIO_FORMAT.getFrameSize() - 46;
                         new WaveFileWriter().write(new AudioInputStream(in, SoundChannel.AUDIO_FORMAT, length),
                                 AudioFileFormat.Type.WAVE, new FileOutputStream(wav));
-                    } catch (IOException e)
+                    } catch (IOException ignored)
                     {
                         // This will only ever exit with a "Pipe closed" exception
-                    }
-                }
+                    }//end try
+                }//end run
             };
             wavWriter.start();
 
@@ -220,10 +222,11 @@ public class SoundManager
             } catch (FileNotFoundException e)
             {
                 e.printStackTrace();
-            }
+            }//end try
 
             // Add shutdown hook for final length update.
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            Runtime.getRuntime().addShutdownHook(new Thread(() ->
+            {
                 try
                 {
                     System.out.println("Saving: " + wav);
@@ -233,10 +236,10 @@ public class SoundManager
                 } catch (IOException e)
                 {
                     e.printStackTrace();
-                }
+                }//end try
             }));
-        }
-    }
+        }//end if
+    }//end static
 
     /**
      * Called every time when the CPU clock advances to generate new samples, if available.
@@ -299,7 +302,7 @@ public class SoundManager
                 // Scale the 8 bit sample to 16-bit, then apply volume scaling.
                 dataLeft = (dataLeft << 8) * volume / 100;
                 dataRight = (dataRight << 8) * volume / 100;
-            }
+            }//end if
 
             // Convert the left and right samples to signed big endian bytes.
             buffer[left] = (byte) (dataLeft >> 8);
@@ -320,7 +323,7 @@ public class SoundManager
                     } catch (IOException e)
                     {
                         out = null;
-                    }
+                    }//end try
 
                 // Write to sound output.
                 int written = 0;
@@ -328,7 +331,7 @@ public class SoundManager
 
                 // Reset used samples.
                 usedSamples = 0;
-            }
-        }
-    }
-}
+            }//end if
+        }//end while
+    }//end tick
+}//end class SoundManager

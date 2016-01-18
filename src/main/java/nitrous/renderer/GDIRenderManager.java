@@ -16,7 +16,7 @@ public class GDIRenderManager extends AbstractRenderManager
     public GDIRenderManager(ComponentPeer peer)
     {
         super(peer, "sun.awt.windows.WComponentPeer", "sun.java2d.windows.GDIWindowSurfaceData");
-    }
+    }//end GDIRenderManager(peer)
 
     /**
      * {@inheritDoc}
@@ -25,5 +25,5 @@ public class GDIRenderManager extends AbstractRenderManager
     protected String getName()
     {
         return "GDI";
-    }
-}
+    }//end getName
+}//end class GDIRenderManager
