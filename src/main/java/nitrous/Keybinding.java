@@ -1,10 +1,7 @@
 package nitrous;
 
 import java.awt.event.KeyEvent;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.prefs.Preferences;
 
 /**
@@ -27,7 +24,7 @@ public class Keybinding
     /**
      * The default key settings.
      */
-    private static final int[] defaultKeys = {
+    public static final int[] DEFAULT_KEY_BINDINGS = {
             KeyEvent.VK_A, KeyEvent.VK_B,
             KeyEvent.VK_RIGHT, KeyEvent.VK_LEFT,
             KeyEvent.VK_UP, KeyEvent.VK_DOWN,
@@ -63,10 +60,10 @@ public class Keybinding
     {
         this.node = node;
 
-        // Gets the keybinding settings from the store, with fallback to defaultKeys
+        // Gets the keybinding settings from the store, with fallback to DEFAULT_KEY_BINDINGS
         for (int i = 0; i < keystrokes.length; ++i)
         {
-            keystrokes[i] = node.getInt("key" + i, defaultKeys[i]);
+            keystrokes[i] = node.getInt("key" + i, DEFAULT_KEY_BINDINGS[i]);
 
             // Populate the reverse mapping.
             keyMap.put(keystrokes[i], i);
