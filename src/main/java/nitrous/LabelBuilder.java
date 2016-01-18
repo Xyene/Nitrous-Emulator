@@ -19,7 +19,6 @@ import java.util.Map;
  */
 public class LabelBuilder
 {
-
     /**
      * Container for all label components.
      */
