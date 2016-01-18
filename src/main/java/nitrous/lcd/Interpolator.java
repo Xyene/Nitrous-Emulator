@@ -7,6 +7,8 @@ package nitrous.lcd;
  * As such, a 160x144 game is unplayable due to its small size - the sensible thing to do is scale it upwards (by a
  * factor of 2x, for example). When doing this, we can the possibility of interpolating the stretch with various functions
  * to improve the graphics quality.
+ *
+ * @author Quantum
  */
 public enum Interpolator
 {

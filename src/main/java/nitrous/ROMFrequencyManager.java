@@ -11,6 +11,8 @@ import java.util.prefs.Preferences;
 
 /**
  * Most frequently used ROMs manager.
+ *
+ * @author Quantum
  */
 public class ROMFrequencyManager
 {
@@ -79,6 +81,10 @@ public class ROMFrequencyManager
         store.putInt(hash, store.getInt(hash, 0) + 1);
     }//end usedROM
 
+    // #alg Mergesort to sort recently used ROMs by usage frequency
+    //      Mergesort is chosen because it only needs to go through the entire list
+    //      very few times as each iteration halves the list size. Since we may potentially
+    //      have many ROMs to sort, we don't want the startup time to be quadratic.
     /**
      * Merges two sorted lists of File objects into one based on frequency.
      *
@@ -195,7 +201,7 @@ public class ROMFrequencyManager
             }//end for
         } catch (BackingStoreException e)
         {
-            // If failed to query ROMs, return an empty list.
+            // #error If failed to query ROMs, return an empty list.
             return new File[0];
         }//end try
 

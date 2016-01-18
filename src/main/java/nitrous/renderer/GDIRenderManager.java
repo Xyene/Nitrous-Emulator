@@ -5,6 +5,9 @@ import java.awt.peer.ComponentPeer;
 
 /**
  * A renderer that uses Java's GDI support.
+ *
+ * @author Quantum
+ * @author Tudor
  */
 public class GDIRenderManager extends AbstractRenderManager
 {

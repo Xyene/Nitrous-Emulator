@@ -6,6 +6,8 @@ import java.util.prefs.Preferences;
 
 /**
  * Keybinding manager.
+ *
+ * @author Quantum
  */
 public class Keybinding
 {

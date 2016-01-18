@@ -5,6 +5,8 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * Implementation of Memory Bank Chip 2.
+ *
+ * @author Tudor
  */
 public class MBC2 extends Memory
 {

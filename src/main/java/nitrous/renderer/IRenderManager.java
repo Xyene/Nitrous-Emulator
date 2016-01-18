@@ -11,6 +11,9 @@ import java.awt.*;
  * <p/>
  * A renderer is responsible for producing a {@link java.awt.Graphics2D}
  * to draw on and switching the {@link java.awt.Panel} to render with it.
+ *
+ * @author Quantum
+ * @author Tudor
  */
 public interface IRenderManager
 {

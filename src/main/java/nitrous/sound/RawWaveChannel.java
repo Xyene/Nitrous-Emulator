@@ -59,6 +59,8 @@ import static nitrous.cpu.R.*;
  * <p/>
  * This storage area holds 32 4-bit samples that are played back upper 4 bits first.
  *
+ * @author Quantum
+ * @author Tudor
  * @see <a href="http://bgb.bircd.org/pandocs.htm#soundchannel3waveoutput">Sound Channel 3 - Wave Output - Pandocs</a>
  */
 public class RawWaveChannel extends SoundChannel

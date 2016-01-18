@@ -8,6 +8,8 @@ import java.io.OutputStream;
 
 /**
  * Abstract implementation of features shared by all Memory Banking Chips.
+ *
+ * @author Tudor
  */
 public abstract class MBC extends Memory
 {

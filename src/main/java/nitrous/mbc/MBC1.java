@@ -7,6 +7,8 @@ import java.io.OutputStream;
 
 /**
  * Implementation of Memory Bank Chip 1.
+ *
+ * @author Tudor
  */
 public class MBC1 extends MBC
 {

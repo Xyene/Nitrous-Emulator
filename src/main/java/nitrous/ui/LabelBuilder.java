@@ -12,6 +12,8 @@ import java.util.Map;
 
 /**
  * Fluent helper class to create rich labels.
+ *
+ * @author Tudor
  */
 public class LabelBuilder
 {
@@ -73,6 +75,8 @@ public class LabelBuilder
     /**
      * Appends an action label.
      *
+     * #action our fluent interface of adding action listeners
+     *
      * @param text The text to display.
      * @param act  The action to perform on click.
      * @return This object.
@@ -89,6 +93,7 @@ public class LabelBuilder
                 setFocusable(false);
                 setBorder(null);
 
+                // #action handle mouse movement and clicks on the label
                 addMouseListener(new MouseAdapter()
                 {
                     Font font;
@@ -116,6 +121,7 @@ public class LabelBuilder
                         {
                             if (clicked)
                             {
+                                // #action we use mouseReleased to invoke actionPerformed
                                 SwingUtilities.invokeLater(() -> act.actionPerformed(new ActionEvent(this,
                                         ActionEvent.ACTION_PERFORMED, "label_action"))
                                 );

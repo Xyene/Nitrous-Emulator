@@ -28,6 +28,11 @@ import java.util.concurrent.Semaphore;
 
 /**
  * Main emulator UI.
+ *
+ * #main
+ *
+ * @author Tudor
+ * @author Quantum
  */
 public class Application
 {
@@ -40,12 +45,15 @@ public class Application
             TITLE_ICON = ImageIO.read(ClassLoader.getSystemResourceAsStream("icon.png"));
         } catch (IOException e)
         {
+            // #error print stacktrace for debugging
             e.printStackTrace();
         }
     }
 
     /**
      * The main entry point.
+     *
+     * #static method
      *
      * @param argv command line arguments
      * @throws Exception
@@ -93,6 +101,7 @@ public class Application
         }//end if
 
         // Load the ROM.
+        // #read load the ROM
         Cartridge cartridge = new Cartridge(Files.readAllBytes(rom.toPath()));
 
         // Create the Emulator.
@@ -106,10 +115,11 @@ public class Application
         {
             try
             {
+                // #read the save file
                 core.mmu.load(new FileInputStream(core.savefile));
             } catch (Exception ignored)
             {
-                // There is nothing you can do if the file fails to load.
+                // #error There is nothing you can do if the file fails to load.
             }//end try
         }//end if
 
@@ -139,6 +149,7 @@ public class Application
                 setIconImage(TITLE_ICON);
 
                 // Stop the waiting if the window is closed.
+                // #action stop waiting on window close
                 addWindowListener(new WindowAdapter()
                 {
                     /**
@@ -253,6 +264,7 @@ public class Application
                         add(Box.createHorizontalGlue());
                         add(new LabelBuilder()
                                 .setFont(verdana.deriveFont(Font.BOLD))
+                                // #action open the file chooser
                                 .append("To begin, ").action("load", (e) -> {
                                     // Display the file chooser.
                                     JFileChooser chooser = new JFileChooser();
@@ -325,6 +337,7 @@ public class Application
                         setModel(romModel);
 
                         // Mouse listener for double click.
+                        // #action select ROM on double click
                         addMouseListener(new MouseAdapter()
                         {
                             /**
@@ -393,6 +406,7 @@ public class Application
         disp.setIconImage(TITLE_ICON);
 
         // Add key listener.
+        // #action on key presses and releases to alter Gameboy button state
         display.addKeyListener(new KeyAdapter()
         {
             /**
@@ -455,6 +469,7 @@ public class Application
         });
 
         // Add mouse listener.
+        // #action listen for right click to show menu
         display.addMouseListener(new MouseAdapter()
         {
             /**
@@ -517,7 +532,9 @@ public class Application
                                         group.setSelected(getModel(), true);
 
                                     // Alter settings on click.
-                                    addActionListener((e) -> {
+                                    // #action alter interpolator on menu click
+                                    addActionListener((e) ->
+                                    {
                                         Settings.setInterpolator(interpolator);
                                         group.setSelected(getModel(), true);
                                     });
@@ -543,6 +560,7 @@ public class Application
                             {
                                 {
                                     // Alter settings on click.
+                                    // #action alter channel state on menu click
                                     addActionListener((x) ->
                                             Settings.setChannelOn(channel, !Settings.isChannelOn(channel)));
                                 }
@@ -555,10 +573,12 @@ public class Application
                 menu.add(new JSeparator());
 
                 // Add the pause menu checkbox item.
+                // #cheat allows the game to be paused
                 menu.add(new JCheckBoxMenuItem("Pause", core.isPaused())
                 {
                     {
                         // On click, toggle the pause state by controlling the execution lock.
+                        // #action alter pause state on menu click
                         addActionListener((x) ->
                         {
                             if (core.isPaused())
@@ -575,11 +595,13 @@ public class Application
                 {
                     {
                         // On click, toggle the setting.
+                        // #action alter mute state on menu click
                         addActionListener((x) -> Settings.setMuted(!Settings.isMuted()));
                     }
                 });
 
                 // Add a submenu for emulation speed settings.
+                // #cheat alters game speed
                 menu.add(new JMenu("Speed")
                 {
                     {
@@ -601,6 +623,7 @@ public class Application
                                         group.setSelected(getModel(), true);
 
                                     // On click, update the speed.
+                                    // #action alter emulation speed on menu click
                                     addActionListener(e ->
                                     {
                                         Settings.setSpeed(speed);
@@ -629,9 +652,11 @@ public class Application
                                 setPaintTrack(true);
 
                                 // Update volume on slider change.
+                                // #action alter volume on slider drag
                                 addChangeListener((e) -> Settings.setVolume(getValue()));
 
                                 // Only save the volume once the slider is released.
+                                // #action save volume on mouse release
                                 addMouseListener(new MouseAdapter()
                                 {
                                     /**
@@ -653,6 +678,7 @@ public class Application
                 {
                     {
                         // On click, switch fullscreen state.
+                        // #action alter fullscreen state on menu click
                         addActionListener((e) ->
                         {
                             // Pause the game while switching fullscreen.
@@ -700,6 +726,7 @@ public class Application
                             {
                                 {
                                     // On click, switch to new setting.
+                                    // #action alter pause state on menu click
                                     addActionListener((e) ->
                                     {
                                         // Pause the game while switching magnification.
@@ -740,6 +767,7 @@ public class Application
                 {
                     {
                         // On click, create and show the dialog.
+                        // #action show keybinding dialog on menu click
                         addActionListener((e) -> new JDialog(disp, "Keybindings...")
                         {
                             {
@@ -813,6 +841,7 @@ public class Application
             disp.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
             // Add window listener for window close.
+            // #action save cartridge memory on window close
             disp.addWindowListener(new WindowAdapter()
             {
                 /**
@@ -824,6 +853,7 @@ public class Application
                     // Print the amount of CPU cycles executed.
                     System.err.println(core.cycle);
 
+                    // #save cartridge memory to disk
                     // Save the cartridge memory if it has a battery.
                     try (FileOutputStream f = new FileOutputStream(core.savefile))
                     {
@@ -834,6 +864,7 @@ public class Application
                         }//end if
                     } catch (IOException e)
                     {
+                        // #error print stacktrace for debugging
                         e.printStackTrace();
                     }//end try
                 }//end windowClosing

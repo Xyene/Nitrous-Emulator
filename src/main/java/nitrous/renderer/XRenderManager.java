@@ -12,6 +12,9 @@ import java.lang.reflect.Method;
  * A renderer that uses Java's rendering support on Linux.
  * <p/>
  * In order, it attempts to initialize XRender, GLX, and X11
+ *
+ * @author Tudor
+ * @author Quantum
  */
 public class XRenderManager implements IRenderManager
 {
@@ -30,6 +33,7 @@ public class XRenderManager implements IRenderManager
                 if (backing.getGraphics() != null) break;
             } catch (ReflectiveOperationException ignored)
             {
+                // #error fail because this is not supported
             }//end try
         }//end for
         if (backing == null || backing.getGraphics() == null) throw new RuntimeException("unable to draw!");
@@ -53,6 +57,7 @@ public class XRenderManager implements IRenderManager
         return new JRadioButtonMenuItem(backing.getName())
         {
             {
+                // #action on click of the menu item
                 addActionListener((x) ->
                 {
                     System.err.println("Switched to " + backing.getName() + " renderer.");
@@ -113,6 +118,7 @@ public class XRenderManager implements IRenderManager
                 );
             } catch (Exception e)
             {
+                // #error fail because this is not supported
                 e.printStackTrace();
                 return null;
             }//end try
@@ -160,6 +166,7 @@ public class XRenderManager implements IRenderManager
                 return (GraphicsConfiguration) getConfig.invoke(null, old.getDevice(), visual);
             } catch (Exception ignored)
             {
+                // #error fail because this is not supported
                 return null;
             }//end try
         }//end getGraphicsConfig

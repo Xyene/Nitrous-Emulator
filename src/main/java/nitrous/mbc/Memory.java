@@ -29,6 +29,9 @@ import static nitrous.cpu.R.*;
  * FF00-FF7F   I/O Ports
  * FF80-FFFE   High RAM (HRAM)
  * FFFF        Interrupt Enable Register
+ *
+ * @author Tudor
+ * @author Quantum
  */
 public class Memory
 {
@@ -233,6 +236,8 @@ public class Memory
 
     /**
      * Sets a byte of data.
+     *
+     * #method
      *
      * @param addr  The address to which to write to.
      * @param _data The data.

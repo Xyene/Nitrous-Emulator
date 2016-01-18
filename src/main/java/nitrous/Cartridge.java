@@ -7,6 +7,9 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * An internal information area located at 0100-014F in each cartridge.
+ *
+ * @author Tudor
+ * @author Quantum
  */
 public class Cartridge
 {

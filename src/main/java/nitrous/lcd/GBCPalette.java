@@ -2,6 +2,8 @@ package nitrous.lcd;
 
 /**
  * Represents a Gameboy Color
+ *
+ * @author Tudor
  */
 public class GBCPalette implements IPalette
 {

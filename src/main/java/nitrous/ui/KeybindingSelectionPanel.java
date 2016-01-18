@@ -7,6 +7,9 @@ import java.awt.event.KeyEvent;
 
 /**
  * A {@link JPanel} to manage keybinding selection.
+ *
+ * @author Tudor
+ * @author Quantum
  */
 public class KeybindingSelectionPanel extends JPanel
 {
@@ -54,6 +57,7 @@ public class KeybindingSelectionPanel extends JPanel
 
                             // Event handler to update binding: it consumes absolutely all events, and updates
                             // the text field itself.
+                            // #action changes the keybinding on key press
                             addKeyListener(new KeyAdapter()
                             {
                                 /**

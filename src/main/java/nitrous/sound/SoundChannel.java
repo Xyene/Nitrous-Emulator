@@ -6,6 +6,8 @@ import javax.sound.sampled.AudioFormat;
 
 /**
  * Abstract class that aids in the implementation of a sound channel.
+ *
+ * @author Quantum
  */
 public abstract class SoundChannel
 {
@@ -101,6 +103,8 @@ public abstract class SoundChannel
 
     /**
      * Utility function to convert Gameboy frequency values into CPU cycles.
+     *
+     * #static
      *
      * @param gbFreq Gameboy frequency value
      * @return CPU cycles

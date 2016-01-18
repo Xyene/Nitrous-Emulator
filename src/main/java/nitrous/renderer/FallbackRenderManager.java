@@ -8,6 +8,9 @@ import java.awt.peer.ComponentPeer;
 
 /**
  * This render manager uses whatever sketchy unknown renderer used by Java.
+ *
+ * @author Tudor
+ * @author Quantum
  */
 public class FallbackRenderManager implements IRenderManager
 {
@@ -56,6 +59,7 @@ public class FallbackRenderManager implements IRenderManager
         {
             {
                 // Switch to this renderer on click of its menu item.
+                // #action on click of the menu item
                 addActionListener((x) ->
                 {
                     System.err.println("Switched to fallback renderer.");

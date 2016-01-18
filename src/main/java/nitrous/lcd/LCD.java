@@ -19,6 +19,9 @@ import static nitrous.cpu.R.*;
 
 /**
  * Emulates the LCD component of a Gameboy.
+ *
+ * @author Tudor
+ * @author Quantum
  */
 public class LCD
 {
@@ -228,6 +231,8 @@ public class LCD
     /**
      * Tick the LCD.
      *
+     * #method
+     *
      * @param cycles The number of CPU cycles elapsed since the last call to tick.
      */
     public void tick(long cycles)
@@ -394,6 +399,7 @@ public class LCD
                     renderer = rendererClass.getDeclaredConstructor(ComponentPeer.class).newInstance(core.display.getPeer());
                 } catch (ReflectiveOperationException ignored)
                 {
+                    // #error failure means we try the next renderer
                     continue;
                 }//end try
                 if (renderer.getGraphics() != null)

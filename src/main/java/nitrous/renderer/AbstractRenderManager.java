@@ -12,6 +12,9 @@ import java.lang.reflect.Method;
 /**
  * An basic implementation of {@link nitrous.renderer.IRenderManager} that
  * works for most situations involving renderers that Java support.
+ *
+ * @author Quantum
+ * @author Tudor
  */
 public abstract class AbstractRenderManager implements IRenderManager
 {
@@ -60,6 +63,7 @@ public abstract class AbstractRenderManager implements IRenderManager
             this.surfaceClass = Class.forName(surfaceClass);
         } catch (ClassNotFoundException e)
         {
+            // #error this renderer is not supported on current platform
             // Avoid checked exceptions, they make interfaces much more complicated than necessary.
             throw new RuntimeException(e);
         }//end try
@@ -91,6 +95,8 @@ public abstract class AbstractRenderManager implements IRenderManager
      * In doing so, this method temporarily switches to the new {@link java.awt.GraphicsConfiguration}.
      * This method does not cache the newly created {@link java.awt.Graphics2D} object.
      *
+     * #method
+     *
      * @return a {@link java.awt.Graphics2D} object.
      */
     protected Graphics2D createGraphics()
@@ -120,7 +126,7 @@ public abstract class AbstractRenderManager implements IRenderManager
             return new SunGraphics2D(surf, Color.BLACK, Color.BLACK, null);
         } catch (Exception e)
         {
-            // If anything bad happens, we fail.
+            // #error If anything bad happens, we fail.
             return null;
         }//end try
     }//end createGraphics
@@ -170,6 +176,7 @@ public abstract class AbstractRenderManager implements IRenderManager
         {
             {
                 // On click, we do switch renderer and call its update() method.
+                // #action on click of the menu item
                 addActionListener((x) ->
                 {
                     System.err.println("Switched to " + AbstractRenderManager.this.getName() + " renderer.");

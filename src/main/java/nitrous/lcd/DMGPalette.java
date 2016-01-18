@@ -4,6 +4,8 @@ import static nitrous.cpu.R.*;
 
 /**
  * Represents a Gameboy color palette. This is a shim for a GBCPalette-like interface.
+ *
+ * @author Tudor
  */
 public class DMGPalette implements IPalette
 {

@@ -9,6 +9,9 @@ import java.lang.reflect.Method;
  * A renderer that uses Java's Direct3D support.
  * <p/>
  * Requires system property {@literal sun.java2d.d3d} to be set to {@literal true}.
+ *
+ * @author Tudor
+ * @author Quantum
  */
 public class D3DRenderManager extends AbstractRenderManager
 {
@@ -65,7 +68,7 @@ public class D3DRenderManager extends AbstractRenderManager
             return (GraphicsConfiguration) newD3DGraphicsConfig.newInstance(device);
         } catch (Exception e)
         {
-            // Otherwise, we fall back to the default and hope for the best.
+            // #error Otherwise, we fall back to the default and hope for the best.
             return super.getGraphicsConfig();
         }//end try
     }//end getGraphicsConfig

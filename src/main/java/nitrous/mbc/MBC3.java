@@ -9,6 +9,8 @@ import static java.lang.Math.max;
 
 /**
  * Implementation of Memory Bank Chip 3.
+ *
+ * @author Tudor
  */
 public class MBC3 extends MBC
 {

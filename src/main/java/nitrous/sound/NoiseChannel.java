@@ -54,6 +54,8 @@ import static nitrous.cpu.R.*;
  * <li>Bit 6   - Counter/consecutive selection (Read/Write, 1=Stop output when length in NR41 expires)</li>
  * </ul>
  *
+ * @author Quantum
+ * @author Tudor
  * @see <a href="http://bgb.bircd.org/pandocs.htm#soundchannel4noise">Sound Channel 4 - Noise - Pandocs</a>
  */
 public class NoiseChannel extends SoundChannel

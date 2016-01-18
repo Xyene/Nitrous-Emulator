@@ -17,6 +17,8 @@ import static nitrous.cpu.R.*;
  * Core emulator class.
  * <p/>
  * Manages all resources and emulates the Gameboy CPU.
+ *
+ * @author Tudor
  */
 public class Emulator
 {
@@ -155,6 +157,8 @@ public class Emulator
         this.sound = new SoundManager(this);
         sound.updateClockSpeed(clockSpeed);
 
+        // #cheat alters game speed
+        // #action respond to emulation speed change
         Settings.addSpeedListener((speed) -> {
             clockSpeed = speed.clockSpeed;
             sound.updateClockSpeed(speed.clockSpeed);
@@ -176,6 +180,8 @@ public class Emulator
     /**
      * Checks if the emulation is paused.
      *
+     * #cheat allows the game to be paused so the user can take a break when they otherwise can't
+     *
      * @return {@literal true} if paused.
      */
     public boolean isPaused()
@@ -186,6 +192,8 @@ public class Emulator
     /**
      * Alters the pause state.
      *
+     * #cheat allows the game to be paused so the user can take a break when they otherwise can't
+     *
      * @param x the new pause state
      */
     public void setPaused(boolean x)
@@ -195,6 +203,8 @@ public class Emulator
 
     /**
      * Gets the execution lock, which if acquired, pauses execution.
+     *
+     * #cheat allows the game to be paused so the user can take a break when they otherwise can't
      *
      * @return the exection lock
      */
@@ -693,6 +703,8 @@ public class Emulator
                     _last = System.nanoTime();
                 } catch (Exception e)
                 {
+                    // #error there is no reason for this to fail, but if it does
+                    //        all we can do is printing the stacktrace for debugging
                     e.printStackTrace();
                 }//end try
                 executeLock.acquireUninterruptibly();
@@ -759,6 +771,8 @@ public class Emulator
      * <p/>
      * The general idea is that _exec executes a single instruction, and returns the number of extra cycles
      * (not counting memory access, see above) that the instruction took.
+     *
+     * #level this is exceptionally annoying to implement
      *******************************************************************************************************/
 
     private int _exec()

@@ -18,6 +18,9 @@ import static nitrous.cpu.R.*;
  * <li>{@link RawWaveChannel} - channel 3</li>
  * <li>{@link NoiseChannel} - channel 4</li>
  * </ul>
+ *
+ * @author Quantum
+ * @author Tudor
  */
 public class SoundManager
 {
@@ -120,6 +123,7 @@ public class SoundManager
             sdl.start();
         } catch (LineUnavailableException e)
         {
+            // #error best we can do is set null if you can't output sound
             e.printStackTrace();
             sdl = null;
         }//end try
@@ -171,6 +175,7 @@ public class SoundManager
 
     static
     {
+        // #save optionally write sound output
         // The system property, nox.soundFile, if declared, sets the wave output file.
         if (System.getProperty("nox.soundFile") != null)
         {
@@ -181,6 +186,7 @@ public class SoundManager
                 out = new BufferedOutputStream(new PipedOutputStream(in));
             } catch (IOException e)
             {
+                // #error print stacktrace for debugging
                 e.printStackTrace();
             }//end try
 
@@ -209,7 +215,7 @@ public class SoundManager
                                 AudioFileFormat.Type.WAVE, new FileOutputStream(wav));
                     } catch (IOException ignored)
                     {
-                        // This will only ever exit with a "Pipe closed" exception
+                        // #error This will only ever exit with a "Pipe closed" exception
                     }//end try
                 }//end run
             };
@@ -221,6 +227,7 @@ public class SoundManager
                 soundFile = new RandomAccessFile(wav, "rwd");
             } catch (FileNotFoundException e)
             {
+                // #error print stacktrace for debugging
                 e.printStackTrace();
             }//end try
 
@@ -235,6 +242,7 @@ public class SoundManager
                     soundFile.close();
                 } catch (IOException e)
                 {
+                    // #error print stacktrace for debugging
                     e.printStackTrace();
                 }//end try
             }));

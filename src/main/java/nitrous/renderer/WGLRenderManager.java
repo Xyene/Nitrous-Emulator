@@ -8,6 +8,9 @@ import java.lang.reflect.Method;
  * A renderer that uses Java's Windows OpenGL support.
  * <p/>
  * Works with system property {@literal sun.java2d.opengl} set to {@literal false}.
+ *
+ * @author Quantum
+ * @author Tudor
  */
 public class WGLRenderManager extends AbstractRenderManager
 {
@@ -47,7 +50,7 @@ public class WGLRenderManager extends AbstractRenderManager
             return (GraphicsConfiguration) getConfig.invoke(null, old.getDevice(), visual);
         } catch (ReflectiveOperationException e)
         {
-            // If reflection fails, we fail.
+            // #error If reflection fails, we fail.
             return null;
         }//end try
     }//end getGraphicsConfig

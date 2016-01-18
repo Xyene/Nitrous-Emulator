@@ -7,6 +7,8 @@ import java.awt.*;
 
 /**
  * Heavyweight panel to display a game's LCD on.
+ *
+ * @author Tudor
  */
 public class HeavyDisplayPanel extends Panel
 {

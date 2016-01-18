@@ -79,6 +79,8 @@ import nitrous.cpu.Emulator;
  * <p/>
  * Frequency = 131072/(2048-x) Hz
  *
+ * @author Quantum
+ * @author Tudor
  * @see <a href="http://bgb.bircd.org/pandocs.htm#soundchannel3waveoutput">Sound Channel 3 - Wave Output - Pandocs</a>
  */
 public class SquareWaveChannel extends SoundChannel

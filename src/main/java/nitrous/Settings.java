@@ -10,6 +10,8 @@ import java.util.prefs.Preferences;
 
 /**
  * Settings manager.
+ *
+ * @author Quantum
  */
 public class Settings
 {
@@ -50,6 +52,8 @@ public class Settings
 
     /**
      * Interface for a listener to activate on CPU clock speed change.
+     *
+     * #action our own action listener for emulation speed change
      */
     public interface SpeedListener
     {
@@ -68,6 +72,8 @@ public class Settings
 
     /**
      * Registered {@link SpeedListener} instances.
+     *
+     * #action our own action listener for emulation speed change
      */
     private static final HashSet<SpeedListener> speedListeners = new HashSet<>();
 
@@ -107,6 +113,8 @@ public class Settings
 
     /**
      * Utility function to get enum values form settings storage with fallback.
+     *
+     * #static
      *
      * @param name the key name that stores the enum
      * @param def  the fallback enum value
@@ -308,6 +316,9 @@ public class Settings
     /**
      * Adds a listener to be notified of changes in emulation speed.
      *
+     * #cheat alters game speed
+     * #action our own action listener for emulation speed change
+     *
      * @param listener the listener to add
      */
     public static void addSpeedListener(SpeedListener listener)
@@ -317,6 +328,9 @@ public class Settings
 
     /**
      * Removes a listener to changes in emulation speed.
+     *
+     * #cheat alters game speed
+     * #action our own action listener for emulation speed change
      *
      * @param listener the listener to remove
      */
@@ -328,6 +342,8 @@ public class Settings
     /**
      * Retrieve the current emulation speed.
      *
+     * #cheat alters game speed
+     *
      * @return the current emulation speed
      */
     public static EmulateSpeed getSpeed()
@@ -337,6 +353,8 @@ public class Settings
 
     /**
      * Alters the current emulation speed.
+     *
+     * #cheat alters game speed
      *
      * @param speed the new emulation speed
      */

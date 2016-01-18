@@ -6,6 +6,8 @@ import static nitrous.cpu.Emulator.BASE_CLOCK_SPEED;
  * Definitions for supported emulation speeds.
  * <p/>
  * All speeds are based off of a 4.194304MHz clock.
+ *
+ * @author Quantum
  */
 public enum EmulateSpeed
 {
