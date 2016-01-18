@@ -4,6 +4,8 @@ import java.awt.*;
 
 /**
  * Palette colour data for non-colour Gameboy ROMs.
+ * <p/>
+ * {@see https://tcrf.net/Game_Boy_Color_Bootstrap_ROM}
  */
 public class PaletteColors
 {
@@ -120,17 +122,27 @@ public class PaletteColors
                 byHash[i] = dmgPalette;
     }
 
-    // The three different palettes.
+    /**
+     * The background palette data.
+     */
     public final int[] bg;
+
+    /**
+     * The object 0 palette data.
+     */
     public final int[] obj0;
+
+    /**
+     * The object 1 palette data.
+     */
     public final int[] obj1;
 
     /**
-     * Construct a palette.
+     * Construct a palette from the given RGB data.
      *
-     * @param bg background palette
-     * @param obj0 object palette 1
-     * @param obj1 object palette 2
+     * @param bg   Background palette data.
+     * @param obj0 Object palette 1 data.
+     * @param obj1 Object palette 2 data.
      */
     public PaletteColors(int[] bg, int[] obj0, int[] obj1)
     {
