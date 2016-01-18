@@ -4,6 +4,7 @@ import nitrous.cpu.Emulator;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * Abstract implementation of features shared by all Memory Banking Chips.
@@ -46,6 +47,7 @@ public abstract class MBC extends Memory
     @Override
     public void load(InputStream in) throws IOException
     {
+        if(!hasBattery()) throw new IllegalStateException("no battery!");
         int read = 0;
         while (true)
         {
@@ -54,6 +56,16 @@ public abstract class MBC extends Memory
             read += n;
         }
         if (read != cartRam.length) throw new IOException("cart data invalid");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void save(OutputStream out) throws IOException
+    {
+        if(!hasBattery()) throw new IllegalStateException("no battery!");
+        out.write(cartRam);
     }
 
     /**
@@ -72,6 +84,7 @@ public abstract class MBC extends Memory
                     return cartRam[addr - 0xA000 + ramPageStart];
                 } else
                 {
+                    // Return an invalid value
                     return 0xff;
                 }
         }

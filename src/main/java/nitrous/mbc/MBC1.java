@@ -30,26 +30,6 @@ public class MBC1 extends MBC
     }
 
     /**
-     * The MBC1 has cart ram.
-     *
-     * @return true.
-     */
-    @Override
-    public boolean hasBattery()
-    {
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void save(OutputStream out) throws IOException
-    {
-        out.write(cartRam);
-    }
-
-    /**
      * Maps a ROM bank to be accessed.
      *
      * @param bank The bank number.
@@ -77,6 +57,7 @@ public class MBC1 extends MBC
         {
             case 0x0000:
             case 0x1000:
+
                 /**
                  * Before external RAM can be read or written, it must be enabled by writing to this address space.
                  * It is recommended to disable external RAM after accessing it, in order to protect its contents
@@ -92,6 +73,7 @@ public class MBC1 extends MBC
                 break;
             case 0xA000:
             case 0xB000:
+
                 /**
                  * This area is used to address external RAM in the cartridge (if any).
                  * External RAM is often battery buffered, allowing to store game positions or high score tables,
@@ -106,6 +88,7 @@ public class MBC1 extends MBC
                 break;
             case 0x2000:
             case 0x3000:
+
                 /**
                  * Writing to this address space selects the lower 5 bits of the ROM Bank Number (in range 01-1Fh).
                  * When 00h is written, the MBC translates that to bank 01h also. That doesn't harm [anything]
@@ -117,6 +100,7 @@ public class MBC1 extends MBC
                 break;
             case 0x4000:
             case 0x5000:
+
                 /**
                  * 2bit register can be used to select a RAM Bank in range from 00-03h, or to specify the
                  * upper two bits (Bit 5-6) of the ROM Bank number, depending on the current ROM/RAM Mode. (See below.)
@@ -131,6 +115,7 @@ public class MBC1 extends MBC
                 break;
             case 0x6000:
             case 0x7000:
+
                 /**
                  * This 1bit Register selects whether the two bits of the above register
                  * should be used as upper two bits of the ROM Bank, or as RAM Bank Number.

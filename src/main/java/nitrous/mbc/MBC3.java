@@ -7,30 +7,38 @@ import java.io.OutputStream;
 
 import static java.lang.Math.max;
 
+/**
+ * Implementation of Memory Bank Chip 3.
+ */
 public class MBC3 extends MBC
 {
+    /**
+     * The currently selected RAM bank.
+     */
     private int ramBank;
+
+    /**
+     * Whether the realtime clock is enabled for IO.
+     */
     private boolean rtcEnabled;
+
+    /**
+     * The realtime clock registers.
+     */
     private byte[] rtc = new byte[4];
 
+    /**
+     * {@inheritDoc}
+     */
     public MBC3(Emulator core)
     {
         super(core);
         cartRam = new byte[RAM_PAGESIZE * 4];
     }
 
-    @Override
-    public boolean hasBattery()
-    {
-        return true;
-    }
-
-    @Override
-    public void save(OutputStream out) throws IOException
-    {
-        out.write(cartRam);
-    }
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setAddress(int addr, int _data)
     {

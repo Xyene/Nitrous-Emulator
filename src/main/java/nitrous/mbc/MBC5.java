@@ -5,26 +5,23 @@ import nitrous.cpu.Emulator;
 import java.io.IOException;
 import java.io.OutputStream;
 
+/**
+ * Implementation of Memory Bank Chip 5.
+ */
 public class MBC5 extends MBC
 {
+    /**
+     * The currently selected ROM bank.
+     */
     private int romBank = 1;
 
+    /**
+     * {@inheritDoc}
+     */
     public MBC5(Emulator core)
     {
         super(core);
         cartRam = new byte[RAM_PAGESIZE * 16];
-    }
-
-    @Override
-    public boolean hasBattery()
-    {
-        return true;
-    }
-
-    @Override
-    public void save(OutputStream out) throws IOException
-    {
-        out.write(cartRam);
     }
 
     /**
@@ -38,6 +35,9 @@ public class MBC5 extends MBC
         romPageStart = Memory.ROM_PAGESIZE * bank;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setAddress(int addr, int _data)
     {
