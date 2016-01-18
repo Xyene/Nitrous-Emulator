@@ -8,7 +8,9 @@ import nitrous.cpu.R;
 import nitrous.lcd.Interpolator;
 import nitrous.renderer.IRenderManager;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
@@ -29,6 +31,19 @@ import java.util.concurrent.Semaphore;
  */
 public class Application
 {
+    private static Image TITLE_ICON;
+
+    static
+    {
+        try
+        {
+            TITLE_ICON = ImageIO.read(ClassLoader.getSystemResourceAsStream("icon.png"));
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * The main entry point.
      *
@@ -120,6 +135,8 @@ public class Application
                 setTitle("NOx Emulator");
                 setSize(new Dimension(R.W * 2, R.H * 2));
                 setLayout(new BorderLayout());
+
+                setIconImage(TITLE_ICON);
 
                 // Stop the waiting if the window is closed.
                 addWindowListener(new WindowAdapter()
@@ -220,7 +237,7 @@ public class Application
         {
             {
                 // Create our font.
-                Font verdana = new Font("Verdana", Font.PLAIN, 14);
+                Font verdana = new Font("Segoe UI", Font.PLAIN, 14);
 
                 // Set drop target and layout.
                 setDropTarget(new ROMDropTarget());
@@ -235,13 +252,15 @@ public class Application
 
                         add(Box.createHorizontalGlue());
                         add(new LabelBuilder()
-                                .setFont(verdana)
-                                .append("Drag and drop or ").action("select", (e) -> {
+                                .setFont(verdana.deriveFont(Font.BOLD))
+                                .append("To begin, ").action("load", (e) -> {
                                     // Display the file chooser.
-                                    JFileChooser chooser = new JFileChooser("Choose a game...");
+                                    JFileChooser chooser = new JFileChooser();
+                                    chooser.setDialogTitle("Choose a game...");
                                     chooser.setVisible(true);
                                     chooser.setFileFilter(acceptor);
-                                    if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION)
+                                    chooser.setDialogType(JFileChooser.OPEN_DIALOG);
+                                    if (chooser.showDialog(dialog, "Load") == JFileChooser.APPROVE_OPTION)
                                     {
                                         // If a file is chosen, set the file, close the window,
                                         // and release the wait.
@@ -249,21 +268,12 @@ public class Application
                                         dialog.dispose();
                                         selectLock.release();
                                     }//end if
-                                }).append(" a game to start").create());
+                                }).append(" or drop a game here").create());
                         add(Box.createHorizontalGlue());
                     }
                 });
 
-                // Add the recent ROMs label.
-                add(new JLabel("Recent ROMs (double-click to run):")
-                {
-                    {
-                        // Layout and set drop target.
-                        setAlignmentX(CENTER_ALIGNMENT);
-                        setFont(verdana);
-                        setDropTarget(new ROMDropTarget());
-                    }
-                });
+                //add(Box.createVerticalStrut(5));
 
                 /**
                  * Helper class to wrap a {@link File} object such that only the filename,
@@ -302,7 +312,7 @@ public class Application
                     {
                         // Set drop target and layout.
                         setDropTarget(new ROMDropTarget());
-                        setFont(verdana);
+                        setFont(verdana.deriveFont(13f));
 
                         // Create data model to store the information.
                         DefaultListModel<FileNameDisplay> romModel = new DefaultListModel<>();
@@ -334,7 +344,17 @@ public class Application
                             }//end mouseClicked
                         });
                     }
-                }));
+                }) {{
+                    setBorder(BorderFactory.createCompoundBorder(
+                            new TitledBorder("Recent games") {
+                                {
+                                    setTitleFont(verdana);
+                                    setBorder(BorderFactory.createEmptyBorder());
+                                }
+                            },
+                            getBorder()));
+                    setPreferredSize(new Dimension(getPreferredSize().width, 140));
+                }});
             }
         };
 
@@ -369,6 +389,8 @@ public class Application
         // Create display panel and frame.
         HeavyDisplayPanel display = new HeavyDisplayPanel(core, mag);
         JFrame disp = new JFrame(core.cartridge.gameTitle);
+
+        disp.setIconImage(TITLE_ICON);
 
         // Add key listener.
         display.addKeyListener(new KeyAdapter()
