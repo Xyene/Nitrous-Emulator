@@ -44,6 +44,7 @@ public class Application
      * The main entry point.
      * <p/>
      * #static method
+     * #main
      *
      * @param argv command line arguments
      * @throws Exception
@@ -565,7 +566,8 @@ public class Application
                 menu.add(new JSeparator());
 
                 // Add the pause menu checkbox item.
-                // #cheat allows the game to be paused
+                // #cheat allows the game to be paused so the user can take a break when they otherwise can't (accessed through
+                //        right click menu)
                 menu.add(new JCheckBoxMenuItem("<html><u>P</u>ause</html>", core.isPaused())
                 {
                     {

@@ -316,7 +316,6 @@ public class Settings
     /**
      * Adds a listener to be notified of changes in emulation speed.
      *
-     * #cheat alters game speed
      * #action our own action listener for emulation speed change
      *
      * @param listener the listener to add
@@ -329,7 +328,6 @@ public class Settings
     /**
      * Removes a listener to changes in emulation speed.
      *
-     * #cheat alters game speed
      * #action our own action listener for emulation speed change
      *
      * @param listener the listener to remove
@@ -342,8 +340,6 @@ public class Settings
     /**
      * Retrieve the current emulation speed.
      *
-     * #cheat alters game speed
-     *
      * @return the current emulation speed
      */
     public static EmulateSpeed getSpeed()
@@ -354,7 +350,7 @@ public class Settings
     /**
      * Alters the current emulation speed.
      *
-     * #cheat alters game speed
+     * #cheat alters game speed, in case the game was too fast or too slow (accessed through right click menu)
      *
      * @param speed the new emulation speed
      */

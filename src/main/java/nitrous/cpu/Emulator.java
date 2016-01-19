@@ -157,7 +157,6 @@ public class Emulator
         this.sound = new SoundManager(this);
         sound.updateClockSpeed(clockSpeed);
 
-        // #cheat alters game speed
         // #action respond to emulation speed change
         Settings.addSpeedListener((speed) -> {
             clockSpeed = speed.clockSpeed;
@@ -180,8 +179,6 @@ public class Emulator
     /**
      * Checks if the emulation is paused.
      *
-     * #cheat allows the game to be paused so the user can take a break when they otherwise can't
-     *
      * @return {@literal true} if paused.
      */
     public boolean isPaused()
@@ -192,7 +189,8 @@ public class Emulator
     /**
      * Alters the pause state.
      *
-     * #cheat allows the game to be paused so the user can take a break when they otherwise can't
+     * #cheat allows the game to be paused so the user can take a break when they otherwise can't (accessed through
+     *        right click menu)
      *
      * @param x the new pause state
      */
@@ -203,8 +201,6 @@ public class Emulator
 
     /**
      * Gets the execution lock, which if acquired, pauses execution.
-     *
-     * #cheat allows the game to be paused so the user can take a break when they otherwise can't
      *
      * @return the exection lock
      */
@@ -772,7 +768,12 @@ public class Emulator
      * The general idea is that _exec executes a single instruction, and returns the number of extra cycles
      * (not counting memory access, see above) that the instruction took.
      *
-     * #level this is exceptionally annoying to implement
+     * #level 10/10 - to even begin testing, you have to implement a decent amount (150+) of instructions,
+     *        /and/ have a working LCD display. Neither of these are trivial feats, and if after a couple weeks
+     *        of implementation you try running a ROM and it doesn't work, there are thousands of lines where
+     *        a potential bug may hide. Simple things like using & 0x3 to mask out "three bits" instead of 0x7
+     *        are difficult-to-find mistakes that require, with no exaggeration, dozens of hours of patience
+     *        and attention to debug.
      *******************************************************************************************************/
 
     private int _exec()
@@ -1110,7 +1111,7 @@ public class Emulator
                         break;
                     default:
                         throw new UnsupportedOperationException(cycle + "-" + Integer.toHexString(op));
-                }
+                }//end switch
         }//end switch
         return 0;
     }//end _exec
@@ -1128,7 +1129,7 @@ public class Emulator
             pushWord(pc);
             pc = jmp;
             return 4;
-        }
+        }//end if
         return 0;
     }//end CALL_cc_nn
 
@@ -1629,6 +1630,7 @@ public class Emulator
          * hf := a.4 XOR tmp.4, a := tmp
          * </pre>
          * </code>
+         * @see http://wikiti.brandonw.net/?title=Z80_Instruction_Set
          */
         int tmp = A;
         if ((F & F_N) == 0)
