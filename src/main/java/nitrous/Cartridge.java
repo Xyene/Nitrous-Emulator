@@ -247,6 +247,7 @@ public class Cartridge
     public Memory createController(Emulator core)
     {
         // Look up which MBC should be used given the cartridge type
+        // #object
         switch (cartridgeType)
         {
             case 0x00:

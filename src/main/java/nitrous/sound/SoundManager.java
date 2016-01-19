@@ -106,7 +106,7 @@ public class SoundManager
     {
         this.core = core;
 
-        // Create channels.
+        // Create channels. #object
         channel1 = new SquareWaveChannel(core, R_NR11, true);
         channel2 = new SquareWaveChannel(core, R_NR21, false);
         channel3 = new RawWaveChannel(core);
