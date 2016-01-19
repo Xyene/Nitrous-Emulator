@@ -262,6 +262,7 @@ public class Application
                                     chooser.setDialogTitle("Choose a game...");
                                     chooser.setVisible(true);
                                     chooser.setFileFilter(acceptor);
+                                    chooser.setCurrentDirectory(new File("."));
                                     chooser.setDialogType(JFileChooser.OPEN_DIALOG);
                                     if (chooser.showDialog(dialog, "Load") == JFileChooser.APPROVE_OPTION)
                                     {
