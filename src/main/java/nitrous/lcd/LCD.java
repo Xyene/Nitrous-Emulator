@@ -32,6 +32,19 @@ public class LCD
     private static final int[] BLANK = new int[W * H];
 
     /**
+     * Draw layer priority constants.
+     *
+     * We can only draw over pixels with equal or greater priority.
+     */
+    public static final int P_0 = 0 << 24;
+    public static final int P_1 = 1 << 24;
+    public static final int P_2 = 2 << 24;
+    public static final int P_3 = 3 << 24;
+    public static final int P_4 = 4 << 24;
+    public static final int P_5 = 5 << 24;
+    public static final int P_6 = 6 << 24;
+
+    /**
      * The Emulator on which to operate.
      */
     protected final Emulator core;
@@ -600,7 +613,7 @@ public class LCD
                     scanline,
                     flipX, flipY,
                     gbcVramBank,
-                    6 << 24,
+                    P_6,
                     false);
         }//end for
     }//end drawWindow
@@ -670,7 +683,7 @@ public class LCD
                             ); // << 0, this is the lower bit of the color number
 
             boolean index0 = paletteIndex == 0;
-            int priority = basePriority == 0 ? (index0 ? 1 << 24 : 3 << 24) : basePriority;
+            int priority = basePriority == 0 ? (index0 ? P_1 : P_3) : basePriority;
             if (sprite && index0)
                 continue;
 
@@ -742,10 +755,9 @@ public class LCD
             if (!tall && !(y - 16 <= scanline && scanline < y - 8))
                 continue;
 
-            // TODO: things like 2 << 24 or 5 << 24 should have fields like P_2 and P_5
             byte attribs = oam[i + 3];
             int vrambank = (attribs & 0b1000) != 0 && isColorGB ? 1 : 0;
-            int priority = (attribs & 0x80) != 0 ? 2 << 24 : 5 << 24;
+            int priority = (attribs & 0x80) != 0 ? P_2 : P_5;
 
             int x = oam[i + 1] & 0xff;
             int tile = oam[i + 2] & 0xff;
