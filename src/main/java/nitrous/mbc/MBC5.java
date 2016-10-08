@@ -24,7 +24,7 @@ public class MBC5 extends MBC
     {
         super(core);
         cartRam = new byte[RAM_PAGESIZE * 16];
-    }//end MBC5
+    }
 
     /**
      * Maps a ROM bank to be accessed.
@@ -35,7 +35,7 @@ public class MBC5 extends MBC
     {
         romBank = bank;
         romPageStart = Memory.ROM_PAGESIZE * bank;
-    }//end mapRom
+    }
 
     /**
      * {@inheritDoc}
@@ -61,7 +61,7 @@ public class MBC5 extends MBC
                 if (ramEnabled)
                 {
                     cartRam[addr - 0xA000 + ramPageStart] = data;
-                }//end if
+                }
                 break;
             case 0x2000:
 
@@ -84,6 +84,6 @@ public class MBC5 extends MBC
             default:
                 super.setAddress(addr, data);
                 break;
-        }//end switch
-    }//end setAddress
-}//end class MBC5
+        }
+    }
+}

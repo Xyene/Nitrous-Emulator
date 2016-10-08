@@ -36,7 +36,7 @@ public class MBC3 extends MBC
     {
         super(core);
         cartRam = new byte[RAM_PAGESIZE * 4];
-    }//end MBC3
+    }
 
     /**
      * {@inheritDoc}
@@ -83,13 +83,13 @@ public class MBC3 extends MBC
                     if (rtcEnabled)
                     {
                         ramBank = -1;
-                    }//end if
+                    }
                 } else if (data <= 0x03)
                 {
                     ramBank = data;
                     //  ramBank &= core.cartridge.ramBanks - 1;
                     ramPageStart = ramBank * RAM_PAGESIZE;
-                }//end if
+                }
                 break;
             case 0xA000:
             case 0xB000:
@@ -105,11 +105,11 @@ public class MBC3 extends MBC
                     // FIXME this is probably incorrect
                     //  rtc[ramBank - 0x08] = data;
                     // System.err.println("Write to RTC not implemented yet");
-                }//end if
+                }
                 break;
             default:
                 super.setAddress(addr, _data);
                 break;
-        }//end switch
-    }//end setAddress
-}//end class MBC3
+        }
+    }
+}

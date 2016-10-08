@@ -69,8 +69,8 @@ public class Keybinding
 
             // Populate the reverse mapping.
             keyMap.put(keystrokes[i], i);
-        }//end for
-    }//end Keybinding(node)
+        }
+    }
 
     /**
      * Gets the number of keys.
@@ -80,7 +80,7 @@ public class Keybinding
     public int getKeyCount()
     {
         return keystrokes.length;
-    }//end getKeyCount
+    }
 
     /**
      * Gets the name of the button from the button id.
@@ -91,7 +91,7 @@ public class Keybinding
     public String getKeyName(int button)
     {
         return keyNames[button];
-    }//end getKeyName
+    }
 
     /**
      * Checks if the key code is already bound to a button.
@@ -106,7 +106,7 @@ public class Keybinding
             if (keystroke == keyCode)
                 return true;
         return false;
-    }//end isKeyUsed
+    }
 
     /**
      * Update the keybinding of a button.
@@ -129,7 +129,7 @@ public class Keybinding
         // Alters the storage.
         node.putInt("key" + button, keyCode);
         return true;
-    }//end updateKey
+    }
 
     /**
      * Get the button bound to the key code.
@@ -144,7 +144,7 @@ public class Keybinding
             return -1;
         else
             return value;
-    }//end getKey
+    }
 
     /**
      * Get the key code of the button.
@@ -155,5 +155,5 @@ public class Keybinding
     public int getKeystroke(int button)
     {
         return keystrokes[button];
-    }//end getKeystroke
-}//end class Keybinding
+    }
+}

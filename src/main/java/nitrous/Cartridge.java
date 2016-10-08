@@ -212,7 +212,7 @@ public class Cartridge
         for (int i = 0; i < 16; ++i)
             chk += rom[0x134 + i];
         this.checksum = chk & 0xFF;
-    }//end Cartridge(rom)
+    }
 
     /**
      * Checks whether this cartridge has a battery.
@@ -235,8 +235,8 @@ public class Cartridge
                 return true;
             default:
                 return false;
-        }//end switch
-    }//end hasBattery
+        }
+    }
 
     /**
      * Creates a memory controlled for the given Emulator.
@@ -267,9 +267,9 @@ public class Cartridge
                 return new MBC3(core);
             case 0x1b:
                 return new MBC5(core);
-        }//end switch
+        }
         throw new UnsupportedOperationException("unsupported controller " + CARTRIDGE_TYPES[cartridgeType]);
-    }//end createController
+    }
 
     /**
      * {@inheritDoc}
@@ -287,5 +287,5 @@ public class Cartridge
                 ", romBanks=" + romBanks +
                 ", ramBanks=" + ramBanks + ")" +
                 '}';
-    }//end toString
-}//end class Cartridge
+    }
+}

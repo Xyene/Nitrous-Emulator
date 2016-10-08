@@ -43,7 +43,7 @@ public class DMGPalette implements IPalette
         this.lcd = lcd;
         this.register = register;
         this.colors = colors;
-    }//end DMGPalette(LCD, colors, register)
+    }
 
     /**
      * {@inheritDoc}
@@ -52,5 +52,5 @@ public class DMGPalette implements IPalette
     {
         // a palette color is defined in the byte form 33221100: to get any color n, we shift right by 2n and mask with 0x3
         return colors[(lcd.core.mmu.registers[register] >> (number * 2)) & 0x3];
-    }//end getColor
-}//end class DMGPalette
+    }
+}

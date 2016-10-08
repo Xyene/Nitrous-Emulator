@@ -22,7 +22,7 @@ public class WGLRenderManager extends AbstractRenderManager
     public WGLRenderManager(ComponentPeer peer)
     {
         super(peer, "sun.awt.windows.WComponentPeer", "sun.java2d.opengl.WGLSurfaceData");
-    }//end WGLRenderManager(peer)
+    }
 
     /**
      * {@inheritDoc}
@@ -52,8 +52,8 @@ public class WGLRenderManager extends AbstractRenderManager
         {
             // #error If reflection fails, we fail.
             return null;
-        }//end try
-    }//end getGraphicsConfig
+        }
+    }
 
     /**
      * {@inheritDoc}
@@ -62,5 +62,5 @@ public class WGLRenderManager extends AbstractRenderManager
     protected String getName()
     {
         return "OpenGL";
-    }//end getName
-}//end class WGLRenderManager
+    }
+}

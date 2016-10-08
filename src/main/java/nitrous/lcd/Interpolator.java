@@ -40,5 +40,5 @@ public enum Interpolator
     Interpolator(String name)
     {
         this.name = name;
-    }//end Interpolator(name)
-}//end enum Interpolator
+    }
+}

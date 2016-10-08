@@ -29,7 +29,7 @@ public class MBC1 extends MBC
     {
         super(core);
         cartRam = new byte[RAM_PAGESIZE * 4];
-    }//end MBC1(core)
+    }
 
     /**
      * Maps a ROM bank to be accessed.
@@ -45,7 +45,7 @@ public class MBC1 extends MBC
             bank++;
         romBank = bank;
         romPageStart = Memory.ROM_PAGESIZE * bank;
-    }//end mapRom
+    }
 
     /**
      * {@inheritDoc}
@@ -86,7 +86,7 @@ public class MBC1 extends MBC
                 if (ramEnabled)
                 {
                     cartRam[addr - 0xA000 + ramPageStart] = data;
-                }//end if
+                }
                 break;
             case 0x2000:
             case 0x3000:
@@ -113,7 +113,7 @@ public class MBC1 extends MBC
                 } else
                 {
                     mapRom((romBank & 0x1F) | ((data & 0x03) << 4));
-                }//end if
+                }
                 break;
             case 0x6000:
             case 0x7000:
@@ -131,6 +131,6 @@ public class MBC1 extends MBC
             default:
                 super.setAddress(addr, data);
                 break;
-        }//end switch
-    }//end setAddress
-}//end class MBC1
+        }
+    }
+}

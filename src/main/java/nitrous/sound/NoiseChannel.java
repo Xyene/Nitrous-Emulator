@@ -136,7 +136,7 @@ public class NoiseChannel extends SoundChannel
     public NoiseChannel(Emulator core)
     {
         super(core);
-    }//end NoiseChannel(core)
+    }
 
     /**
      * Handle sound update.
@@ -162,7 +162,7 @@ public class NoiseChannel extends SoundChannel
         {
             envelopeInitial = newEnvelope;
             currentVolume = -1;
-        }//end if
+        }
 
         // Update envelope increase flag and sweep time.
         envelopeIncrease = (registers[R_NR42] & 0x8) != 0;
@@ -185,11 +185,11 @@ public class NoiseChannel extends SoundChannel
         {
             // Otherwise we use 524288 Hz / r / 2^(s+1)
             freq = 524288 * r >> (s + 1);
-        }//end if
+        }
 
         // Convert frequency to period.
         period = 4194304 / freq;
-    }//end handleUpdateRequest
+    }
 
     /**
      * Handle restart request: update {@link #clockStart}.
@@ -198,7 +198,7 @@ public class NoiseChannel extends SoundChannel
     protected void handleRestartRequest()
     {
         clockStart = core.cycle;
-    }//end handleRestartRequest
+    }
 
     /**
      * {@inheritDoc}
@@ -214,7 +214,7 @@ public class NoiseChannel extends SoundChannel
         {
             isPlaying = false;
             return 0;
-        }//end if
+        }
 
         // Otherwise the sound is still playing.
         isPlaying = true;
@@ -236,7 +236,7 @@ public class NoiseChannel extends SoundChannel
             // Otherwise, calculate the amount of sweeping done and predict what the envelope would be at,
             // then capping it to fit between 0 and 15 inclusive.
             currentVolume = amplitude = Math.min(15, Math.max(0, envelopeInitial + delta / envelopeSweep * (envelopeIncrease ? 1 : -1))) * 2;
-        }//end if
+        }
 
         // If it has been one entire period since last toggle.
         if (core.cycle - lastToggle >= period)
@@ -250,9 +250,9 @@ public class NoiseChannel extends SoundChannel
 
             // Update the last toggle time.
             lastToggle = core.cycle;
-        }//end if
+        }
 
         // Return a positive amplitude if the wave is high, otherwise a negative one.
         return high ? amplitude : -amplitude;
-    }//end render
-}//end class NoiseChannel
+    }
+}

@@ -27,7 +27,7 @@ public class FallbackRenderManager implements IRenderManager
     public FallbackRenderManager(ComponentPeer peer)
     {
         this.peer = peer;
-    }//end FallbackRenderManager(peer)
+    }
 
     /**
      * {@inheritDoc}
@@ -38,7 +38,7 @@ public class FallbackRenderManager implements IRenderManager
         // Return the default peer.
         Toolkit.getDefaultToolkit().sync();
         return (Graphics2D) peer.getGraphics();
-    }//end getGraphics
+    }
 
     /**
      * {@inheritDoc}
@@ -47,7 +47,7 @@ public class FallbackRenderManager implements IRenderManager
     public void update()
     {
         // There is nothing needed to do when switching.
-    }//end update
+    }
 
     /**
      * {@inheritDoc}
@@ -68,5 +68,5 @@ public class FallbackRenderManager implements IRenderManager
                 });
             }
         };
-    }//end getRadioMenuItem
-}//end class FallbackRenderManager
+    }
+}

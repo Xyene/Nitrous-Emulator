@@ -117,7 +117,7 @@ public class Memory
 
         // and 8k of vram
         vram = new byte[VRAM_PAGESIZE * (core.cartridge.isColorGB ? 2 : 1)];
-    }//end Memory(core)
+    }
 
     /**
      * Convenience method for determining whether the current cartridge supports saving (i.e., whether or not
@@ -128,7 +128,7 @@ public class Memory
     public boolean hasBattery()
     {
         return core.cartridge.hasBattery();
-    }//end hasBattery
+    }
 
     /**
      * Writes cart ram to the given OutputStream.
@@ -140,7 +140,7 @@ public class Memory
     public void save(OutputStream out) throws IOException
     {
         throw new UnsupportedOperationException("no battery");
-    }//end save
+    }
 
     /**
      * Represents a H-Blank DMA transfer session.
@@ -182,7 +182,7 @@ public class Memory
             this.source = source;
             this.dest = dest;
             this.length = length;
-        }//end HDMA(source, dest, length)
+        }
 
         /**
          * Ticks DMA.
@@ -205,7 +205,7 @@ public class Memory
             for (int i = ptr; i < ptr + 0x10; i++)
             {
                 vram[vramPageStart + dest + i] = (byte) (getAddress(source + i) & 0xff);
-            }//end for
+            }
 
             ptr += 0x10;
             length -= 0x10;
@@ -218,9 +218,9 @@ public class Memory
             } else
             {
                 registers[0x55] = (byte) (length / 0x10 - 1);
-            }//end if
-        }//end tick
-    }//end class HDMA
+            }
+        }
+    }
 
     /**
      * Loads cart ram from the given InputStream.
@@ -232,7 +232,7 @@ public class Memory
     public void load(InputStream in) throws IOException
     {
         throw new UnsupportedOperationException("no battery");
-    }//end load
+    }
 
     /**
      * Sets a byte of data.
@@ -287,10 +287,10 @@ public class Memory
                 } else
                 {
                     setIO(addr - 0xFF00, data);
-                }//end if
+                }
                 break;
-        }//end switch
-    }//end setAddress
+        }
+    }
 
     /**
      * Sets a register.
@@ -316,7 +316,7 @@ public class Memory
                     currentRegister++;
                     currentRegister %= 0x40;
                     registers[0x68] = (byte) (0x80 | currentRegister);
-                }//end if
+                }
                 break;
             }
             case 0x6b:
@@ -330,7 +330,7 @@ public class Memory
                     currentRegister++;
                     currentRegister %= 0x40;
                     registers[0x6a] = (byte) (0x80 | currentRegister);
-                }//end if
+                }
                 break;
             }
             case 0x55: // HDMA start
@@ -350,15 +350,15 @@ public class Memory
                     if (hdma != null)
                     {
                         System.err.printf("!!! Terminated HDMA from %04X-%04X, %02X remaining\n", source, dest, length);
-                    }//end if
+                    }
 
                     // General DMA
                     for (int i = 0; i < length; i++)
                     {
                         vram[vramPageStart + dest + i] = (byte) (getAddress(source + i) & 0xff);
-                    }//end for
+                    }
                     registers[0x55] = (byte) 0xFF;
-                }//end if
+                }
                 break;
             }
             case R_VRAM_BANK:
@@ -366,7 +366,7 @@ public class Memory
                 if (core.cartridge.isColorGB)
                 {
                     vramPageStart = VRAM_PAGESIZE * (data & 0x3);
-                }//end if
+                }
                 break;
             }
             case R_WRAM_BANK:
@@ -374,7 +374,7 @@ public class Memory
                 if (core.cartridge.isColorGB)
                 {
                     wramPageStart = WRAM_PAGESIZE * Math.max(1, data & 0x7);
-                }//end if
+                }
                 break;
             }
             case R_NR14:
@@ -382,7 +382,7 @@ public class Memory
                 {
                     core.sound.channel1.restart();
                     data &= 0x7f;
-                }//end if
+                }
             case R_NR10:
             case R_NR11:
             case R_NR12:
@@ -395,7 +395,7 @@ public class Memory
                 {
                     core.sound.channel2.restart();
                     data &= 0x7F;
-                }//end if
+                }
             case R_NR21:
             case R_NR22:
             case R_NR23:
@@ -407,7 +407,7 @@ public class Memory
                 {
                     core.sound.channel3.restart();
                     data &= 0x7F;
-                }//end if
+                }
             case R_NR30:
             case R_NR31:
             case R_NR32:
@@ -420,7 +420,7 @@ public class Memory
                 {
                     core.sound.channel4.restart();
                     data &= 0x7F;
-                }//end if
+                }
             case R_NR41:
             case R_NR42:
             case R_NR43:
@@ -445,7 +445,7 @@ public class Memory
                 for (int i = 0; i < 0xA0; i++)
                 {
                     setAddress(0xFE00 + i, getAddress(addressBase + i));
-                }//end for
+                }
                 break;
             }
 
@@ -464,16 +464,16 @@ public class Memory
                 {
                     core.timerCycle = 0;
                     registers[R_TIMA] = registers[R_TMA];
-                }//end if
+                }
                 break;
             case R_LCD_STAT:
                 break;
             default:
                 if (0x30 <= addr && addr < 0x40)
                     core.sound.channel3.updateSample(addr - 0x30, (byte) data);
-        }//end switch
+        }
         registers[addr] = (byte) data;
-    }//end setIO
+    }
 
     /**
      * Fetches a byte from an address.
@@ -523,10 +523,10 @@ public class Memory
                 } else
                 {
                     return getIO(addr - 0xFF00);
-                }//end if
-        }//end switch
+                }
+        }
         return 0xFF;
-    }//end getAddress
+    }
 
     /**
      * Reads a register.
@@ -561,7 +561,7 @@ public class Memory
                         if (core.buttonUp) output &= ~0x4;
                         if (core.buttonDown) output &= ~0x8;
                         break;
-                }//end switch
+                }
 
                 // keep the last 2 bits as-is, in case someone wrote to them
                 // I'm not sure if this is correct, but if its not it probably doesn't matter
@@ -576,7 +576,7 @@ public class Memory
                 if (core.sound.channel4.isPlaying) reg |= 0x08;
                 return reg;
             }
-        }//end switch
+        }
         return registers[addr];
-    }//end getIO
-}//end Memory
+    }
+}

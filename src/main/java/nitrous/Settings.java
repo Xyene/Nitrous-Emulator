@@ -109,7 +109,7 @@ public class Settings
 
         // Load full screen setting.
         fullScreen = storage.getBoolean("fullscreen", false);
-    }//end static
+    }
 
     /**
      * Utility function to get enum values form settings storage with fallback.
@@ -128,7 +128,7 @@ public class Settings
         if (index < 0 || index >= values.length)
             index = def.ordinal();
         return values[index];
-    }//end getEnum
+    }
 
     /**
      * Checks if channel 1 is enabled.
@@ -138,7 +138,7 @@ public class Settings
     public static boolean isChannel1On()
     {
         return channel1On;
-    }//end isChannel1On
+    }
 
     /**
      * Alters the channel 1 state.
@@ -149,7 +149,7 @@ public class Settings
     {
         Settings.channel1On = channel1On;
         storage.putBoolean("channel1", channel1On);
-    }//end setChannel1On
+    }
 
     /**
      * Checks if channel 2 is enabled.
@@ -159,7 +159,7 @@ public class Settings
     public static boolean isChannel2On()
     {
         return channel2On;
-    }//end isChannel2On
+    }
 
     /**
      * Alters the channel 2 state.
@@ -170,7 +170,7 @@ public class Settings
     {
         Settings.channel2On = channel2On;
         storage.putBoolean("channel2", channel2On);
-    }//end setChannel2On
+    }
 
     /**
      * Checks if channel 3 is enabled.
@@ -180,7 +180,7 @@ public class Settings
     public static boolean isChannel3On()
     {
         return channel3On;
-    }//end isChannel3On
+    }
 
     /**
      * Alters the channel 3 state.
@@ -191,7 +191,7 @@ public class Settings
     {
         Settings.channel3On = channel3On;
         storage.putBoolean("channel3", channel3On);
-    }//end setChannel3On
+    }
 
     /**
      * Checks if channel 4 is enabled.
@@ -201,7 +201,7 @@ public class Settings
     public static boolean isChannel4On()
     {
         return channel4On;
-    }//end isChannel4On
+    }
 
     /**
      * Alters the channel 4 state.
@@ -212,7 +212,7 @@ public class Settings
     {
         Settings.channel4On = channel4On;
         storage.putBoolean("channel4", channel4On);
-    }//end setChannel4On
+    }
 
     /**
      * Check the enabled state of a channel.
@@ -234,8 +234,8 @@ public class Settings
                 return channel4On;
             default:
                 throw new IllegalArgumentException();
-        }//end switch
-    }//end isChannelOn
+        }
+    }
 
     /**
      * Alter the enabled state of a channel.
@@ -261,8 +261,8 @@ public class Settings
                 break;
             default:
                 throw new IllegalArgumentException();
-        }//end switch
-    }//end setChannelOn
+        }
+    }
 
     /**
      * Checks the muted state.
@@ -272,7 +272,7 @@ public class Settings
     public static boolean isMuted()
     {
         return muted;
-    }//end isMuted
+    }
 
     /**
      * Alters the muted state.
@@ -283,7 +283,7 @@ public class Settings
     {
         Settings.muted = muted;
         storage.putBoolean("muted", muted);
-    }//end setMuted
+    }
 
     /**
      * Retrieves the volume settings.
@@ -293,7 +293,7 @@ public class Settings
     public static int getVolume()
     {
         return volume;
-    }//end getVolume
+    }
 
     /**
      * Alters the volume settings.
@@ -303,7 +303,7 @@ public class Settings
     public static void setVolume(int volume)
     {
         Settings.volume = volume;
-    }//end setVolume
+    }
 
     /**
      * Save the altered volume setting.
@@ -311,7 +311,7 @@ public class Settings
     public static void saveVolume()
     {
         storage.putInt("volume", volume);
-    }//end saveVolume
+    }
 
     /**
      * Adds a listener to be notified of changes in emulation speed.
@@ -323,7 +323,7 @@ public class Settings
     public static void addSpeedListener(SpeedListener listener)
     {
         speedListeners.add(listener);
-    }//end addSpeedListener
+    }
 
     /**
      * Removes a listener to changes in emulation speed.
@@ -335,7 +335,7 @@ public class Settings
     public static void removeSpeedListener(SpeedListener listener)
     {
         speedListeners.remove(listener);
-    }//end removeSpeedListener
+    }
 
     /**
      * Retrieve the current emulation speed.
@@ -345,7 +345,7 @@ public class Settings
     public static EmulateSpeed getSpeed()
     {
         return speed;
-    }//end getSpeed
+    }
 
     /**
      * Alters the current emulation speed.
@@ -362,7 +362,7 @@ public class Settings
         // Signal all SpeedListeners
         for (SpeedListener listener : speedListeners)
             listener.updateSpeed(speed);
-    }//end setSpeed
+    }
 
     /**
      * Retrieves the current interpolator setting.
@@ -372,7 +372,7 @@ public class Settings
     public static Interpolator getInterpolator()
     {
         return interpolator;
-    }//end getInterpolator
+    }
 
     /**
      * Alters the current interpolator setting.
@@ -383,7 +383,7 @@ public class Settings
     {
         Settings.interpolator = interpolator;
         storage.putInt("interpolator", interpolator.ordinal());
-    }//end setInterpolator
+    }
 
     /**
      * Retrieves the current magnification setting.
@@ -393,7 +393,7 @@ public class Settings
     public static int getMagnification()
     {
         return magnification;
-    }//end getMagnification
+    }
 
     /**
      * Alters the magnification setting.
@@ -404,7 +404,7 @@ public class Settings
     {
         Settings.magnification = magnification;
         storage.putInt("magnification", magnification);
-    }//end setMagnification
+    }
 
     /**
      * Retrieves the full screen settings.
@@ -414,7 +414,7 @@ public class Settings
     public static boolean isFullScreen()
     {
         return fullScreen;
-    }//end isFullScreen
+    }
 
     /**
      * Alters the full screen settings.
@@ -425,5 +425,5 @@ public class Settings
     {
         Settings.fullScreen = fullScreen;
         storage.putBoolean("fullscreen", fullScreen);
-    }//end setFullScreen
-}//end class Settings
+    }
+}

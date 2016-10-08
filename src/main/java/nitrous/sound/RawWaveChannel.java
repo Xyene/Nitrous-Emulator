@@ -134,7 +134,7 @@ public class RawWaveChannel extends SoundChannel
     public RawWaveChannel(Emulator core)
     {
         super(core);
-    }//end RawWaveChannel(core)
+    }
 
     /**
      * Handle sound update.
@@ -169,8 +169,8 @@ public class RawWaveChannel extends SoundChannel
         {
             period = newPeriod;
             clockStart = core.cycle;
-        }//end if
-    }//end handleUpdateRequest
+        }
+    }
 
     /**
      * Handle restart request: update {@link #clockStart}.
@@ -179,7 +179,7 @@ public class RawWaveChannel extends SoundChannel
     protected void handleRestartRequest()
     {
         clockStart = core.cycle;
-    }//end handleRestartRequest
+    }
 
     /**
      * Handle sample update request: update {@link #samples} with {@link #updated}.
@@ -191,7 +191,7 @@ public class RawWaveChannel extends SoundChannel
 
         // Set request flag to false.
         requestCopy = false;
-    }//end handleCopyRequest
+    }
 
     /**
      * Update sample request, by byte. Each byte contains two samples.
@@ -210,7 +210,7 @@ public class RawWaveChannel extends SoundChannel
 
         // Set request flag.
         requestCopy = true;
-    }//end updateSample
+    }
 
     /**
      * {@inheritDoc}
@@ -229,7 +229,7 @@ public class RawWaveChannel extends SoundChannel
 
             // Update last update time.
             lastUpdate = core.cycle;
-        }//end if
+        }
 
         // Calculate the amount of time elapsed since the sound started.
         long delta = core.cycle - clockStart;
@@ -239,7 +239,7 @@ public class RawWaveChannel extends SoundChannel
         {
             isPlaying = false;
             return 0;
-        }//end if
+        }
 
         // We are playing.
         isPlaying = true;
@@ -252,6 +252,6 @@ public class RawWaveChannel extends SoundChannel
         {
             // Otherwise, find the currently playing sample and shift it.
             return (samples[(int) (delta / period) & 0x1F] << shift);
-        }//end if
-    }//end render
-}//end class RawWaveChannel
+        }
+    }
+}

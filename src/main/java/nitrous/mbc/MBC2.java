@@ -17,5 +17,5 @@ public class MBC2 extends Memory
     {
         super(core);
         throw new NotImplementedException();
-    }//end MBC2(core)
-}//end class MBC2
+    }
+}

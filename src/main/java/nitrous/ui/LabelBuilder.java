@@ -52,7 +52,7 @@ public class LabelBuilder
     {
         this.font = font;
         return this;
-    }//end setFont
+    }
 
     /**
      * Appends a normal label.
@@ -70,7 +70,7 @@ public class LabelBuilder
             }
         });
         return this;
-    }//end append
+    }
 
     /**
      * Appends an action label.
@@ -109,7 +109,7 @@ public class LabelBuilder
                         active = clicked = true;
                         color = e.getComponent().getForeground();
                         e.getComponent().setForeground(LabelBuilder.this.active);
-                    }//end mousePressed
+                    }
 
                     /**
                      * {@inheritDoc}
@@ -125,11 +125,11 @@ public class LabelBuilder
                                 SwingUtilities.invokeLater(() -> act.actionPerformed(new ActionEvent(this,
                                         ActionEvent.ACTION_PERFORMED, "label_action"))
                                 );
-                            }//end if
+                            }
                             mouseExited(e);
                             active = false;
-                        }//end if
-                    }//end mouseReleased
+                        }
+                    }
 
                     /**
                      * {@inheritDoc}
@@ -144,8 +144,8 @@ public class LabelBuilder
                             Map attributes = font.getAttributes();
                             attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
                             e.getComponent().setFont(font.deriveFont(attributes));
-                        }//end if
-                    }//end mouseEntered
+                        }
+                    }
 
                     /**
                      * {@inheritDoc}
@@ -158,13 +158,13 @@ public class LabelBuilder
                         {
                             e.getComponent().setForeground(color);
                             clicked = false;
-                        }//end if
-                    }//end mouseExited
+                        }
+                    }
                 });
             }
         });
         return this;
-    }//end action
+    }
 
     /**
      * Generates a container for this compound label.
@@ -176,5 +176,5 @@ public class LabelBuilder
         JPanel panel = new JPanel(new GridBagLayout());
         bits.forEach(panel::add);
         return panel;
-    }//end create
-}//end class LabelBuilder
+    }
+}

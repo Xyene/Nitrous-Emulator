@@ -54,12 +54,12 @@ public class ROMFrequencyManager
         {
             // This can't really happen.
             throw new RuntimeException(e);
-        }//end try
+        }
 
         // Use BigInteger to convert binary data into hexadecimal.
         BigInteger bi = new BigInteger(1, digest);
         return String.format("%0" + (digest.length << 1) + "X", bi);
-    }//end md5String
+    }
 
     /**
      * Increase the usage frequency of a ROM.
@@ -79,7 +79,7 @@ public class ROMFrequencyManager
 
         // Increase the usage frequency.
         store.putInt(hash, store.getInt(hash, 0) + 1);
-    }//end usedROM
+    }
 
     // #alg Mergesort to sort recently used ROMs by usage frequency
     //      Mergesort is chosen because it only needs to go through the entire list
@@ -109,22 +109,22 @@ public class ROMFrequencyManager
             {
                 System.arraycopy(listB, indexB, result, index, listB.length - indexB);
                 break;
-            }//end if
+            }
             if (indexB == listB.length)
             {
                 System.arraycopy(listA, indexA, result, index, listA.length - indexA);
                 break;
-            }//end if
+            }
 
             // Otherwise, put the element with greater frequency to the output list.
             if (frequency.get(listA[indexA]) > frequency.get(listB[indexB]))
                 result[index++] = listA[indexA++];
             else
                 result[index++] = listB[indexB++];
-        }//end while
+        }
 
         return result;
-    }//end merge
+    }
 
     /**
      * A mergesort implementation that would sort a list of {@link File} objects by frequency.
@@ -154,7 +154,7 @@ public class ROMFrequencyManager
 
         // Merge the two partitions.
         return merge(a, b, frequency);
-    }//end mergeSort
+    }
 
     /**
      * Find the {@literal count} most used ROMs.
@@ -182,7 +182,7 @@ public class ROMFrequencyManager
                 {
                     store.remove(hash);
                     continue;
-                }//end if
+                }
 
                 // Create file object based on path.
                 File file = new File(rom);
@@ -197,13 +197,13 @@ public class ROMFrequencyManager
                     // Remove information about deleted ROMs.
                     store.remove(hash);
                     fileNameStore.remove(hash);
-                }//end if
-            }//end for
+                }
+            }
         } catch (BackingStoreException e)
         {
             // #error If failed to query ROMs, return an empty list.
             return new File[0];
-        }//end try
+        }
 
         // Sort the ROMs by frequency.
         File[] sorted = mergeSort(roms.toArray(new File[roms.size()]), frequency);
@@ -216,5 +216,5 @@ public class ROMFrequencyManager
         File[] result = new File[count];
         System.arraycopy(sorted, 0, result, 0, count);
         return result;
-    }//end mostUsed
-}//end class ROMFrequencyManager
+    }
+}

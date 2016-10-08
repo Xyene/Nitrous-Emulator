@@ -164,7 +164,7 @@ public class Emulator
         });
 
         reset();
-    }//end Emulator(Cartridge)
+    }
 
     /**
      * Change the display.
@@ -174,7 +174,7 @@ public class Emulator
     public void setDisplay(Panel display)
     {
         this.display = display;
-    }//end setDisplay
+    }
 
     /**
      * Checks if the emulation is paused.
@@ -184,7 +184,7 @@ public class Emulator
     public boolean isPaused()
     {
         return paused;
-    }//end isPaused
+    }
 
     /**
      * Alters the pause state.
@@ -197,7 +197,7 @@ public class Emulator
     public void setPaused(boolean x)
     {
         paused = x;
-    }//end setPaused
+    }
 
     /**
      * Gets the execution lock, which if acquired, pauses execution.
@@ -207,7 +207,7 @@ public class Emulator
     public Semaphore executeLock()
     {
         return executeLock;
-    }//end executeLock
+    }
 
     /**
      * Fetches the short value contained in a register pair.
@@ -227,9 +227,9 @@ public class Emulator
                 return (H << 8) | L;
             case SP:
                 return SP;
-        }//end switch
+        }
         throw new UnsupportedOperationException("" + object);
-    }//end getRegisterPair
+    }
 
     /**
      * Like getRegisterPair, except 0x3 maps to AF.
@@ -250,9 +250,9 @@ public class Emulator
             case SP:
                 // Some instructions care about AF instead of SP, which is why this method exists
                 return (A << 8) | F;
-        }//end switch
+        }
         throw new UnsupportedOperationException("" + object);
-    }//end getRegisterPair2
+    }
 
     /**
      * Alters the short value contained in a register pair.
@@ -282,8 +282,8 @@ public class Emulator
             case SP:
                 SP = (hi << 8) | lo;
                 break;
-        }//end switch
-    }//end setRegisterPair
+        }
+    }
 
     /**
      * Alters the short value contained in a register pair.
@@ -296,7 +296,7 @@ public class Emulator
         short hi = (short) ((val >> 8) & 0xFF);
         short lo = (short) (val & 0xFF);
         setRegisterPair(object, hi, lo);
-    }//end setRegisterPair
+    }
 
     /**
      * Like setRegisterPair, except 0x3 maps to AF.
@@ -329,8 +329,8 @@ public class Emulator
                 // Other bits don't actually exist
                 F = lo & (F_C | F_H | F_N | F_Z);
                 break;
-        }//end switch
-    }//end setRegisterPair2
+        }
+    }
 
     /**
      * Emulates the Gameboy system startup.
@@ -354,7 +354,7 @@ public class Emulator
         for (int i = 0; i < 0x100; i++)
         {
             setIO(i, 0);
-        }//end for
+        }
 
         // More "special" register initial values
         setIO(0x10, 0x80);
@@ -376,7 +376,7 @@ public class Emulator
         setIO(0x47, 0xfc);
         setIO(0x48, 0xff);
         setIO(0x49, 0xff);
-    }//end reset
+    }
 
     /**
      * Checks a condition from an opcode.
@@ -397,9 +397,9 @@ public class Emulator
                 return (F & F_C) == 0;
             case 0b111:
                 return (F & F_C) != 0;
-        }//end switch
+        }
         return false;
-    }//end getConditionalFlag
+    }
 
     /**
      * Fetches the byte value contained in a register.
@@ -428,9 +428,9 @@ public class Emulator
             case 0b110:
                 // Indirect memory access
                 return getByte((H << 8) | L);
-        }//end switch
+        }
         return 0;
-    }//end getRegister
+    }
 
     /**
      * Alters the byte value contained in a register.
@@ -468,8 +468,8 @@ public class Emulator
                 // Indirect memory access
                 setByte((H << 8) | L, val);
                 break;
-        }//end switch
-    }//end setRegister
+        }
+    }
 
     /**
      * Fires interrupts if interrupts are enabled.
@@ -514,10 +514,10 @@ public class Emulator
             {
                 pc = R.HILO_HANDLER_ADDRESS;
                 triggeredInterrupts &= ~R.HILO_BIT;
-            }//end if
+            }
             mmu.registers[R.R_TRIGGERED_INTERRUPTS] = triggeredInterrupts;
-        }//end if
-    }//end fireInterrupts
+        }
+    }
 
     /**
      * Checks whether a particular interrupt is enabled.
@@ -528,7 +528,7 @@ public class Emulator
     public boolean isInterruptTriggered(int interrupt)
     {
         return (mmu.registers[R.R_TRIGGERED_INTERRUPTS] & mmu.registers[R.R_ENABLED_INTERRUPTS] & interrupt) != 0;
-    }//end isInterruptTriggered
+    }
 
     /**
      * Triggers a particular interrupt.
@@ -538,7 +538,7 @@ public class Emulator
     public void setInterruptTriggered(int interrupt)
     {
         mmu.registers[R.R_TRIGGERED_INTERRUPTS] |= interrupt;
-    }//end setInterruptTriggered
+    }
 
     /**
      * Checks if the emulator is running in double speed mode.
@@ -548,7 +548,7 @@ public class Emulator
     public boolean isDoubleSpeed()
     {
         return doubleSpeed;
-    }//end isDoubleSpeed
+    }
 
     /**
      * Puts the emulator in and out of double speed mode.
@@ -565,7 +565,7 @@ public class Emulator
             clockSpeed = BASE_CLOCK_SPEED * 2;
         else
             clockSpeed = BASE_CLOCK_SPEED;
-    }//end setDoubleSpeed
+    }
 
     /**
      * Trigger timer interrupts, LCD updates, and sound updates as needed.
@@ -585,7 +585,7 @@ public class Emulator
             divCycle -= 256;
             // This is... probably correct
             mmu.registers[R.R_DIV]++;
-        }//end if
+        }
 
         // The Timer is similar to DIV, except that when it overflows it triggers an interrupt
         int tac = mmu.registers[R.R_TAC];
@@ -618,7 +618,7 @@ public class Emulator
                 case 0b11:
                     timerPeriod = clockSpeed / 16384;
                     break;
-            }//end switch
+            }
 
             while (timerCycle >= timerPeriod)
             {
@@ -630,14 +630,14 @@ public class Emulator
                 {
                     tima = mmu.registers[R.R_TMA] & 0xff;
                     setInterruptTriggered(R.TIMER_OVERFLOW_BIT);
-                }//end if
+                }
                 mmu.registers[R.R_TIMA] = (byte) tima;
-            }//end while
-        }//end if
+            }
+        }
 
         sound.tick(delta);
         lcd.tick(delta);
-    }//end updateInterrupts
+    }
 
     /**
      * Increase the clock cycles and trigger interrupts as needed.
@@ -651,7 +651,7 @@ public class Emulator
         cyclesExecutedThisSecond += delta;
 
         updateInterrupts(delta);
-    }//end tick
+    }
 
     /**
      * The execution thread.
@@ -673,14 +673,14 @@ public class Emulator
             if (interruptsEnabled)
             {
                 fireInterrupts();
-            }//end if
+            }
 
             if (System.nanoTime() - last > 1_000_000_000)
             {
                 System.err.println(last + " -- " + clockSpeed + " Hz -- " + (1.0 * cyclesExecutedThisSecond / clockSpeed));
                 last = System.nanoTime();
                 cyclesExecutedThisSecond = 0;
-            }//end if
+            }
 
             int t = 100000;
             if (cyclesSinceLastSleep >= t)
@@ -695,19 +695,19 @@ public class Emulator
                     {
                         clockSpeed = (int) (1_000_000_000L * t / (System.nanoTime() - _last));
                         sound.updateClockSpeed(clockSpeed);
-                    }//end else
+                    }
                     _last = System.nanoTime();
                 } catch (Exception e)
                 {
                     // #error there is no reason for this to fail, but if it does
                     //        all we can do is printing the stacktrace for debugging
                     e.printStackTrace();
-                }//end try
+                }
                 executeLock.acquireUninterruptibly();
                 cyclesSinceLastSleep -= t;
-            }//end if
-        }//end while
-    }//end exec
+            }
+        }
+    }
 
     /*******************************************************************************************************
      * The following functions handle common memory access instructions.
@@ -722,40 +722,40 @@ public class Emulator
 
         setByte(SP, what & 0x00FF);
         setByte(SP + 1, (what & 0xFF00) >> 8);
-    }//end pushWord
+    }
 
     private int nextUByte()
     {
         return getUByte(pc++);
-    }//end nextUByte
+    }
 
     private int nextByte()
     {
         return getByte(pc++);
-    }//end nextByte
+    }
 
     private void setByte(int addr, int _data)
     {
         tick(4);
         mmu.setAddress(addr, _data);
-    }//end setByte
+    }
 
     private void setIO(int addr, int data)
     {
         tick(4);
         mmu.setIO(addr, data);
-    }//end setIO
+    }
 
     private int getUByte(int addr)
     {
         return getByte(addr) & 0xff;
-    }//end getUByte
+    }
 
     private int getByte(int addr)
     {
         tick(4);
         return mmu.getAddress(addr);
-    }//end getByte
+    }
 
     /*******************************************************************************************************
      * The rest of this file handles execution of the 200-something individual instructions.
@@ -783,7 +783,7 @@ public class Emulator
             if (mmu.registers[R.R_TRIGGERED_INTERRUPTS] == 0)
                 return 4;
             cpuHalted = false;
-        }//end if
+        }
 
         int op = nextUByte();
 
@@ -1111,15 +1111,15 @@ public class Emulator
                         break;
                     default:
                         throw new UnsupportedOperationException(cycle + "-" + Integer.toHexString(op));
-                }//end switch
-        }//end switch
+                }
+        }
         return 0;
-    }//end _exec
+    }
 
     private int NOP()
     {
         return 0;
-    }//end NOP
+    }
 
     private int CALL_cc_nn(int op)
     {
@@ -1129,9 +1129,9 @@ public class Emulator
             pushWord(pc);
             pc = jmp;
             return 4;
-        }//end if
+        }
         return 0;
-    }//end CALL_cc_nn
+    }
 
     private int CALL_nn()
     {
@@ -1139,13 +1139,13 @@ public class Emulator
         pushWord(pc);
         pc = jmp;
         return 4;
-    }//end CALL_nn
+    }
 
     private int LD_dd_nn(int op)
     {
         setRegisterPair(RegisterPair.byValue[(op >> 4) & 0x3], nextUByte() | (nextUByte() << 8));
         return 0;
-    }//end LD_dd_nn
+    }
 
     private int LD_r_n(int op)
     {
@@ -1153,37 +1153,37 @@ public class Emulator
         int n = nextUByte();
         setRegister(to, n);
         return 0;
-    }//end LD_r_n
+    }
 
     private int LD_A_BC()
     {
         A = getUByte(getRegisterPair(RegisterPair.BC));
         return 0;
-    }//end LD_A_BC
+    }
 
     private int LD_A_DE()
     {
         A = getUByte(getRegisterPair(RegisterPair.DE));
         return 0;
-    }//end LD_A_DE
+    }
 
     private int LD_BC_A()
     {
         setByte(getRegisterPair(RegisterPair.BC), A);
         return 0;
-    }//end LD_BC_A
+    }
 
     private int LD_DE_A()
     {
         setByte(getRegisterPair(RegisterPair.DE), A);
         return 0;
-    }//end LD_DE_A
+    }
 
     private int LD_A_C()
     {
         A = getUByte(0xFF00 | C);
         return 0;
-    }//end LD_A_C
+    }
 
     private int ADD_SP_n()
     {
@@ -1199,33 +1199,33 @@ public class Emulator
 
         SP = nsp;
         return 4;
-    }//end ADD_SP_n
+    }
 
     private int SCF()
     {
         F &= F_Z;
         F |= F_C;
         return 0;
-    }//end SCF
+    }
 
     private int CCF()
     {
         F = (F & F_C) != 0 ? (F & F_Z) : ((F & F_Z) | F_C);
         return 0;
-    }//end CCF
+    }
 
     private int LD_A_n()
     {
         A = getUByte(getRegisterPair(RegisterPair.HL) & 0xffff);
         setRegisterPair(RegisterPair.HL, (getRegisterPair(RegisterPair.HL) - 1) & 0xFFFF);
         return 0;
-    }//end LD_A_n
+    }
 
     private int LD_nn_A()
     {
         setByte(nextUByte() | (nextUByte() << 8), A);
         return 0;
-    }//end LD_nn_A
+    }
 
     private int LDHL_SP_n()
     {
@@ -1240,47 +1240,47 @@ public class Emulator
 
         setRegisterPair(RegisterPair.HL, nsp);
         return 0;
-    }//end LDHL_SP_n
+    }
 
     private int CPL()
     {
         A = (~A) & 0xFF;
         F = (F & (F_C | F_Z)) | F_H | F_N;
         return 0;
-    }//end CPL
+    }
 
     private int LD_FFn_A()
     {
         setByte(0xff00 | nextUByte(), A);
         return 0;
-    }//end LD_FFn_A
+    }
 
     private int LDH_FFC_A()
     {
         setByte(0xFF00 | (C & 0xFF), A);
         return 0;
-    }//end LDH_FFC_A
+    }
 
     private int LD_A_nn()
     {
         int nn = nextUByte() | (nextUByte() << 8);
         A = getUByte(nn);
         return 0;
-    }//end LD_A_nn
+    }
 
     private int LD_A_HLI()
     {
         A = getUByte(getRegisterPair(RegisterPair.HL) & 0xffff);
         setRegisterPair(RegisterPair.HL, (getRegisterPair(RegisterPair.HL) + 1) & 0xFFFF);
         return 0;
-    }//end LD_A_HLI
+    }
 
     private int LD_HLI_A()
     {
         setByte(getRegisterPair(RegisterPair.HL) & 0xFFFF, A);
         setRegisterPair(RegisterPair.HL, (getRegisterPair(RegisterPair.HL) + 1) & 0xFFFF);
         return 0;
-    }//end LD_HLI_A
+    }
 
     private int LD_HLD_A()
     {
@@ -1289,12 +1289,12 @@ public class Emulator
         setRegisterPair(RegisterPair.HL, (hl - 1) & 0xFFFF);
 
         return 0;
-    }//end LD_HLD_A
+    }
 
     private int STOP()
     {
         return NOP();
-    }//end STOP
+    }
 
     private void LD_r_r(int op)
     {
@@ -1303,7 +1303,7 @@ public class Emulator
 
         // important note: getIO(6) fetches (HL)
         setRegister(to, getRegister(from) & 0xFF);
-    }//end LD_r_r
+    }
 
     private void CBPrefix()
     {
@@ -1442,19 +1442,19 @@ public class Emulator
                     }
                     default:
                         throw new UnsupportedOperationException("cb-&f8-" + Integer.toHexString(cbop));
-                }//end switch
+                }
             }
             default:
                 throw new UnsupportedOperationException("cb-" + Integer.toHexString(cbop));
-        }//end switch
-    }//end CBPrefix
+        }
+    }
 
     private void DEC_rr(int op)
     {
         RegisterPair p = RegisterPair.byValue[(op >> 4) & 0x3];
         int o = getRegisterPair(p);
         setRegisterPair(p, o - 1);
-    }//end DEC_rr
+    }
 
     private void RLA()
     {
@@ -1468,7 +1468,7 @@ public class Emulator
 
         // move old C into bit 0
         if (carryflag) A |= 1;
-    }//end RLA
+    }
 
     private void RRA()
     {
@@ -1481,7 +1481,7 @@ public class Emulator
 
         // move old C into bit 7
         if (carryflag) A |= 0x80;
-    }//end RRA
+    }
 
     private void RRCA()
     {
@@ -1491,7 +1491,7 @@ public class Emulator
 
         // we're shifting circular right, add back bit 7
         if ((F & F_C) != 0) A |= 0x80;
-    }//end RRCA
+    }
 
     private void SBC_r(int op)
     {
@@ -1505,9 +1505,9 @@ public class Emulator
         {
             F |= F_C;
             A &= 0xFF;
-        }//end if
+        }
         if (A == 0) F |= F_Z;
-    }//end SBC_r
+    }
 
     private void ADC_n()
     {
@@ -1522,30 +1522,30 @@ public class Emulator
         {
             F |= F_C;
             A &= 0xFF;
-        }//end if
+        }
         if (A == 0) F |= F_Z;
-    }//end ADC_n
+    }
 
     private int RET()
     {
         pc = (getUByte(SP + 1) << 8) | getUByte(SP);
         SP += 2;
         return 4;
-    }//end RET
+    }
 
     private void XOR_n()
     {
         A ^= nextUByte();
         F = 0;
         if (A == 0) F |= F_Z;
-    }//end XOR_n
+    }
 
     private void AND_n()
     {
         A &= nextUByte();
         F = F_H;
         if (A == 0) F |= F_Z;
-    }//end AND_n
+    }
 
     private int EI()
     {
@@ -1557,19 +1557,19 @@ public class Emulator
         // we still need to increment div etc
         tick(4);
         return _exec();
-    }//end EI
+    }
 
     private void DI()
     {
         interruptsEnabled = false;
-    }//end DI
+    }
 
     private int RST_p(int op)
     {
         pushWord(pc);
         pc = op & 0b00111000;
         return 4;
-    }//end RST_p
+    }
 
     private int RET_c(int op)
     {
@@ -1577,20 +1577,20 @@ public class Emulator
         {
             pc = (getUByte(SP + 1) << 8) | getUByte(SP);
             SP += 2;
-        }//end if
+        }
         return 4;
-    }//end RET_c
+    }
 
     private int HALT()
     {
         cpuHalted = true;
         return 0;
-    }//end HALT
+    }
 
     private void LDH_FFnn()
     {
         A = getUByte(0xFF00 | nextUByte());
-    }//end LDH_FFnn
+    }
 
     private int JR_c_e(int op)
     {
@@ -1599,9 +1599,9 @@ public class Emulator
         {
             pc += e;
             return 4;
-        }//end if
+        }
         return 0;
-    }//end JR_c_e
+    }
 
     private int JP_c_nn(int op)
     {
@@ -1610,9 +1610,9 @@ public class Emulator
         {
             pc = npc;
             return 4;
-        }//end if
+        }
         return 0;
-    }//end JP_c_nn
+    }
 
     private void DAA()
     {
@@ -1641,58 +1641,58 @@ public class Emulator
         {
             if ((F & F_H) != 0) tmp = ((tmp - 6) & 0xff);
             if ((F & F_C) != 0) tmp -= 0x60;
-        }//end if
+        }
         F &= F_N | F_C;
 
         if (tmp > 0xff)
         {
             F |= F_C;
             tmp &= 0xff;
-        }//end if
+        }
 
         if (tmp == 0) F |= F_Z;
 
         A = tmp;
-    }//end DAA
+    }
 
     private int JR_e()
     {
         int e = nextByte();
         pc += e;
         return 4;
-    }//end JR_e
+    }
 
     private void OR(int n)
     {
         A |= n;
         F = 0;
         if (A == 0) F |= F_Z;
-    }//end OR
+    }
 
     private void OR_r(int op)
     {
         OR(getRegister(op & 0b111) & 0xff);
-    }//end OR_r
+    }
 
     private void OR_n()
     {
         int n = nextUByte();
         OR(n);
-    }//end OR_n
+    }
 
     private void XOR_r(int op)
     {
         A = (A ^ getRegister(op & 0b111)) & 0xff;
         F = 0;
         if (A == 0) F |= F_Z;
-    }//end XOR_r
+    }
 
     private void AND_r(int op)
     {
         A = (A & getRegister(op & 0b111)) & 0xff;
         F = F_H;
         if (A == 0) F |= F_Z;
-    }//end AND_r
+    }
 
     private void ADC_r(int op)
     {
@@ -1708,9 +1708,9 @@ public class Emulator
         {
             F |= F_C;
             A &= 0xFF;
-        }//end if
+        }
         if (A == 0) F |= F_Z;
-    }//end ADC_r
+    }
 
     private void ADD(int n)
     {
@@ -1721,21 +1721,21 @@ public class Emulator
         {
             F |= F_C;
             A &= 0xFF;
-        }//end if
+        }
         if (A == 0) F |= F_Z;
-    }//end ADD
+    }
 
     private void ADD_r(int op)
     {
         int n = getRegister(op & 0b111) & 0xff;
         ADD(n);
-    }//end ADD_r
+    }
 
     private void ADD_n()
     {
         int n = nextUByte();
         ADD(n);
-    }//end ADD_n
+    }
 
     private void SUB(int n)
     {
@@ -1745,19 +1745,19 @@ public class Emulator
         if ((A & 0xFF00) != 0) F |= F_C;
         A &= 0xFF;
         if (A == 0) F |= F_Z;
-    }//end SUB
+    }
 
     private void SUB_r(int op)
     {
         int n = getRegister(op & 0b111) & 0xff;
         SUB(n);
-    }//end SUB_r
+    }
 
     private void SUB_n()
     {
         int n = nextUByte();
         SUB(n);
-    }//end SUB_n
+    }
 
     private void SBC_n()
     {
@@ -1772,14 +1772,14 @@ public class Emulator
         {
             F |= F_C;
             A &= 0xff;
-        }//end if
+        }
         if (A == 0) F |= F_Z;
-    }//end SBC_n
+    }
 
     private void JP_HL()
     {
         pc = getRegisterPair(RegisterPair.HL) & 0xFFFF;
-    }//end JP_HL
+    }
 
     private void ADD_HL_rr(int op)
     {
@@ -1797,7 +1797,7 @@ public class Emulator
         if (((hl & 0xFFF) + (ss & 0xFFF)) > 0xFFF)
         {
             F |= F_H;
-        }//end if
+        }
 
         hl += ss;
 
@@ -1805,10 +1805,10 @@ public class Emulator
         {
             F |= F_C;
             hl &= 0xFFFF;
-        }//end if
+        }
 
         setRegisterPair(RegisterPair.HL, hl);
-    }//end ADD_HL_rr
+    }
 
     private void CP(int n)
     {
@@ -1816,26 +1816,26 @@ public class Emulator
         if (A < n) F |= F_C;
         if (A == n) F |= F_Z;
         if ((A & 0xf) < ((A - n) & 0xf)) F |= F_H;
-    }//end CP
+    }
 
     private void CP_n()
     {
         int n = nextUByte();
         CP(n);
-    }//end CP_n
+    }
 
     private void CP_rr(int op)
     {
         int n = getRegister(op & 0x7) & 0xFF;
         CP(n);
-    }//end CP_rr
+    }
 
     private void INC_rr(int op)
     {
         RegisterPair pair = RegisterPair.byValue[(op >> 4) & 0x3];
         int o = getRegisterPair(pair) & 0xffff;
         setRegisterPair(pair, o + 1);
-    }//end INC_rr
+    }
 
     private void DEC_r(int op)
     {
@@ -1847,7 +1847,7 @@ public class Emulator
         a = (a - 1) & 0xff;
 
         setRegister(reg, a);
-    }//end DEC_r
+    }
 
     private void INC_r(int op)
     {
@@ -1859,7 +1859,7 @@ public class Emulator
         a = (a + 1) & 0xff;
 
         setRegister(reg, a);
-    }//end INC_r
+    }
 
     private void RLCA()
     {
@@ -1872,13 +1872,13 @@ public class Emulator
             A |= 1;
         } else F = 0;
         A &= 0xff;
-    }//end RLCA
+    }
 
     private int JP_nn()
     {
         pc = (nextUByte()) | (nextUByte() << 8);
         return 4;
-    }//end JP_nn
+    }
 
     private int RETI()
     {
@@ -1886,7 +1886,7 @@ public class Emulator
         pc = (getUByte(SP + 1) << 8) | getUByte(SP);
         SP += 2;
         return 4;
-    }//end RETI
+    }
 
     private int LD_a16_SP()
     {
@@ -1894,19 +1894,19 @@ public class Emulator
         setByte(pos + 1, (SP & 0xFF00) >> 8);
         setByte(pos, (SP & 0x00FF));
         return 0;
-    }//end LD_a16_SP
+    }
 
     private int POP_rr(int op)
     {
         setRegisterPair2(RegisterPair.byValue[(op >> 4) & 0x3], getByte(SP + 1), getByte(SP));
         SP += 2;
         return 0;
-    }//end POP_rr
+    }
 
     private int PUSH_rr(int op)
     {
         int val = getRegisterPair2(RegisterPair.byValue[(op >> 4) & 0x3]);
         pushWord(val);
         return 4;
-    }//end PUSH_rr
-}//end class Emulator
+    }
+}

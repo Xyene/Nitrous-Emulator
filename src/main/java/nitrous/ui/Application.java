@@ -75,21 +75,21 @@ public class Application
             {
                 System.err.println(rom + " does not exist");
                 rom = null;
-            }//end if
-        }//end if
+            }
+        }
 
         // Try invoking the ROM selection window.
         if (rom == null)
         {
             rom = selectROM();
-        }//end if
+        }
 
         // If we still can't get a ROM, give up.
         if (rom == null)
         {
             System.err.println("No ROM provided, exiting...");
             return;
-        }//end if
+        }
 
         // Load the ROM.
         // #read load the ROM
@@ -111,12 +111,12 @@ public class Application
             } catch (Exception ignored)
             {
                 // #error There is nothing you can do if the file fails to load.
-            }//end try
-        }//end if
+            }
+        }
 
         // Initialize the UI with stored fullscreen and magnification settings.
         initUI(core, Settings.isFullScreen(), Settings.getMagnification());
-    }//end main
+    }
 
     /**
      * Shows the ROM selection UI.
@@ -150,7 +150,7 @@ public class Application
                     public void windowClosed(WindowEvent e)
                     {
                         selectLock.release();
-                    }//end windowClosed
+                    }
                 });
             }
         };
@@ -164,7 +164,7 @@ public class Application
         class FileReference
         {
             File ref;
-        }//end class FileReference
+        }
         FileReference target = new FileReference();
 
         // Acquire the semaphore such that the next acquire blocks until release.
@@ -182,7 +182,7 @@ public class Application
                 if (f.isDirectory()) return true;
                 String name = f.getName();
                 return name.endsWith(".gb") || name.endsWith(".gbc") || name.endsWith(".rom");
-            }//end accept
+            }
 
             /**
              * {@inheritDoc}
@@ -191,7 +191,7 @@ public class Application
             public String getDescription()
             {
                 return "Gameboy ROM (*.gb, *.gbc, *.rom)";
-            }//end getDescription
+            }
         };
 
         /**
@@ -221,7 +221,7 @@ public class Application
                                 "File must be a " + acceptor.getDescription() + "!", "No ROM image provided",
                                 JOptionPane.ERROR_MESSAGE);
                         return;
-                    }//end if
+                    }
 
                     // If it's good, set the file, close the window, and release the wait.
                     target.ref = rom;
@@ -230,9 +230,9 @@ public class Application
                 } catch (Exception ex)
                 {
                     ex.printStackTrace();
-                }//end try
-            }//end drop
-        }//end class ROMDropTarget
+                }
+            }
+        }
 
         // Create the welcome panel.
         JPanel welcome = new JPanel()
@@ -271,7 +271,7 @@ public class Application
                                         target.ref = chooser.getSelectedFile();
                                         dialog.dispose();
                                         selectLock.release();
-                                    }//end if
+                                    }
                                 }).append(" or drop a game here").create());
                         add(Box.createHorizontalGlue());
                     }
@@ -297,7 +297,7 @@ public class Application
                     FileNameDisplay(File file)
                     {
                         this.file = file;
-                    }//end FileNameDisplay(file)
+                    }
 
                     /**
                      * {@inheritDoc}
@@ -307,8 +307,8 @@ public class Application
                     {
                         // Get the file name and remove the extension.
                         return file.getName().replaceFirst("[.][^.]+$", "");
-                    }//end toString
-                }//end class FileNameDisplay
+                    }
+                }
 
                 // Create a list display control.
                 add(new JScrollPane(new JList<FileNameDisplay>()
@@ -345,8 +345,8 @@ public class Application
                                     target.ref = romModel.elementAt(locationToIndex(evt.getPoint())).file;
                                     dialog.dispose();
                                     selectLock.release();
-                                }//end if
-                            }//end mouseClicked
+                                }
+                            }
                         });
                     }
                 })
@@ -382,7 +382,7 @@ public class Application
 
         // Return the selected ROM.
         return target.ref;
-    }//end selectROM
+    }
 
     /**
      * Create the emulator UI.
@@ -438,8 +438,8 @@ public class Application
                     case Keybinding.KEY_SELECT:
                         core.buttonSelect = to;
                         break;
-                }//end switch
-            }//end toggle
+                }
+            }
 
             /**
              * {@inheritDoc}
@@ -449,7 +449,7 @@ public class Application
             {
                 // Handle releasing.
                 toggle(e, false);
-            }//end keyReleased
+            }
 
             /**
              * {@inheritDoc}
@@ -459,7 +459,7 @@ public class Application
             {
                 // Handle pressing.
                 toggle(e, true);
-            }//end keyPressed
+            }
         });
 
         // Add mouse listener.
@@ -500,7 +500,7 @@ public class Application
                                 group.setSelected(menuItem.getModel(), true);
 
                             add(menuItem);
-                        }//end for
+                        }
                     }
                 });
 
@@ -534,7 +534,7 @@ public class Application
                                     });
                                 }
                             });
-                        }//end for
+                        }
                     }
                 });
 
@@ -559,7 +559,7 @@ public class Application
                                             Settings.setChannelOn(channel, !Settings.isChannelOn(channel)));
                                 }
                             });
-                        }//end for
+                        }
                     }
                 });
 
@@ -663,7 +663,7 @@ public class Application
                                     public void mouseReleased(MouseEvent e)
                                     {
                                         Settings.saveVolume();
-                                    }//end mouseReleased
+                                    }
                                 });
                             }
                         });
@@ -753,7 +753,7 @@ public class Application
                                     });
                                 }
                             });
-                        }//end for
+                        }
                     }
                 });
 
@@ -797,7 +797,7 @@ public class Application
 
                 // Show the menu at the mouse position.
                 menu.show(e.getComponent(), e.getX(), e.getY());
-            }//end mouseReleased
+            }
         });
 
         // Continuing setting up the frame.
@@ -836,14 +836,14 @@ public class Application
                         add(Box.createVerticalGlue());
                     }
                 });
-            }//end if
+            }
 
             // Undecorate and maximize if fullscreen.
             if (fullscreen)
             {
                 disp.setUndecorated(true);
                 disp.setExtendedState(JFrame.MAXIMIZED_BOTH);
-            }//end if
+            }
 
             // Pack the frame, set location, and declare exit on close.
             disp.pack();
@@ -872,13 +872,13 @@ public class Application
                         {
                             System.err.println("Saving cart ram");
                             core.mmu.save(f);
-                        }//end if
+                        }
                     } catch (IOException e)
                     {
                         // #error print stacktrace for debugging
                         e.printStackTrace();
-                    }//end try
-                }//end windowClosing
+                    }
+                }
             });
 
             // Show the frame.
@@ -899,5 +899,5 @@ public class Application
         System.err.println(core.cartridge.gameTitle);
         System.err.println(core.cartridge);
         System.out.flush();
-    }//end initUI
-}//end class Application
+    }
+}

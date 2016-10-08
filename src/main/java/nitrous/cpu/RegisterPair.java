@@ -13,4 +13,4 @@ public enum RegisterPair
      * CPU id -> RegisterPair conversion.
      */
     public static final RegisterPair[] byValue = {BC, DE, HL, SP};
-}//end enum RegisterPair
+}

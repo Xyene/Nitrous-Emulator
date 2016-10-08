@@ -14,4 +14,4 @@ public interface IPalette
      * @return A color in RGBA format.
      */
     int getColor(int number);
-}//end interface IPalette
+}

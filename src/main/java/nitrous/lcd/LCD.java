@@ -124,7 +124,7 @@ public class LCD
     {
         this.core = core;
         initializePalettes();
-    }//end LCD(core)
+    }
 
     /**
      * Initializes all palette RAM to the default on Gameboy boot.
@@ -162,8 +162,8 @@ public class LCD
             bgPalettes[0] = new DMGPalette(this, colors.bg, R_BGP);
             spritePalettes[0] = new DMGPalette(this, colors.obj0, R_OBP0);
             spritePalettes[1] = new DMGPalette(this, colors.obj1, R_OBP1);
-        }//end if
-    }//end initializePalettes
+        }
+    }
 
     /**
      * Reloads all Gameboy Color palettes.
@@ -179,8 +179,8 @@ public class LCD
             // 4 bytes per palette
             for (int j = 0; j < 4; ++j)
                 updatePaletteByte(from, to[i], i, j);
-        }//end for
-    }//end loadPalettesFromMemory
+        }
+    }
 
     /**
      * Performs an update to a byte of palette RAM.
@@ -213,7 +213,7 @@ public class LCD
         ((GBCPalette) to).colors[j] = (((int) (red / 31f * 255 + 0.5) & 0xFF) << 16) |
                 (((int) (green / 31f * 255 + 0.5) & 0xFF) << 8) |
                 ((int) (blue / 31f * 255 + 0.5) & 0xFF);
-    }//end updatePaletteByte
+    }
 
     /**
      * Updates an entry of background palette RAM. Internal function for use in a Memory controller.
@@ -226,7 +226,7 @@ public class LCD
         gbcBackgroundPaletteMemory[reg] = (byte) data;
         int palette = reg >> 3;
         updatePaletteByte(gbcBackgroundPaletteMemory, bgPalettes[palette], palette, (reg >> 1) & 0x3);
-    }//end setBackgroundPalette
+    }
 
     /**
      * Updates an entry of sprite palette RAM. Internal function for use in a Memory controller.
@@ -239,7 +239,7 @@ public class LCD
         gbcSpritePaletteMemory[reg] = (byte) data;
         int palette = reg >> 3;
         updatePaletteByte(gbcSpritePaletteMemory, spritePalettes[palette], palette, (reg >> 1) & 0x3);
-    }//end setSpritePalette
+    }
 
     /**
      * Tick the LCD.
@@ -281,7 +281,7 @@ public class LCD
                 {
                     lastSecondTime = System.nanoTime();
                     lastCoreCycle = core.cycle;
-                }//end if
+                }
                 currentVBlankCount++;
                 if (currentVBlankCount == 60)
                 {
@@ -290,8 +290,8 @@ public class LCD
                     lastCoreCycle = core.cycle;
                     currentVBlankCount = 0;
                     lastSecondTime = System.nanoTime();
-                }//end if
-            }//end if
+                }
+            }
 
             boolean isVBlank = 144 <= LY;
 
@@ -299,7 +299,7 @@ public class LCD
             {
                 System.err.println(LY);
                 core.mmu.hdma.tick();
-            }//end if
+            }
 
             core.mmu.registers[R_LCD_STAT] &= ~0x03;
 
@@ -333,14 +333,14 @@ public class LCD
                     } else
                     {
                         core.mmu.registers[R_LCD_STAT] &= ~LCD_STAT.COINCIDENCE_BIT;
-                    }//end if
-                }//end if
+                    }
+                }
 
                 if ((lcdStat & LCD_STAT.HBLANK_MODE_BIT) != 0)
                 {
                     core.setInterruptTriggered(LCDC_BIT);
-                }//end if
-            }//end if
+                }
+            }
 
             /**
              * INT 40 - V-Blank Interrupt
@@ -373,11 +373,11 @@ public class LCD
                         case BICUBIC:
                             graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
                             break;
-                    }//end switch
+                    }
 
                     // Blit the our buffer onto the display. The top bytes we use for tile priority won't show up.
                     graphics.drawImage(screenBuffer, 0, 0, core.display.getWidth(), core.display.getHeight(), null);
-                }//end if
+                }
 
                 // Trigger interrupts if the display is enabled
                 if (displayEnabled)
@@ -389,11 +389,11 @@ public class LCD
                     if ((lcdStat & LCD_STAT.VBLANK_MODE_BIT) != 0)
                     {
                         core.setInterruptTriggered(LCDC_BIT);
-                    }//end if
-                }//end if
-            }//end if
-        }//end if
-    }//end tick
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * Initializes renderers to draw on the current Emulator display.
@@ -414,7 +414,7 @@ public class LCD
                 {
                     // #error failure means we try the next renderer
                     continue;
-                }//end try
+                }
                 if (renderer.getGraphics() != null)
                 {
                     add(renderer);
@@ -422,14 +422,14 @@ public class LCD
                     {
                         System.out.println("Using " + renderer);
                         currentRenderer = renderer;
-                    }//end if
+                    }
                 } else
                 {
                     System.err.println(renderer + " failed to produce a Graphics2D");
-                }//end if
-            }//end for
+                }
+            }
         }});
-    }//end initializeRenderers
+    }
 
     /**
      * Draws a scanline.
@@ -469,7 +469,7 @@ public class LCD
         // If the window appears in this scanline, draw it
         if (windowEnabled() && scanline >= getWindowPosY() && getWindowPosX() < W && getWindowPosY() >= 0)
             drawWindow(data, scanline);
-    }//end draw
+    }
 
     /**
      * Attempt to draw background tiles.
@@ -544,7 +544,7 @@ public class LCD
                 flipX = (attribs & 0x20) != 0;
                 flipY = (attribs & 0x40) != 0;
                 gbcPalette = (attribs & 0x7);
-            }//end if
+            }
 
             // Delegate tile drawing
             drawTile(bgPalettes[gbcPalette],
@@ -556,8 +556,8 @@ public class LCD
                     gbcVramBank,
                     0,
                     false);
-        }//end for
-    }//end drawBackgroundTiles
+        }
+    }
 
     /**
      * Attempt to draw window tiles.
@@ -604,7 +604,7 @@ public class LCD
                 flipX = (attribs & 0x20) != 0;
                 flipY = (attribs & 0x40) != 0;
                 gbcPalette = (attribs & 0x07);
-            }//end if
+            }
 
             drawTile(bgPalettes[gbcPalette],
                     data,
@@ -615,8 +615,8 @@ public class LCD
                     gbcVramBank,
                     P_6,
                     false);
-        }//end for
-    }//end drawWindow
+        }
+    }
 
     /**
      * Attempt to draw a single line of a tile.
@@ -689,8 +689,8 @@ public class LCD
 
             if (priority >= (data[index] & 0xFF000000))
                 data[index] = priority | palette.getColor(paletteIndex);
-        }//end for
-    }//end drawTile
+        }
+    }
 
     /**
      * Attempts to draw all sprites.
@@ -777,19 +777,19 @@ public class LCD
                 {
                     drawTile(pal, data, x - 8, y - 16, hi, scanline, flipX, flipY, vrambank, priority, true);
                     spritesDrawnPerLine[scanline]++;
-                }//end if
+                }
                 if (y - 8 <= scanline && scanline < y)
                 {
                     drawTile(pal, data, x - 8, y - 8, lo, scanline, flipX, flipY, vrambank, priority, true);
                     spritesDrawnPerLine[scanline]++;
-                }//end if
+                }
             } else
             {
                 drawTile(pal, data, x - 8, y - 16, tile, scanline, flipX, flipY, vrambank, priority, true);
                 spritesDrawnPerLine[scanline]++;
-            }//end if
-        }//end for
-    }//end drawSprites
+            }
+        }
+    }
 
     /**
      * Determines whether the display is enabled from the LCDC register.
@@ -799,7 +799,7 @@ public class LCD
     public boolean displayEnabled()
     {
         return (core.mmu.registers[R_LCDC] & LCDC.CONTROL_OPERATION_BIT) != 0;
-    }//end displayEnabled
+    }
 
     /**
      * Determines whether the background layer is enabled from the LCDC register.
@@ -809,7 +809,7 @@ public class LCD
     public boolean backgroundEnabled()
     {
         return (core.mmu.registers[R_LCDC] & LCDC.BGWINDOW_DISPLAY_BIT) != 0;
-    }//end backgroundEnabled
+    }
 
     /**
      * Determines the window tile map offset from the LCDC register.
@@ -821,7 +821,7 @@ public class LCD
         if ((core.mmu.registers[R_LCDC] & LCDC.WINDOW_TILE_MAP_DISPLAY_SELECT_BIT) != 0)
             return 0x1c00;
         return 0x1800;
-    }//end getWindowTileMapOffset
+    }
 
     /**
      * Determines the background tile map offset from the LCDC register.
@@ -833,7 +833,7 @@ public class LCD
         if ((core.mmu.registers[R_LCDC] & LCDC.BG_TILE_MAP_DISPLAY_SELECT_BIT) != 0)
             return 0x1c00;
         return 0x1800;
-    }//end getBackgroundTileMapOffset
+    }
 
     /**
      * Determines whether tall sprites are enabled from the LCDC register.
@@ -843,7 +843,7 @@ public class LCD
     public boolean isUsingTallSprites()
     {
         return (core.mmu.registers[R_LCDC] & LCDC.SPRITE_SIZE_BIT) != 0;
-    }//end isUsingtallSprites
+    }
 
     /**
      * Determines whether sprites are enabled from the LCDC register.
@@ -853,7 +853,7 @@ public class LCD
     public boolean spritesEnabled()
     {
         return (core.mmu.registers[R_LCDC] & LCDC.SPRITE_DISPLAY_BIT) != 0;
-    }//end spritesEnabled
+    }
 
     /**
      * Determines whether the window is enabled from the LCDC register.
@@ -863,7 +863,7 @@ public class LCD
     public boolean windowEnabled()
     {
         return (core.mmu.registers[R_LCDC] & LCDC.WINDOW_DISPLAY_BIT) != 0;
-    }//end windowEnabled
+    }
 
     /**
      * Tile patterns are taken from the Tile Data Table located either at $8000-8FFF or $8800-97FF.
@@ -877,7 +877,7 @@ public class LCD
         if ((core.mmu.registers[R_LCDC] & LCDC.BGWINDOW_TILE_DATA_SELECT_BIT) != 0)
             return 0;
         return 0x0800;
-    }//end getTileDataOffset
+    }
 
     /**
      * Fetches the current background X-coordinate from the WX register.
@@ -887,7 +887,7 @@ public class LCD
     public int getScrollX()
     {
         return (core.mmu.registers[R_SCX] & 0xFF);
-    }//end getScrollX
+    }
 
     /**
      * Fetches the current background Y-coordinate from the SCY register.
@@ -897,7 +897,7 @@ public class LCD
     public int getScrollY()
     {
         return (core.mmu.registers[R_SCY] & 0xff);
-    }//end getScrollY
+    }
 
     /**
      * Fetches the current window X-coordinate from the WX register.
@@ -907,7 +907,7 @@ public class LCD
     public int getWindowPosX()
     {
         return (core.mmu.registers[R_WX] & 0xFF) - 7;
-    }//end getWindowPosX
+    }
 
     /**
      * Fetches the current window Y-coordinate from the WY register.
@@ -917,5 +917,5 @@ public class LCD
     public int getWindowPosY()
     {
         return (core.mmu.registers[R_WY] & 0xFF);
-    }//end getWindowPosY
-}//end class LCD
+    }
+}

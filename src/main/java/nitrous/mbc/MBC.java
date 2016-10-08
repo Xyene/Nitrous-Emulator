@@ -41,7 +41,7 @@ public abstract class MBC extends Memory
     MBC(Emulator core)
     {
         super(core);
-    }//end MBC(core)
+    }
 
     /**
      * {@inheritDoc}
@@ -56,9 +56,9 @@ public abstract class MBC extends Memory
             int n = in.read(cartRam, read, cartRam.length);
             if (n == -1) break;
             read += n;
-        }//end while
+        }
         if (read != cartRam.length) throw new IOException("cart data invalid");
-    }//end load
+    }
 
     /**
      * {@inheritDoc}
@@ -68,7 +68,7 @@ public abstract class MBC extends Memory
     {
         if(!hasBattery()) throw new IllegalStateException("no battery!");
         out.write(cartRam);
-    }//end save
+    }
 
     /**
      * {@inheritDoc}
@@ -88,8 +88,8 @@ public abstract class MBC extends Memory
                 {
                     // Return an invalid value
                     return 0xff;
-                }//end if
-        }//end switch
+                }
+        }
         return super.getAddress(addr);
-    }//end getAddress
-}//end class MBC
+    }
+}

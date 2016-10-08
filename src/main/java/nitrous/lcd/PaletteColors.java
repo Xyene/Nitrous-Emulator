@@ -122,7 +122,7 @@ public class PaletteColors
         for (int i = 0; i < byHash.length; i++)
             if (byHash[i] == null)
                 byHash[i] = dmgPalette;
-    }//end static
+    }
 
     /**
      * The background palette data.
@@ -151,5 +151,5 @@ public class PaletteColors
         this.bg = bg;
         this.obj0 = obj0;
         this.obj1 = obj1;
-    }//end PaletteColors(bg, obj0, obj1)
-}//end class PaletteColors
+    }
+}

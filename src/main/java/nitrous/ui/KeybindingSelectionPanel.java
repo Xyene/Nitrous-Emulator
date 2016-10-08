@@ -67,7 +67,7 @@ public class KeybindingSelectionPanel extends JPanel
                                 public void keyTyped(KeyEvent e)
                                 {
                                     e.consume();
-                                }//end keyTyped
+                                }
 
                                 /**
                                  * {@inheritDoc}
@@ -82,7 +82,7 @@ public class KeybindingSelectionPanel extends JPanel
                                     // we update the TextField to reflect the new binding.
                                     if (keybinding.updateKey(button, e.getKeyCode()))
                                         setText(KeyEvent.getKeyText(e.getKeyCode()));
-                                }//end keyPressed
+                                }
 
                                 /**
                                  * {@inheritDoc}
@@ -91,12 +91,12 @@ public class KeybindingSelectionPanel extends JPanel
                                 public void keyReleased(KeyEvent e)
                                 {
                                     e.consume();
-                                }//end keyReleased
+                                }
                             });
                         }
                     });
                 }
             });
-        }//end for
-    }//end KeybindingSelectionPanel(keybinding)
-}//end class KeybindingSelectionPanel
+        }
+    }
+}
