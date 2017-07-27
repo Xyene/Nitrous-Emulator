@@ -5,7 +5,7 @@ Nitrous is a high-performance Gameboy Color emulator aimed at squeezing every la
 <table>
 <tr>
 <td>
-<img src="https://i.imgur.com/1Mw3mXu.gif" width="256px">
+<img src="https://i.imgur.com/4eZAc8I.gif" width="256px">
 </td>
 <td>
 <img src="https://i.imgur.com/jEUTg6Y.gif" width="256px">
