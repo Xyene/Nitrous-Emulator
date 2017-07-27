@@ -1,4 +1,4 @@
-# Nitrous Emulator ![](https://api.travis-ci.org/Xyene/Nitrous-Emulator.svg?branch=master)
+# Nitrous Emulator [![](https://api.travis-ci.org/Xyene/Nitrous-Emulator.svg?branch=master)](https://travis-ci.org/Xyene/Nitrous-Emulator)
 
 Nitrous is a high-performance Gameboy Color emulator aimed at squeezing every last drop of performance out of the Java runtime.
 
