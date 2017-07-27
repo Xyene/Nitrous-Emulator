@@ -21,10 +21,19 @@ It supports many popular games to a playable extent, including:
 * The Legend of Zelda: Oracle of Ages
 * Super Mario Bros. Deluxe
 
-You may download Nitrous from [the release tab](https://github.com/Xyene/Nitrous-Emulator/releases), or build it yourself from the source.
+You may **download Nitrous from [the release tab](https://github.com/Xyene/Nitrous-Emulator/releases)**, or build it yourself from the source.
 
 The code is extensively documented, with excerpts and references to the [Pandocs](http://bgb.bircd.org/pandocs.htm) where appropriate,
 so it can be used as educational material for those interested in learning about Gameboy emulation.
+
+## Implemented Features
+Below is a (partial) list of Gameboy features Nitrous implements:
+
+* [Gameboy / Gameboy Color ROM support](https://github.com/Xyene/Nitrous-Emulator/blob/master/src/main/java/nitrous/Cartridge.java)
+* [Support for MBC1, MBC3, and MBC5 memory bank controllers](https://github.com/Xyene/Nitrous-Emulator/tree/master/src/main/java/nitrous/mbc) (savefile support)
+* [Fully accurate instruction emulation](https://github.com/Xyene/Nitrous-Emulator/blob/master/src/main/java/nitrous/cpu/Emulator.java); perfect score on the [cpu_instrs.gb](http://gbdev.gg8.se/files/roms/blargg-gb-tests/) test
+* [Noise / PCM / square wave programmable sound generators](https://github.com/Xyene/Nitrous-Emulator/tree/master/src/main/java/nitrous/sound)
+* [Checksum-based recoloring of original Gameboy games when running as Gameboy Color](https://github.com/Xyene/Nitrous-Emulator/blob/master/src/main/java/nitrous/lcd/PaletteColors.java)
 
 ## Performance and Compatibility
 For extra rendering speed, Nitrous bypasses the Java2D API to obtain rendering contexts for the various pipelines Java2D supports simultaneously (e.g., on Windows you can switch whether Nitrous should render using GDI, Direct3D or OpenGL at runtime). Though this allows for higher performance by reducing the abstraction of rendering, it comes at the cost of portability.
