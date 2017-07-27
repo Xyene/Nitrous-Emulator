@@ -10,6 +10,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.awt.peer.ComponentPeer;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -409,7 +410,12 @@ public class LCD
                 try
                 {
                     System.err.println(rendererClass);
-                    renderer = rendererClass.getDeclaredConstructor(ComponentPeer.class).newInstance(core.display.getPeer());
+                    // Look up peer reflectively since Container#getPeer is removed in
+                    // Java 9; this is still "illegal access" as far as the JRE cares,
+                    // but it should work till Java 10 at least.
+                    Field peer = Component.class.getDeclaredField("peer");
+                    peer.setAccessible(true);
+                    renderer = rendererClass.getDeclaredConstructor(ComponentPeer.class).newInstance(peer.get(core.display));
                 } catch (ReflectiveOperationException ignored)
                 {
                     // #error failure means we try the next renderer
